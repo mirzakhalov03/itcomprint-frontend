@@ -1,5 +1,4 @@
-import { usePrinterStore } from '../store/printerStore';
-import { toast } from '../store/toastStore';
+import { connectPrinterWithToast, usePrinterStore } from '../store/printerStore';
 import { PlugIcon } from './icons';
 
 /**
@@ -10,7 +9,7 @@ import { PlugIcon } from './icons';
  *  - disconnected → red outline pill + Connect button ("Printer not connected")
  */
 export function PrinterStatus() {
-  const { adapter, status, connect } = usePrinterStore();
+  const { adapter, status } = usePrinterStore();
   const preview = adapter.kind === 'preview';
   const connected = status === 'connected';
 
@@ -24,13 +23,6 @@ export function PrinterStatus() {
 
   const dot = preview ? 'bg-brand' : connected ? 'bg-white' : 'bg-danger';
 
-  async function handleConnect() {
-    await connect();
-    const s = usePrinterStore.getState();
-    if (s.status === 'connected') toast('Printer connected');
-    else if (s.error) toast(s.error);
-  }
-
   return (
     <div className="relative flex items-center gap-2.5">
       <span
@@ -41,7 +33,7 @@ export function PrinterStatus() {
       </span>
       {adapter.kind === 'webusb' && !connected && (
         <button
-          onClick={handleConnect}
+          onClick={connectPrinterWithToast}
           className="inline-flex h-[38px] items-center gap-[7px] rounded-full bg-brand px-[18px] font-display text-[13px] font-bold tracking-[.02em] text-white transition-colors hover:bg-brand-strong"
         >
           <PlugIcon size={15} strokeWidth={2.4} />
