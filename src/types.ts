@@ -1,9 +1,19 @@
+export interface AuthUser {
+  id: string;
+  email: string;
+  displayName: string;
+  picture: string;
+  onboardedAt: string | null;
+}
+
 export interface AppEvent {
   _id: string;
   name: string;
   date: string;
   createdAt: string;
   attendeeCount?: number;
+  authorName?: string;
+  authorPicture?: string;
 }
 
 export type PrintStatus = 'not_printed' | 'printed';

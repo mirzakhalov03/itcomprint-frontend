@@ -1,4 +1,5 @@
 import { PrinterStatus } from './PrinterStatus';
+import { UserMenu } from './UserMenu';
 
 const APP_TITLE = 'ROADSHOW BADGES';
 
@@ -50,7 +51,10 @@ export function Header() {
         </div>
       </div>
 
-      <PrinterStatus />
+      <div className="relative flex items-center gap-5">
+        <PrinterStatus />
+        <UserMenu />
+      </div>
     </header>
   );
 }
