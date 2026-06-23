@@ -12,6 +12,7 @@ export interface AppEvent {
   date: string;
   createdAt: string;
   attendeeCount?: number;
+  printedCount?: number;
   authorName?: string;
   authorPicture?: string;
 }

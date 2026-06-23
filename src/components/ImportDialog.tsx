@@ -3,11 +3,17 @@ import * as XLSX from 'xlsx';
 import { useCreateEvent } from '../hooks/useEvents';
 import { toast } from '../store/toastStore';
 import { ChevronDownIcon, UploadIcon } from './icons';
-import type { NewAttendee } from '../types';
+import type { AppEvent, NewAttendee } from '../types';
 
 type Row = Record<string, string>;
 
-export function ImportDialog({ onClose }: { onClose: () => void }) {
+export function ImportDialog({
+  onClose,
+  onImported,
+}: {
+  onClose: () => void;
+  onImported?: (event: AppEvent) => void;
+}) {
   const [rows, setRows] = useState<Row[]>([]);
   const [columns, setColumns] = useState<string[]>([]);
   const [nameCol, setNameCol] = useState('');
@@ -44,9 +50,10 @@ export function ImportDialog({ onClose }: { onClose: () => void }) {
       })
       .filter((a) => a.fullName);
 
-    await createEvent.mutateAsync({ name: eventName.trim(), date: eventDate, attendees });
+    const created = await createEvent.mutateAsync({ name: eventName.trim(), date: eventDate, attendees });
     toast('Event imported');
-    onClose();
+    if (onImported) onImported(created);
+    else onClose();
   }
 
   const canImport = !!eventName.trim() && !!nameCol && rows.length > 0;
