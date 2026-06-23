@@ -1,3 +1,57 @@
+import { usePrinterStore } from '../store/printerStore';
+import { toast } from '../store/toastStore';
+import { PlugIcon, PrinterIcon } from '../components/icons';
+
 export function PrinterPage() {
-  return <div className="text-sm text-muted">Printer — coming up next.</div>;
+  const { adapter, status, connect } = usePrinterStore();
+  const preview = adapter.kind === 'preview';
+  const connected = status === 'connected';
+
+  async function handleConnect() {
+    await connect();
+    const s = usePrinterStore.getState();
+    if (s.status === 'connected') toast('Printer connected');
+    else if (s.error) toast(s.error);
+  }
+
+  const label = preview ? 'Preview mode' : connected ? 'Connected' : 'Not connected';
+  const desc = preview
+    ? 'Badges render to the on-screen preview tray. No physical printer is attached.'
+    : connected
+      ? 'A label printer is connected over WebUSB and ready to print.'
+      : 'Connect your Gainscha label printer over USB to start printing badges.';
+
+  const iconBox = connected
+    ? 'bg-brand text-white'
+    : preview
+      ? 'bg-ink-2 text-white'
+      : 'bg-surface text-muted';
+
+  return (
+    <div className="max-w-[560px]">
+      <h1 className="mb-5 font-display text-xl font-bold text-ink">Printer</h1>
+      <div className="rounded-2xl border border-line bg-white p-6">
+        <div className="flex items-center gap-3">
+          <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${iconBox}`}>
+            <PrinterIcon size={20} />
+          </div>
+          <div>
+            <div className="font-display text-base font-bold text-ink">{label}</div>
+            <div className="text-xs uppercase tracking-wide text-faint">
+              {adapter.kind === 'webusb' ? 'WebUSB' : 'Preview'}
+            </div>
+          </div>
+        </div>
+        <p className="mt-4 text-sm text-muted">{desc}</p>
+        {adapter.kind === 'webusb' && !connected && (
+          <button
+            onClick={handleConnect}
+            className="mt-5 inline-flex h-11 items-center gap-2 rounded-full bg-brand px-5 font-display text-sm font-bold text-white transition-colors hover:bg-brand-strong"
+          >
+            <PlugIcon size={16} /> Connect printer
+          </button>
+        )}
+      </div>
+    </div>
+  );
 }
