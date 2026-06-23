@@ -2,6 +2,10 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { LoginPage } from './pages/LoginPage';
 import { OnboardingPage } from './pages/OnboardingPage';
 import { KioskPage } from './pages/KioskPage';
+import { DashboardLayout } from './components/DashboardLayout';
+import { DashboardPage } from './pages/DashboardPage';
+import { PrinterPage } from './pages/PrinterPage';
+import { SettingsPage } from './pages/SettingsPage';
 import { RequireAuth } from './components/RequireAuth';
 
 export default function App() {
@@ -17,14 +21,31 @@ export default function App() {
             </RequireAuth>
           }
         />
+
+        {/* Shell sections share the persistent sidebar layout */}
         <Route
-          path="/app/*"
+          path="/app"
+          element={
+            <RequireAuth>
+              <DashboardLayout />
+            </RequireAuth>
+          }
+        >
+          <Route index element={<DashboardPage />} />
+          <Route path="printer" element={<PrinterPage />} />
+          <Route path="settings" element={<SettingsPage />} />
+        </Route>
+
+        {/* Kiosk is full-screen — a sibling route, NOT under the layout */}
+        <Route
+          path="/app/events/:id"
           element={
             <RequireAuth>
               <KioskPage />
             </RequireAuth>
           }
         />
+
         <Route path="*" element={<Navigate to="/app" replace />} />
       </Routes>
     </BrowserRouter>
