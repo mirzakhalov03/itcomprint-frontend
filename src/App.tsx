@@ -6,6 +6,7 @@ import { DashboardLayout } from './components/DashboardLayout';
 import { DashboardPage } from './pages/DashboardPage';
 import { PrinterPage } from './pages/PrinterPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { TemplatesPage } from './pages/TemplatesPage';
 import { RequireAuth } from './components/RequireAuth';
 
 export default function App() {
@@ -33,6 +34,7 @@ export default function App() {
         >
           <Route index element={<DashboardPage />} />
           <Route path="printer" element={<PrinterPage />} />
+          <Route path="templates" element={<TemplatesPage />} />
           <Route path="settings" element={<SettingsPage />} />
         </Route>
 

@@ -1,4 +1,11 @@
-import type { AppEvent, Attendee, AuthUser, NewAttendee } from '../types';
+import type {
+  AppEvent,
+  Attendee,
+  AuthUser,
+  BadgeTemplate,
+  NewAttendee,
+  TemplateInput,
+} from '../types';
 
 const BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:4000/api';
 
@@ -31,6 +38,27 @@ export const api = {
 
   printAttendee: (attendeeId: string) =>
     request<Attendee>(`/attendees/${attendeeId}/print`, { method: 'POST' }),
+
+  listTemplates: () => request<BadgeTemplate[]>('/templates'),
+
+  getTemplate: (id: string) => request<BadgeTemplate>(`/templates/${id}`),
+
+  templateFieldKeys: () => request<string[]>('/templates/field-keys'),
+
+  createTemplate: (payload: TemplateInput) =>
+    request<BadgeTemplate>('/templates', { method: 'POST', body: JSON.stringify(payload) }),
+
+  updateTemplate: (id: string, payload: TemplateInput) =>
+    request<BadgeTemplate>(`/templates/${id}`, { method: 'PUT', body: JSON.stringify(payload) }),
+
+  deleteTemplate: (id: string) =>
+    request<{ ok: boolean }>(`/templates/${id}`, { method: 'DELETE' }),
+
+  setEventTemplate: (eventId: string, templateId: string | null) =>
+    request<AppEvent>(`/events/${eventId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ templateId }),
+    }),
 
   googleLogin: (idToken: string) =>
     request<{ user: AuthUser; isNewUser: boolean }>('/auth/google', {

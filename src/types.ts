@@ -15,6 +15,7 @@ export interface AppEvent {
   printedCount?: number;
   authorName?: string;
   authorPicture?: string;
+  templateId: string | null;
 }
 
 export type PrintStatus = 'not_printed' | 'printed';
@@ -33,3 +34,29 @@ export interface NewAttendee {
   fullName: string;
   extra: Record<string, string>;
 }
+
+export interface TemplateZone {
+  id: string;
+  field: string; // 'fullName' or an attendee extra-column key
+  fontSize: number; // 1–8 scale
+  bold: boolean;
+  align: 'left' | 'center' | 'right';
+  hidden: boolean;
+}
+
+export interface BadgeTemplate {
+  _id: string;
+  name: string;
+  labelWidthMm: number;
+  labelHeightMm: number;
+  zones: TemplateZone[];
+  isDefault: boolean;
+  createdByName?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export type TemplateInput = Pick<
+  BadgeTemplate,
+  'name' | 'labelWidthMm' | 'labelHeightMm' | 'zones'
+>;

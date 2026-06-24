@@ -1,8 +1,12 @@
+import type { BadgeLine } from './buildBadgeTSPL';
+
 export interface PrintJob {
-  name: string; // for the on-screen preview
+  name: string; // attendee name — used for the download filename
   tspl: string; // raw bytes sent to the printer
-  role?: string; // secondary line on the preview badge card
   eventName?: string; // event label on the preview badge card
+  lines: BadgeLine[]; // rendered zone lines for the on-screen preview
+  labelWidthMm: number; // preview aspect ratio
+  labelHeightMm: number;
 }
 
 export type PrinterStatus = 'disconnected' | 'connected';

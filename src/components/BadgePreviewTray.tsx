@@ -1,6 +1,7 @@
 import { usePreviewStore } from '../store/previewStore';
 import { DownloadIcon, NodeMesh } from './icons';
 import type { PrintJob } from '../printer/PrinterAdapter';
+import { BadgePreview } from './BadgePreview';
 
 function downloadTspl(job: PrintJob) {
   const blob = new Blob([job.tspl], { type: 'text/plain' });
@@ -10,12 +11,6 @@ function downloadTspl(job: PrintJob) {
   a.download = `badge-${job.name.replace(/\s+/g, '_')}.tspl.txt`;
   a.click();
   URL.revokeObjectURL(url);
-}
-
-function nameSize(name: string): string {
-  if (name.length > 16) return '20px';
-  if (name.length > 12) return '24px';
-  return '28px';
 }
 
 export function BadgePreviewTray() {
@@ -50,19 +45,18 @@ export function BadgePreviewTray() {
             <div key={i} className="animate-badge-rise w-[220px] shrink-0">
               <div className="flex h-[165px] w-[220px] flex-col overflow-hidden rounded-lg border border-line bg-white shadow-[0_10px_26px_rgba(0,0,0,.4)]">
                 <div className="h-1.5 bg-brand" />
-                <div className="flex flex-1 flex-col items-center justify-center px-3.5 py-2.5 text-center">
+                <div className="flex flex-1 flex-col px-3 py-2">
                   {job.eventName && (
-                    <span className="font-display text-[9px] font-semibold tracking-[.1em] text-faint">
+                    <span className="mb-1 text-center font-display text-[9px] font-semibold tracking-[.1em] text-faint">
                       {job.eventName}
                     </span>
                   )}
-                  <span
-                    className="mt-2 font-display font-extrabold uppercase leading-[1.05] text-ink"
-                    style={{ fontSize: nameSize(job.name) }}
-                  >
-                    {job.name}
-                  </span>
-                  {job.role && <span className="mt-[7px] text-[11px] text-muted">{job.role}</span>}
+                  <BadgePreview
+                    lines={job.lines}
+                    widthMm={job.labelWidthMm}
+                    heightMm={job.labelHeightMm}
+                    className="flex-1 border-0"
+                  />
                 </div>
               </div>
               <button

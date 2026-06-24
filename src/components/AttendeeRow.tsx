@@ -5,16 +5,18 @@ import { errMessage } from '../lib/errors';
 import { CheckIcon, PrinterIcon } from './icons';
 import { Button } from './ui/Button';
 import { Checkbox } from './ui/Checkbox';
-import type { Attendee } from '../types';
+import type { Attendee, BadgeTemplate } from '../types';
 
 export function AttendeeRow({
   attendee,
   eventName,
+  template,
   selected,
   onToggle,
 }: {
   attendee: Attendee;
   eventName?: string;
+  template: BadgeTemplate | undefined;
   selected: boolean;
   onToggle: (id: string) => void;
 }) {
@@ -28,7 +30,8 @@ export function AttendeeRow({
   async function handlePrint() {
     try {
       setError(false);
-      await print.mutateAsync({ attendee, eventName });
+      if (!template) throw new Error('Template still loading — try again.');
+      await print.mutateAsync({ attendee, eventName, template });
     } catch (e) {
       setError(true);
       toast(errMessage(e, 'Printer not connected'));
@@ -76,7 +79,7 @@ export function AttendeeRow({
           <Button
             variant="outline"
             onClick={handlePrint}
-            disabled={print.isPending}
+            disabled={print.isPending || !template}
             className="h-9.5 rounded-[9px] px-3.5 text-[13px] sm:px-4"
           >
             Reprint
@@ -84,7 +87,7 @@ export function AttendeeRow({
         ) : (
           <Button
             onClick={handlePrint}
-            disabled={print.isPending}
+            disabled={print.isPending || !template}
             className="h-11 gap-1.75 rounded-[9px] px-3.5 text-sm tracking-[.01em] shadow-[0_6px_16px_rgba(111,162,63,.26)] sm:px-5"
           >
             <PrinterIcon size={15} />

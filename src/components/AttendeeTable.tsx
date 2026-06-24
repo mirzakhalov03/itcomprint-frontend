@@ -8,7 +8,9 @@ import { PrinterIcon, SearchIcon } from './icons';
 import { Button } from './ui/Button';
 import { Checkbox } from './ui/Checkbox';
 import { EmptyState, LoadingPanel } from './ui/EmptyState';
-import type { Attendee } from '../types';
+import { useTemplates } from '../hooks/useTemplates';
+import { TemplateSelect } from './TemplateSelect';
+import type { Attendee, AppEvent } from '../types';
 
 type Filter = 'all' | 'printed' | 'notprinted';
 
@@ -44,7 +46,12 @@ function Segment({
   );
 }
 
-export function AttendeeTable({ eventId, eventName }: { eventId: string; eventName?: string }) {
+export function AttendeeTable({ event }: { event: AppEvent }) {
+  const eventId = event._id;
+  const eventName = event.name;
+  const { data: templates = [] } = useTemplates();
+  const activeTemplate =
+    templates.find((t) => t._id === event.templateId) ?? templates.find((t) => t.isDefault);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<Filter>('all');
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -107,8 +114,9 @@ export function AttendeeTable({ eventId, eventName }: { eventId: string; eventNa
     if (!targets.length) return;
     setBatchRunning(true);
     try {
+      if (!activeTemplate) throw new Error('Template still loading — try again.');
       for (const a of targets) {
-        await print.mutateAsync({ attendee: a, eventName }); // one label at a time
+        await print.mutateAsync({ attendee: a, eventName, template: activeTemplate }); // one label at a time
       }
       setSelected(new Set());
     } catch (e) {
@@ -132,6 +140,8 @@ export function AttendeeTable({ eventId, eventName }: { eventId: string; eventNa
             className="h-10.5 w-full rounded-[10px] border border-line-2 bg-surface pl-10 pr-3.5 text-sm text-ink outline-none placeholder:text-faint"
           />
         </div>
+
+        <TemplateSelect event={event} templates={templates} />
 
         <div className="inline-flex gap-0.5 rounded-[10px] border border-line bg-surface p-0.75">
           <Segment
@@ -190,6 +200,7 @@ export function AttendeeTable({ eventId, eventName }: { eventId: string; eventNa
               key={a._id}
               attendee={a}
               eventName={eventName}
+              template={activeTemplate}
               selected={selected.has(a._id)}
               onToggle={toggle}
             />

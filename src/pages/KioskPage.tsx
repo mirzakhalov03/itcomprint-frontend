@@ -4,7 +4,7 @@ import { BadgePreviewTray } from '../components/BadgePreviewTray';
 import { Toast } from '../components/Toast';
 import { AppHeader } from '../components/AppHeader';
 import { ArrowLeftIcon } from '../components/icons';
-import { EmptyState } from '../components/ui/EmptyState';
+import { EmptyState, LoadingPanel } from '../components/ui/EmptyState';
 import { useEvents } from '../hooks/useEvents';
 
 /** Full-screen, single-event badge-printing view. Event comes from the URL. */
@@ -30,8 +30,10 @@ export function KioskPage() {
 
       <div className="flex-1 overflow-y-auto px-4 pb-7 pt-5 sm:px-6">
         <div className="mx-auto max-w-[1120px]">
-          {id && (event || isLoading) ? (
-            <AttendeeTable key={id} eventId={id} eventName={event?.name} />
+          {event ? (
+            <AttendeeTable key={event._id} event={event} />
+          ) : isLoading ? (
+            <LoadingPanel>Loading event…</LoadingPanel>
           ) : (
             <EmptyState
               title="Event not found"

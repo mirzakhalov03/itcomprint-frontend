@@ -3,7 +3,7 @@ import { api } from '../lib/api';
 import type { NewAttendee } from '../types';
 
 export function useEvents() {
-  return useQuery({ queryKey: ['events'], queryFn: api.listEvents });
+  return useQuery({ queryKey: ['events'], queryFn: api.listEvents, refetchOnWindowFocus: true });
 }
 
 export function useCreateEvent() {
