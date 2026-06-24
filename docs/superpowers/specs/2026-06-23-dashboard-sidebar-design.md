@@ -25,7 +25,7 @@ with the badge-printing kiosk as a focused full-screen mode entered per event.
 
 - No per-attendee CRUD (backend intentionally has none).
 - No new auth/roles, no multi-user admin.
-- No separate "Events" management section — the Dashboard *is* the events view.
+- No separate "Events" management section — the Dashboard _is_ the events view.
 - No unit tests (project preference). Backend changes verified via `npm run verify`.
 
 ## Navigation model
@@ -65,14 +65,14 @@ Reuse existing Tailwind design tokens (`bg-ink`, `bg-surface`, `bg-brand`,
 
 ### New
 
-| Component | Purpose |
-|-----------|---------|
-| `components/DashboardLayout.tsx` | Shell: `<Sidebar/>` + dark header + `<Outlet/>`. |
-| `components/Sidebar.tsx` | Dark nav: logo/title, `NavLink` items, user footer. |
-| `pages/DashboardPage.tsx` | Events overview grid + "New event / Import" action + empty state. |
-| `components/EventCard.tsx` | One event: name, date, stats (attendees · printed ✓ · remaining), author; links to `/app/events/:id`. |
-| `pages/PrinterPage.tsx` | Connect/disconnect, current adapter (preview vs WebUSB), status. Backed by `printerStore`. |
-| `pages/SettingsPage.tsx` | Display-name edit (`useUpdateName`) + logout (`useLogout`). |
+| Component                        | Purpose                                                                                               |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `components/DashboardLayout.tsx` | Shell: `<Sidebar/>` + dark header + `<Outlet/>`.                                                      |
+| `components/Sidebar.tsx`         | Dark nav: logo/title, `NavLink` items, user footer.                                                   |
+| `pages/DashboardPage.tsx`        | Events overview grid + "New event / Import" action + empty state.                                     |
+| `components/EventCard.tsx`       | One event: name, date, stats (attendees · printed ✓ · remaining), author; links to `/app/events/:id`. |
+| `pages/PrinterPage.tsx`          | Connect/disconnect, current adapter (preview vs WebUSB), status. Backed by `printerStore`.            |
+| `pages/SettingsPage.tsx`         | Display-name edit (`useUpdateName`) + logout (`useLogout`).                                           |
 
 ### Refactored
 
@@ -93,8 +93,9 @@ Reuse existing Tailwind design tokens (`bg-ink`, `bg-surface`, `bg-brand`,
 
 `ImportDialog` (lazy), `AttendeeTable`, `BadgePreviewTray`, `Toast`, `PrinterStatus`
 (as the header chip + basis for `PrinterPage`), `UserMenu` (basis for sidebar footer
-+ Settings), and all hooks/stores (`useEvents`, `useAttendees`, `usePrintAttendee`,
-`useAuth`, `printerStore`, `previewStore`, `toastStore`).
+
+- Settings), and all hooks/stores (`useEvents`, `useAttendees`, `usePrintAttendee`,
+  `useAuth`, `printerStore`, `previewStore`, `toastStore`).
 
 ## Data flow
 
@@ -113,7 +114,11 @@ Reuse existing Tailwind design tokens (`bg-ink`, `bg-surface`, `bg-brand`,
 `$group` aggregation that derives `attendeeCount` also emits `printedCount`:
 
 ```ts
-printedCount: { $sum: { $cond: [{ $eq: ['$printStatus', 'printed'] }, 1, 0] } }
+printedCount: {
+  $sum: {
+    $cond: [{ $eq: ['$printStatus', 'printed'] }, 1, 0];
+  }
+}
 ```
 
 - Include `printedCount` in the event controller response shape.

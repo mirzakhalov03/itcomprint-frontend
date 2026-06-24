@@ -33,9 +33,7 @@ export function GoogleSignInButton() {
   return (
     <div className="flex flex-col items-center gap-3">
       <div ref={ref} />
-      {login.isError && (
-        <p className="text-sm text-amber">Sign-in failed. Please try again.</p>
-      )}
+      {login.isError && <p className="text-sm text-amber">Sign-in failed. Please try again.</p>}
     </div>
   );
 }

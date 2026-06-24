@@ -8,7 +8,12 @@ export function UserMenu() {
   return (
     <div className="relative flex items-center gap-3">
       {user.picture ? (
-        <img src={user.picture} alt="" className="h-8 w-8 rounded-full object-cover" referrerPolicy="no-referrer" />
+        <img
+          src={user.picture}
+          alt=""
+          className="h-8 w-8 rounded-full object-cover"
+          referrerPolicy="no-referrer"
+        />
       ) : (
         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand text-sm font-bold text-white">
           {user.displayName.charAt(0).toUpperCase()}

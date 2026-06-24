@@ -13,7 +13,11 @@ export function PrinterStatus() {
   const preview = adapter.kind === 'preview';
   const connected = status === 'connected';
 
-  const label = preview ? 'Preview mode' : connected ? 'Printer connected' : 'Printer not connected';
+  const label = preview
+    ? 'Preview mode'
+    : connected
+      ? 'Printer connected'
+      : 'Printer not connected';
 
   const pill = preview
     ? 'bg-ink-2 text-white'
@@ -24,20 +28,22 @@ export function PrinterStatus() {
   const dot = preview ? 'bg-brand' : connected ? 'bg-white' : 'bg-danger';
 
   return (
-    <div className="relative flex items-center gap-2.5">
+    <div className="relative flex shrink-0 items-center gap-2">
       <span
-        className={`inline-flex h-[38px] items-center gap-2 rounded-full px-4 font-display text-[13px] font-semibold tracking-[.01em] ${pill}`}
+        className={`inline-flex h-[38px] shrink-0 items-center gap-2 rounded-full px-3 font-display text-[13px] font-semibold tracking-[.01em] sm:px-4 ${pill}`}
+        title={label}
       >
         <span className={`h-2 w-2 shrink-0 rounded-full ${dot}`} />
-        {label}
+        <span className="hidden sm:inline">{label}</span>
       </span>
       {adapter.kind === 'webusb' && !connected && (
         <button
           onClick={connectPrinterWithToast}
-          className="inline-flex h-[38px] items-center gap-[7px] rounded-full bg-brand px-[18px] font-display text-[13px] font-bold tracking-[.02em] text-white transition-colors hover:bg-brand-strong"
+          aria-label="Connect printer"
+          className="inline-flex h-[38px] shrink-0 items-center gap-[7px] rounded-full bg-brand px-3 font-display text-[13px] font-bold tracking-[.02em] text-white transition-colors hover:bg-brand-strong sm:px-[18px]"
         >
           <PlugIcon size={15} strokeWidth={2.4} />
-          Connect printer
+          <span className="hidden sm:inline">Connect printer</span>
         </button>
       )}
     </div>

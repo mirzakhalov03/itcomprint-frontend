@@ -13,21 +13,21 @@ npm run dev            # http://localhost:5173
 
 Requires the backend running (default `http://localhost:4000/api`).
 
-| Script          | Does                          |
-| --------------- | ----------------------------- |
-| `npm run dev`   | Vite dev server (port 5173)   |
-| `npm run build` | Type-check + production build  |
-| `npm run lint`  | ESLint                        |
-| `npm run preview` | Serve the built `dist/`     |
+| Script            | Does                          |
+| ----------------- | ----------------------------- |
+| `npm run dev`     | Vite dev server (port 5173)   |
+| `npm run build`   | Type-check + production build |
+| `npm run lint`    | ESLint                        |
+| `npm run preview` | Serve the built `dist/`       |
 
 ## Environment
 
 `.env` is gitignored — copy `.env.example` and fill it in.
 
-| Variable             | Purpose                                                        |
-| -------------------- | ------------------------------------------------------------- |
-| `VITE_API_URL`       | Backend base URL **including `/api`**, no trailing slash.     |
-| `VITE_PRINTER_MODE`  | `preview` (on-screen badges) or `webusb` (Gainscha hardware). |
+| Variable            | Purpose                                                       |
+| ------------------- | ------------------------------------------------------------- |
+| `VITE_API_URL`      | Backend base URL **including `/api`**, no trailing slash.     |
+| `VITE_PRINTER_MODE` | `preview` (on-screen badges) or `webusb` (Gainscha hardware). |
 
 Vite bakes `VITE_*` vars in at **build** time, so changing them requires a rebuild/redeploy.
 

@@ -31,7 +31,9 @@ function Segment({
       }`}
     >
       {label}
-      <span className={`font-display text-[11px] font-bold ${active ? 'text-white/85' : 'text-faint'}`}>
+      <span
+        className={`font-display text-[11px] font-bold ${active ? 'text-white/85' : 'text-faint'}`}
+      >
         {count}
       </span>
     </button>
@@ -128,7 +130,12 @@ export function AttendeeTable({ eventId, eventName }: { eventId: string; eventNa
         </div>
 
         <div className="inline-flex gap-0.5 rounded-[10px] border border-line bg-surface p-[3px]">
-          <Segment label="All" count={counts.all} active={filter === 'all'} onClick={() => setFilter('all')} />
+          <Segment
+            label="All"
+            count={counts.all}
+            active={filter === 'all'}
+            onClick={() => setFilter('all')}
+          />
           <Segment
             label="Printed"
             count={counts.printed}
@@ -158,7 +165,7 @@ export function AttendeeTable({ eventId, eventName }: { eventId: string; eventNa
       </div>
 
       {/* List header */}
-      <div className="flex items-center gap-4 border-b border-line-3 bg-surface-2 px-5 py-[9px]">
+      <div className="flex items-center gap-3 border-b border-line-3 bg-surface-2 px-4 py-[9px] sm:gap-4 sm:px-5">
         <button
           onClick={toggleAll}
           role="checkbox"
@@ -173,10 +180,10 @@ export function AttendeeTable({ eventId, eventName }: { eventId: string; eventNa
         <span className="flex-1 font-display text-[11px] font-semibold uppercase tracking-[.08em] text-faint">
           Attendee
         </span>
-        <span className="w-[140px] font-display text-[11px] font-semibold uppercase tracking-[.08em] text-faint">
+        <span className="hidden w-[140px] font-display text-[11px] font-semibold uppercase tracking-[.08em] text-faint sm:block">
           Status
         </span>
-        <span className="w-[124px]" />
+        <span className="w-[92px] sm:w-[124px]" />
       </div>
 
       {/* Body */}

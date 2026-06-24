@@ -24,9 +24,14 @@ export function OnboardingPage() {
 
   return (
     <div className="flex h-screen items-center justify-center bg-surface px-6">
-      <form onSubmit={submit} className="w-full max-w-sm rounded-2xl border border-line bg-white p-8">
+      <form
+        onSubmit={submit}
+        className="w-full max-w-sm rounded-2xl border border-line bg-white p-8"
+      >
         <h1 className="font-display text-xl font-bold text-ink">Welcome 👋</h1>
-        <p className="mt-1.5 text-sm text-muted">Confirm the name we should show as the event author.</p>
+        <p className="mt-1.5 text-sm text-muted">
+          Confirm the name we should show as the event author.
+        </p>
         <input
           autoFocus
           value={value}

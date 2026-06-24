@@ -50,7 +50,11 @@ export function ImportDialog({
       })
       .filter((a) => a.fullName);
 
-    const created = await createEvent.mutateAsync({ name: eventName.trim(), date: eventDate, attendees });
+    const created = await createEvent.mutateAsync({
+      name: eventName.trim(),
+      date: eventDate,
+      attendees,
+    });
     toast('Event imported');
     if (onImported) onImported(created);
     else onClose();
@@ -63,11 +67,11 @@ export function ImportDialog({
   return (
     <div
       onClick={onClose}
-      className="animate-fade-in fixed inset-0 z-[100] flex items-center justify-center bg-ink/55 p-6 backdrop-blur-[4px]"
+      className="animate-fade-in fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-ink/55 p-4 backdrop-blur-[4px] sm:p-6"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="animate-dlg-in w-full max-w-[520px] rounded-2xl bg-white p-7 shadow-[0_24px_60px_rgba(0,0,0,.3)]"
+        className="animate-dlg-in my-auto w-full max-w-[520px] rounded-2xl bg-white p-5 shadow-[0_24px_60px_rgba(0,0,0,.3)] sm:p-7"
       >
         <div className="font-display text-xl font-bold text-ink">Import event spreadsheet</div>
         <div className="mt-1 text-sm text-muted">Upload a CSV or XLSX of attendees.</div>

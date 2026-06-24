@@ -23,7 +23,7 @@ export function BadgePreviewTray() {
   if (jobs.length === 0) return null;
 
   return (
-    <div className="relative shrink-0 overflow-hidden border-t-[3px] border-brand bg-ink px-6 pb-[18px] pt-3.5">
+    <div className="relative shrink-0 overflow-hidden border-t-[3px] border-brand bg-ink px-4 pb-[18px] pt-3.5 sm:px-6">
       <NodeMesh className="pointer-events-none absolute inset-0 h-full w-full opacity-40" />
 
       <div className="relative mx-auto max-w-[1120px]">

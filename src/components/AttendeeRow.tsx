@@ -38,7 +38,7 @@ export function AttendeeRow({
 
   return (
     <div
-      className={`flex h-16 items-center gap-4 border-b border-line-3 px-5 transition-colors hover:bg-brand-tint ${rowBg}`}
+      className={`flex h-16 items-center gap-3 border-b border-line-3 px-4 transition-colors hover:bg-brand-tint sm:gap-4 sm:px-5 ${rowBg}`}
       style={{ borderLeft: selected ? '3px solid var(--color-brand)' : '3px solid transparent' }}
     >
       <button
@@ -60,7 +60,7 @@ export function AttendeeRow({
         {meta && <div className="truncate text-[13px] leading-[1.3] text-muted">{meta}</div>}
       </div>
 
-      <div className="flex w-[140px] items-center">
+      <div className="hidden w-[140px] items-center sm:flex">
         {printed ? (
           <span className="inline-flex h-[26px] items-center gap-[5px] rounded-full bg-brand-tint pl-[9px] pr-[11px] font-display text-xs font-bold tracking-[.02em] text-brand-deep">
             <CheckIcon size={13} className="text-brand-deep" strokeWidth={3} />
@@ -74,12 +74,12 @@ export function AttendeeRow({
         )}
       </div>
 
-      <div className="flex w-[124px] flex-col items-end gap-[3px]">
+      <div className="flex w-[92px] flex-col items-end gap-[3px] sm:w-[124px]">
         {printed ? (
           <button
             onClick={handlePrint}
             disabled={print.isPending}
-            className="inline-flex h-[38px] items-center rounded-[9px] border border-brand-line bg-white px-4 font-display text-[13px] font-bold text-brand-deep transition-colors hover:bg-brand-tint disabled:opacity-50"
+            className="inline-flex h-[38px] items-center rounded-[9px] border border-brand-line bg-white px-3.5 font-display text-[13px] font-bold text-brand-deep transition-colors hover:bg-brand-tint disabled:opacity-50 sm:px-4"
           >
             Reprint
           </button>
@@ -87,7 +87,7 @@ export function AttendeeRow({
           <button
             onClick={handlePrint}
             disabled={print.isPending}
-            className="inline-flex h-11 items-center gap-[7px] rounded-[9px] bg-brand px-5 font-display text-sm font-bold tracking-[.01em] text-white shadow-[0_6px_16px_rgba(111,162,63,.26)] transition-colors hover:bg-brand-strong disabled:opacity-50"
+            className="inline-flex h-11 items-center gap-[7px] rounded-[9px] bg-brand px-3.5 font-display text-sm font-bold tracking-[.01em] text-white shadow-[0_6px_16px_rgba(111,162,63,.26)] transition-colors hover:bg-brand-strong disabled:opacity-50 sm:px-5"
           >
             <PrinterIcon size={15} />
             Print

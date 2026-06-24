@@ -14,23 +14,23 @@ export function KioskPage() {
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-surface text-ink">
-      <header className="flex h-16 shrink-0 items-center justify-between bg-ink px-6">
-        <div className="flex items-center gap-3.5">
+      <header className="flex h-16 shrink-0 items-center justify-between gap-3 bg-ink px-4 sm:px-6">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3.5">
           <Link
             to="/app"
             aria-label="Back to dashboard"
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-faint transition-colors hover:bg-white/10 hover:text-white"
+            className="-ml-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-faint transition-colors hover:bg-white/10 hover:text-white sm:ml-0"
           >
             <ArrowLeftIcon size={18} />
           </Link>
-          <span className="font-display text-[15px] font-bold tracking-[.02em] text-white">
+          <span className="truncate font-display text-[15px] font-bold tracking-[.02em] text-white">
             {event?.name ?? 'Event'}
           </span>
         </div>
         <PrinterStatus />
       </header>
 
-      <div className="flex-1 overflow-y-auto px-6 pb-7 pt-5">
+      <div className="flex-1 overflow-y-auto px-4 pb-7 pt-5 sm:px-6">
         <div className="mx-auto max-w-[1120px]">
           {id && (event || isLoading) ? (
             <AttendeeTable key={id} eventId={id} eventName={event?.name} />

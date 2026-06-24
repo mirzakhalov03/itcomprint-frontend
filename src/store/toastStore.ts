@@ -23,5 +23,4 @@ export const useToastStore = create<ToastState>((set) => ({
 }));
 
 /** Imperative helper for non-component callers (hooks, handlers). */
-export const toast = (message: string, ms?: number) =>
-  useToastStore.getState().show(message, ms);
+export const toast = (message: string, ms?: number) => useToastStore.getState().show(message, ms);

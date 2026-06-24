@@ -4,7 +4,7 @@
 
 **Goal:** Add a post-login dashboard (events overview + stats) framed by a dark branded sidebar shell, with the badge-printing kiosk as a focused full-screen per-event mode.
 
-**Architecture:** A React Router 7 layout route (`DashboardLayout` = sidebar + dark header + `<Outlet/>`) wraps the Dashboard/Printer/Settings sections. The kiosk is a sibling route *outside* the layout so it renders full-screen with no conditional chrome. A small backend aggregation change adds `printedCount` per event for the dashboard stats.
+**Architecture:** A React Router 7 layout route (`DashboardLayout` = sidebar + dark header + `<Outlet/>`) wraps the Dashboard/Printer/Settings sections. The kiosk is a sibling route _outside_ the layout so it renders full-screen with no conditional chrome. A small backend aggregation change adds `printedCount` per event for the dashboard stats.
 
 **Tech Stack:** React 19, React Router 7, React Query, Zustand, Tailwind v4. Backend: Express 5 + Mongoose 9 + Zod 4 (TypeScript ESM).
 
@@ -28,10 +28,12 @@ Extend the `listEvents` aggregation to also count printed attendees, so the dash
 **Repo:** `itcomprint-backend`
 
 **Files:**
+
 - Modify: `src/services/event.services.ts` (`listEvents`, lines 32-39)
 - Modify: `scripts/verify.ts` (the `GET /events` assertion ~line 144-145; add a post-print re-list ~line 200)
 
 **Interfaces:**
+
 - Produces: `listEvents()` returns `Array<Event & { attendeeCount: number; printedCount: number }>`. The frontend `AppEvent` type (Task 4) relies on `printedCount: number` being present on each listed event.
 
 - [ ] **Step 1: Create the backend branch**
@@ -70,33 +72,37 @@ export async function listEvents() {
 In `scripts/verify.ts`, replace the existing list-events assertion (currently around line 144-145):
 
 ```ts
-    // list events → attendeeCount present
-    const events = await afetch('/events').then((r) => r.json());
-    check('GET /events → array with attendeeCount=2', Array.isArray(events) && events[0]?.attendeeCount === 2, events);
+// list events → attendeeCount present
+const events = await afetch('/events').then((r) => r.json());
+check(
+  'GET /events → array with attendeeCount=2',
+  Array.isArray(events) && events[0]?.attendeeCount === 2,
+  events,
+);
 ```
 
 with:
 
 ```ts
-    // list events → attendeeCount + printedCount present (nothing printed yet)
-    const events = await afetch('/events').then((r) => r.json());
-    check(
-      'GET /events → attendeeCount=2, printedCount=0',
-      Array.isArray(events) && events[0]?.attendeeCount === 2 && events[0]?.printedCount === 0,
-      events,
-    );
+// list events → attendeeCount + printedCount present (nothing printed yet)
+const events = await afetch('/events').then((r) => r.json());
+check(
+  'GET /events → attendeeCount=2, printedCount=0',
+  Array.isArray(events) && events[0]?.attendeeCount === 2 && events[0]?.printedCount === 0,
+  events,
+);
 ```
 
 Then, immediately after the "status filter reflects the print" block (after the `printedList` check, ~line 200), add:
 
 ```ts
-    // list events again → printedCount reflects the print
-    const eventsAfterPrint = await afetch('/events').then((r) => r.json());
-    check(
-      'GET /events after print → printedCount=1',
-      eventsAfterPrint[0]?.printedCount === 1,
-      eventsAfterPrint,
-    );
+// list events again → printedCount reflects the print
+const eventsAfterPrint = await afetch('/events').then((r) => r.json());
+check(
+  'GET /events after print → printedCount=1',
+  eventsAfterPrint[0]?.printedCount === 1,
+  eventsAfterPrint,
+);
 ```
 
 - [ ] **Step 4: Run verify**
@@ -123,6 +129,7 @@ Build the dark sidebar + dark header shell and minimal placeholder section pages
 **Repo:** `itcomprint-frontend` (branch `feat/dashboard-shell`)
 
 **Files:**
+
 - Modify: `src/components/icons.tsx` (add `GridIcon`, `SettingsIcon`, `ArrowLeftIcon`, `UsersIcon`, `CalendarIcon`)
 - Create: `src/components/Sidebar.tsx`
 - Create: `src/components/DashboardLayout.tsx`
@@ -131,6 +138,7 @@ Build the dark sidebar + dark header shell and minimal placeholder section pages
 - Create: `src/pages/SettingsPage.tsx` (placeholder)
 
 **Interfaces:**
+
 - Consumes: existing `NodeMesh`, `PrinterIcon` from `./icons`; `UserMenu` from `./UserMenu`; `PrinterStatus` from `./PrinterStatus`.
 - Produces: `Sidebar` (no props), `DashboardLayout` (no props; renders `<Outlet/>`), `DashboardPage`/`PrinterPage`/`SettingsPage` (no props). New icon components with the standard `IconProps` signature (`{ size?, className?, strokeWidth? }`).
 
@@ -203,11 +211,19 @@ export function Sidebar() {
 
       <div className="relative flex items-center gap-[13px] px-5 pb-6 pt-6">
         <div className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-[9px] bg-brand">
-          <img src="/brand/itcomuz-icon-white.png" alt="ITCOMUZ" className="h-[26px] w-[26px] object-contain" />
+          <img
+            src="/brand/itcomuz-icon-white.png"
+            alt="ITCOMUZ"
+            className="h-[26px] w-[26px] object-contain"
+          />
         </div>
         <div className="flex flex-col gap-px">
-          <span className="font-display text-[14px] font-bold leading-tight text-white">IT Community</span>
-          <span className="font-display text-[14px] font-bold leading-tight text-white">Registration</span>
+          <span className="font-display text-[14px] font-bold leading-tight text-white">
+            IT Community
+          </span>
+          <span className="font-display text-[14px] font-bold leading-tight text-white">
+            Registration
+          </span>
         </div>
       </div>
 
@@ -256,7 +272,9 @@ export function DashboardLayout() {
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
         <header className="flex h-16 shrink-0 items-center justify-between bg-ink px-6">
-          <span className="font-display text-[15px] font-bold tracking-[.04em] text-white">{title}</span>
+          <span className="font-display text-[15px] font-bold tracking-[.04em] text-white">
+            {title}
+          </span>
           <PrinterStatus />
         </header>
         <main className="flex-1 overflow-y-auto px-6 pb-7 pt-5">
@@ -321,11 +339,13 @@ Wire the layout route + sibling kiosk route, refactor `KioskPage` to read its ev
 **Repo:** `itcomprint-frontend` (branch `feat/dashboard-shell`)
 
 **Files:**
+
 - Modify: `src/App.tsx` (whole file)
 - Modify: `src/pages/KioskPage.tsx` (whole file)
 - Delete: `src/components/Header.tsx`, `src/components/EventBar.tsx`, `src/components/EventSelector.tsx`
 
 **Interfaces:**
+
 - Consumes: `DashboardLayout`, `DashboardPage`, `PrinterPage`, `SettingsPage` (Task 2); existing `RequireAuth`, `AttendeeTable`, `BadgePreviewTray`, `Toast`, `PrinterStatus`, `useEvents`, `ArrowLeftIcon`.
 - Produces: route `/app/events/:id` rendering a full-screen `KioskPage` that reads `id` via `useParams`.
 
@@ -491,12 +511,14 @@ Flesh out `DashboardPage` with an event-card grid + stats, move spreadsheet impo
 **Repo:** `itcomprint-frontend` (branch `feat/dashboard-shell`)
 
 **Files:**
+
 - Modify: `src/types.ts` (`AppEvent`)
 - Create: `src/components/EventCard.tsx`
 - Modify: `src/components/ImportDialog.tsx` (props + success path)
 - Modify: `src/pages/DashboardPage.tsx` (replace placeholder)
 
 **Interfaces:**
+
 - Consumes: `useEvents` (`{ data: AppEvent[] }`), `useCreateEvent` (already used inside `ImportDialog`), `UploadIcon`, `CalendarIcon`, `UsersIcon`, `CheckIcon`.
 - Produces: `EventCard({ event: AppEvent })`; `ImportDialog({ onClose: () => void; onImported?: (event: AppEvent) => void })`. `AppEvent` gains `printedCount?: number`.
 
@@ -589,10 +611,14 @@ export function ImportDialog({
 Replace the tail of `handleImport` (the `await createEvent.mutateAsync(...)` line and the two lines after it, lines 47-49) with:
 
 ```tsx
-    const created = await createEvent.mutateAsync({ name: eventName.trim(), date: eventDate, attendees });
-    toast('Event imported');
-    if (onImported) onImported(created);
-    else onClose();
+const created = await createEvent.mutateAsync({
+  name: eventName.trim(),
+  date: eventDate,
+  attendees,
+});
+toast('Event imported');
+if (onImported) onImported(created);
+else onClose();
 ```
 
 - [ ] **Step 4: Replace the `DashboardPage` placeholder**
@@ -694,10 +720,12 @@ Replace the two remaining placeholders with real (minimal) pages. Printer surfac
 **Repo:** `itcomprint-frontend` (branch `feat/dashboard-shell`)
 
 **Files:**
+
 - Modify: `src/pages/PrinterPage.tsx` (replace placeholder)
 - Modify: `src/pages/SettingsPage.tsx` (replace placeholder)
 
 **Interfaces:**
+
 - Consumes: `usePrinterStore` (`{ adapter, status, connect }`), `toast`, `PrinterIcon`, `PlugIcon`; `useAuth`/`useUpdateName`/`useLogout`.
 - Produces: nothing consumed by later tasks.
 
