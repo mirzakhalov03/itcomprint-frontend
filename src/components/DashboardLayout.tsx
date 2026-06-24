@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
-import { PrinterStatus } from './PrinterStatus';
+import { AppHeader } from './AppHeader';
 import { MenuIcon } from './icons';
 
 const TITLES: Record<string, string> = {
@@ -35,8 +35,9 @@ export function DashboardLayout() {
       )}
 
       <div className="flex flex-1 flex-col overflow-hidden">
-        <header className="flex h-16 shrink-0 items-center justify-between gap-3 bg-ink px-4 sm:px-6">
-          <div className="flex min-w-0 items-center gap-2">
+        <AppHeader
+          title={title}
+          leftSlot={
             <button
               onClick={() => setMenuOpen(true)}
               aria-label="Open menu"
@@ -44,14 +45,10 @@ export function DashboardLayout() {
             >
               <MenuIcon size={20} />
             </button>
-            <span className="truncate font-display text-[15px] font-bold tracking-[.04em] text-white">
-              {title}
-            </span>
-          </div>
-          <PrinterStatus />
-        </header>
+          }
+        />
         <main className="flex-1 overflow-y-auto px-4 pb-7 pt-5 sm:px-6">
-          <div className="mx-auto max-w-[1120px]">
+          <div className="mx-auto max-w-280">
             <Outlet />
           </div>
         </main>

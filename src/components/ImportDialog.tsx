@@ -3,6 +3,8 @@ import * as XLSX from 'xlsx';
 import { useCreateEvent } from '../hooks/useEvents';
 import { toast } from '../store/toastStore';
 import { ChevronDownIcon, UploadIcon } from './icons';
+import { Button } from './ui/Button';
+import { Input } from './ui/Input';
 import type { AppEvent, NewAttendee } from '../types';
 
 type Row = Record<string, string>;
@@ -61,8 +63,6 @@ export function ImportDialog({
   }
 
   const canImport = !!eventName.trim() && !!nameCol && rows.length > 0;
-  const inputClass =
-    'h-[42px] rounded-[10px] border border-line-2 bg-surface px-3 text-sm text-ink outline-none placeholder:text-faint';
 
   return (
     <div
@@ -101,21 +101,15 @@ export function ImportDialog({
         <div className="mt-[18px] grid grid-cols-2 gap-3.5">
           <label className="flex flex-col gap-1.5">
             <span className="font-display text-xs font-semibold text-ink-3">Event name</span>
-            <input
+            <Input
               value={eventName}
               onChange={(e) => setEventName(e.target.value)}
               placeholder="e.g. DevFest Tashkent"
-              className={inputClass}
             />
           </label>
           <label className="flex flex-col gap-1.5">
             <span className="font-display text-xs font-semibold text-ink-3">Event date</span>
-            <input
-              type="date"
-              value={eventDate}
-              onChange={(e) => setEventDate(e.target.value)}
-              className={inputClass}
-            />
+            <Input type="date" value={eventDate} onChange={(e) => setEventDate(e.target.value)} />
           </label>
         </div>
 
@@ -152,19 +146,20 @@ export function ImportDialog({
         </div>
 
         <div className="mt-6 flex justify-end gap-2.5">
-          <button
+          <Button
+            variant="secondary"
             onClick={onClose}
-            className="h-11 rounded-[10px] border border-line-2 px-5 font-display text-sm font-semibold text-ink-3 transition-colors hover:bg-surface"
+            className="h-11 rounded-[10px] px-5 text-sm"
           >
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={handleImport}
             disabled={!canImport || createEvent.isPending}
-            className="h-11 rounded-[10px] bg-brand px-6 font-display text-sm font-bold text-white transition-colors hover:bg-brand-strong disabled:cursor-not-allowed disabled:bg-[#c8ccc2]"
+            className="h-11 rounded-[10px] px-6 text-sm"
           >
             {createEvent.isPending ? 'Importing…' : 'Import'}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

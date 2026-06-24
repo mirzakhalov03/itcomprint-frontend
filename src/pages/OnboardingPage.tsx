@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth, useUpdateName } from '../hooks/useAuth';
+import { Button } from '../components/ui/Button';
 
 export function OnboardingPage() {
   const { user, isLoading } = useAuth();
@@ -39,13 +40,13 @@ export function OnboardingPage() {
           className="mt-5 w-full rounded-lg border border-line px-3 py-2.5 text-ink outline-none focus:border-brand"
           placeholder="Your name"
         />
-        <button
+        <Button
           type="submit"
           disabled={update.isPending || !value.trim()}
-          className="mt-4 w-full rounded-lg bg-brand py-2.5 font-semibold text-white disabled:opacity-50"
+          className="mt-4 w-full rounded-lg py-2.5 text-sm"
         >
           {update.isPending ? 'Saving…' : 'Continue'}
-        </button>
+        </Button>
       </form>
     </div>
   );

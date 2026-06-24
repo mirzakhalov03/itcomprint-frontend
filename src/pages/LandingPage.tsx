@@ -1,9 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import { loadGoogleScript } from '../lib/google';
-import { useAuth, useGoogleLogin } from '../hooks/useAuth';
-
-const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID as string;
+import { useAuth } from '../hooks/useAuth';
+import { useGoogleSignIn } from '../hooks/useGoogleSignIn';
 
 /**
  * Pre-sign-up hero. A dark, branded control-center scene that gates the app
@@ -13,32 +11,9 @@ const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID as string;
  */
 export function LandingPage() {
   const { user, isLoading } = useAuth();
-  const login = useGoogleLogin();
   const gsiRef = useRef<HTMLDivElement>(null);
+  const login = useGoogleSignIn(gsiRef, { width: 320 });
   const [hover, setHover] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    loadGoogleScript().then(() => {
-      if (cancelled || !gsiRef.current || !window.google) return;
-      window.google.accounts.id.initialize({
-        client_id: CLIENT_ID,
-        callback: (resp) => login.mutate(resp.credential),
-      });
-      window.google.accounts.id.renderButton(gsiRef.current, {
-        theme: 'outline',
-        size: 'large',
-        text: 'continue_with',
-        shape: 'pill',
-        width: 320,
-      });
-    });
-    return () => {
-      cancelled = true;
-    };
-    // login.mutate identity is stable across renders (React Query)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   if (isLoading) return null;
   if (user) return <Navigate to={user.onboardedAt ? '/app' : '/onboarding'} replace />;

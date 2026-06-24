@@ -1,5 +1,7 @@
-import { connectPrinterWithToast, usePrinterStore } from '../store/printerStore';
+import { connectPrinterWithToast } from '../store/printerStore';
+import { usePrinterPresentation } from '../hooks/usePrinterPresentation';
 import { PlugIcon } from './icons';
+import { Button } from './ui/Button';
 
 /**
  * Printer state pill + conditional Connect button.
@@ -9,9 +11,7 @@ import { PlugIcon } from './icons';
  *  - disconnected → red outline pill + Connect button ("Printer not connected")
  */
 export function PrinterStatus() {
-  const { adapter, status } = usePrinterStore();
-  const preview = adapter.kind === 'preview';
-  const connected = status === 'connected';
+  const { preview, connected, showConnect } = usePrinterPresentation();
 
   const label = preview
     ? 'Preview mode'
@@ -36,15 +36,15 @@ export function PrinterStatus() {
         <span className={`h-2 w-2 shrink-0 rounded-full ${dot}`} />
         <span className="hidden sm:inline">{label}</span>
       </span>
-      {adapter.kind === 'webusb' && !connected && (
-        <button
+      {showConnect && (
+        <Button
           onClick={connectPrinterWithToast}
           aria-label="Connect printer"
-          className="inline-flex h-[38px] shrink-0 items-center gap-[7px] rounded-full bg-brand px-3 font-display text-[13px] font-bold tracking-[.02em] text-white transition-colors hover:bg-brand-strong sm:px-[18px]"
+          className="h-[38px] shrink-0 gap-[7px] rounded-full px-3 text-[13px] tracking-[.02em] sm:px-[18px]"
         >
           <PlugIcon size={15} strokeWidth={2.4} />
           <span className="hidden sm:inline">Connect printer</span>
-        </button>
+        </Button>
       )}
     </div>
   );

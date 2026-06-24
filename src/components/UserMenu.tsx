@@ -1,4 +1,5 @@
 import { useAuth, useLogout } from '../hooks/useAuth';
+import { Avatar } from './ui/Avatar';
 
 export function UserMenu() {
   const { user } = useAuth();
@@ -7,18 +8,7 @@ export function UserMenu() {
 
   return (
     <div className="relative flex items-center gap-3">
-      {user.picture ? (
-        <img
-          src={user.picture}
-          alt=""
-          className="h-8 w-8 rounded-full object-cover"
-          referrerPolicy="no-referrer"
-        />
-      ) : (
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand text-sm font-bold text-white">
-          {user.displayName.charAt(0).toUpperCase()}
-        </div>
-      )}
+      <Avatar user={user} size="sm" />
       <span className="hidden text-sm font-medium text-white sm:inline">{user.displayName}</span>
       <button
         onClick={() => logout.mutate()}

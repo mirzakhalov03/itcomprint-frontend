@@ -1,10 +1,10 @@
-import { connectPrinterWithToast, usePrinterStore } from '../store/printerStore';
+import { connectPrinterWithToast } from '../store/printerStore';
+import { usePrinterPresentation } from '../hooks/usePrinterPresentation';
 import { PlugIcon, PrinterIcon } from '../components/icons';
+import { Button } from '../components/ui/Button';
 
 export function PrinterPage() {
-  const { adapter, status } = usePrinterStore();
-  const preview = adapter.kind === 'preview';
-  const connected = status === 'connected';
+  const { preview, connected, isWebUsb, showConnect } = usePrinterPresentation();
 
   const label = preview ? 'Preview mode' : connected ? 'Connected' : 'Not connected';
   const desc = preview
@@ -30,18 +30,18 @@ export function PrinterPage() {
           <div>
             <div className="font-display text-base font-bold text-ink">{label}</div>
             <div className="text-xs uppercase tracking-wide text-faint">
-              {adapter.kind === 'webusb' ? 'WebUSB' : 'Preview'}
+              {isWebUsb ? 'WebUSB' : 'Preview'}
             </div>
           </div>
         </div>
         <p className="mt-4 text-sm text-muted">{desc}</p>
-        {adapter.kind === 'webusb' && !connected && (
-          <button
+        {showConnect && (
+          <Button
             onClick={connectPrinterWithToast}
-            className="mt-5 inline-flex h-11 items-center gap-2 rounded-full bg-brand px-5 font-display text-sm font-bold text-white transition-colors hover:bg-brand-strong"
+            className="mt-5 h-11 gap-2 rounded-full px-5 text-sm"
           >
             <PlugIcon size={16} /> Connect printer
-          </button>
+          </Button>
         )}
       </div>
     </div>

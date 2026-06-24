@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { PrinterAdapter, PrinterStatus } from '../printer/PrinterAdapter';
 import { createPrinter } from '../printer/createPrinter';
+import { errMessage } from '../lib/errors';
 import { usePreviewStore } from './previewStore';
 import { toast } from './toastStore';
 
@@ -22,7 +23,7 @@ export const usePrinterStore = create<PrinterState>((set) => ({
       await adapter.connect();
       set({ status: adapter.status, error: null });
     } catch (e) {
-      set({ error: e instanceof Error ? e.message : 'Failed to connect' });
+      set({ error: errMessage(e, 'Failed to connect') });
     }
   },
 }));
