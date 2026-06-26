@@ -4,7 +4,7 @@ import { usePrintAttendee } from '../hooks/usePrintAttendee';
 import { toast } from '../store/toastStore';
 import { errMessage } from '../lib/errors';
 import { AttendeeRow } from './AttendeeRow';
-import { PrinterIcon, SearchIcon } from './icons';
+import { BarChartIcon, CloseIcon, PrinterIcon, SearchIcon } from './icons';
 import { Button } from './ui/Button';
 import { Checkbox } from './ui/Checkbox';
 import { EmptyState, LoadingPanel } from './ui/EmptyState';
@@ -46,7 +46,15 @@ function Segment({
   );
 }
 
-export function AttendeeTable({ event }: { event: AppEvent }) {
+export function AttendeeTable({
+  event,
+  onPreview,
+  previewId,
+}: {
+  event: AppEvent;
+  onPreview: (a: Attendee) => void;
+  previewId?: string;
+}) {
   const eventId = event._id;
   const eventName = event.name;
   const { data: templates = [] } = useTemplates();
@@ -56,14 +64,20 @@ export function AttendeeTable({ event }: { event: AppEvent }) {
   const [filter, setFilter] = useState<Filter>('all');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [batchRunning, setBatchRunning] = useState(false);
+  const [statsOpen, setStatsOpen] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
 
   const { data: attendees = [], isLoading } = useAttendees(eventId);
   const print = usePrintAttendee();
 
-  // `/` focuses search (kiosk speed) unless typing in a field.
+  // `/` or Ctrl+F / Cmd+F focuses search (kiosk speed).
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+        e.preventDefault();
+        searchRef.current?.focus();
+        return;
+      }
       const tag = (document.activeElement as HTMLElement | null)?.tagName;
       if (e.key === '/' && tag !== 'INPUT' && tag !== 'SELECT') {
         e.preventDefault();
@@ -141,6 +155,14 @@ export function AttendeeTable({ event }: { event: AppEvent }) {
           />
         </div>
 
+        <button
+          onClick={() => setStatsOpen(true)}
+          className="inline-flex h-10.5 shrink-0 items-center gap-2 rounded-[10px] border border-line-2 bg-white px-4 font-display text-sm font-semibold text-ink transition-colors hover:bg-surface"
+        >
+          <BarChartIcon size={15} className="text-muted" />
+          Stats
+        </button>
+
         <TemplateSelect event={event} templates={templates} />
 
         <div className="inline-flex gap-0.5 rounded-[10px] border border-line bg-surface p-0.75">
@@ -181,8 +203,11 @@ export function AttendeeTable({ event }: { event: AppEvent }) {
       {/* List header */}
       <div className="flex items-center gap-3 border-b border-line-3 bg-surface-2 px-4 py-2.25 sm:gap-4 sm:px-5">
         <Checkbox checked={allChecked} onClick={toggleAll} label="Select all visible" />
+        <span className="w-8 shrink-0 font-display text-[11px] font-semibold uppercase tracking-[.08em] text-faint">
+          ID
+        </span>
         <span className="flex-1 font-display text-[11px] font-semibold uppercase tracking-[.08em] text-faint">
-          Attendee
+          Full Name
         </span>
         <span className="hidden w-35 font-display text-[11px] font-semibold uppercase tracking-[.08em] text-faint sm:block">
           Status
@@ -199,10 +224,12 @@ export function AttendeeTable({ event }: { event: AppEvent }) {
             <AttendeeRow
               key={a._id}
               attendee={a}
-              eventName={eventName}
+              search={search}
               template={activeTemplate}
               selected={selected.has(a._id)}
+              isPreviewing={previewId === a._id}
               onToggle={toggle}
+              onPreview={onPreview}
             />
           ))}
         </div>
@@ -216,6 +243,69 @@ export function AttendeeTable({ event }: { event: AppEvent }) {
               : 'No attendees match your search or filter.'
           }
         />
+      )}
+      {statsOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={() => setStatsOpen(false)}
+        >
+          <div
+            className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-5 flex items-center justify-between">
+              <h2 className="font-display text-lg font-bold text-ink">Check-in Stats</h2>
+              <button
+                onClick={() => setStatsOpen(false)}
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-faint hover:bg-surface hover:text-ink"
+              >
+                <CloseIcon size={16} />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3">
+              <div className="rounded-xl bg-surface-2 p-4 text-center">
+                <div className="font-display text-3xl font-bold text-ink">{counts.all}</div>
+                <div className="mt-1 text-[11px] font-semibold uppercase tracking-[.06em] text-faint">
+                  Total
+                </div>
+              </div>
+              <div className="rounded-xl bg-brand-tint p-4 text-center">
+                <div className="font-display text-3xl font-bold text-brand-deep">
+                  {counts.printed}
+                </div>
+                <div className="mt-1 text-[11px] font-semibold uppercase tracking-[.06em] text-brand-deep/60">
+                  Checked In
+                </div>
+              </div>
+              <div className="rounded-xl bg-amber-50 p-4 text-center">
+                <div className="font-display text-3xl font-bold text-amber-ink">
+                  {counts.notprinted}
+                </div>
+                <div className="mt-1 text-[11px] font-semibold uppercase tracking-[.06em] text-amber-ink/60">
+                  Not Yet
+                </div>
+              </div>
+            </div>
+
+            {counts.all > 0 && (
+              <div className="mt-5">
+                <div className="mb-1.5 flex justify-between text-[12px] font-semibold">
+                  <span className="text-faint">Progress</span>
+                  <span className="text-brand-deep">
+                    {Math.round((counts.printed / counts.all) * 100)}%
+                  </span>
+                </div>
+                <div className="h-2 overflow-hidden rounded-full bg-surface-2">
+                  <div
+                    className="h-full rounded-full bg-brand transition-all duration-500"
+                    style={{ width: `${(counts.printed / counts.all) * 100}%` }}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       )}
     </div>
   );

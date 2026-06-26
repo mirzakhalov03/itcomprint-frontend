@@ -138,6 +138,14 @@ export const UsersIcon = (p: IconProps) => (
   </Svg>
 );
 
+export const BarChartIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <line x1="18" y1="20" x2="18" y2="10" />
+    <line x1="12" y1="20" x2="12" y2="4" />
+    <line x1="6" y1="20" x2="6" y2="14" />
+  </Svg>
+);
+
 export const CalendarIcon = (p: IconProps) => (
   <Svg {...p}>
     <rect x="3" y="4" width="18" height="18" rx="2" />

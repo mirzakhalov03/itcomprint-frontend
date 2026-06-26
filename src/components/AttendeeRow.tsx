@@ -1,51 +1,63 @@
-import { useRef, useState } from 'react';
-import { usePrintAttendee } from '../hooks/usePrintAttendee';
-import { toast } from '../store/toastStore';
-import { errMessage } from '../lib/errors';
+import type { ReactNode } from 'react';
 import { CheckIcon, PrinterIcon } from './icons';
 import { Button } from './ui/Button';
 import { Checkbox } from './ui/Checkbox';
 import type { Attendee, BadgeTemplate } from '../types';
 
+function highlight(text: string, query: string): ReactNode {
+  const q = query.trim().toLowerCase();
+  if (!q) return text;
+  const parts: ReactNode[] = [];
+  let last = 0;
+  let i = text.toLowerCase().indexOf(q, last);
+  while (i !== -1) {
+    if (i > last) parts.push(text.slice(last, i));
+    parts.push(
+      <mark key={i} className="rounded-[3px] bg-brand px-[1px] text-white not-italic">
+        {text.slice(i, i + q.length)}
+      </mark>,
+    );
+    last = i + q.length;
+    i = text.toLowerCase().indexOf(q, last);
+  }
+  if (last < text.length) parts.push(text.slice(last));
+  return <>{parts}</>;
+}
+
 export function AttendeeRow({
   attendee,
-  eventName,
+  search = '',
   template,
   selected,
+  isPreviewing = false,
   onToggle,
+  onPreview,
 }: {
   attendee: Attendee;
-  eventName?: string;
+  search?: string;
   template: BadgeTemplate | undefined;
   selected: boolean;
+  isPreviewing?: boolean;
   onToggle: (id: string) => void;
+  onPreview: (a: Attendee) => void;
 }) {
-  const print = usePrintAttendee();
-  const [error, setError] = useState(false);
-  const errTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
-
   const printed = attendee.printStatus === 'printed';
-  const meta = Object.values(attendee.extra).join('  ·  ');
+  const regNumber = attendee.extra['Reg. Number'] ?? '';
 
-  async function handlePrint() {
-    try {
-      setError(false);
-      if (!template) throw new Error('Template still loading — try again.');
-      await print.mutateAsync({ attendee, eventName, template });
-    } catch (e) {
-      setError(true);
-      toast(errMessage(e, 'Printer not connected'));
-      clearTimeout(errTimer.current);
-      errTimer.current = setTimeout(() => setError(false), 2600);
-    }
-  }
-
-  const rowBg = selected ? 'bg-brand-tint' : printed ? 'bg-surface-3' : 'bg-white';
+  const rowBg = selected
+    ? 'bg-brand-tint'
+    : isPreviewing
+      ? 'bg-surface-2'
+      : printed
+        ? 'bg-surface-3'
+        : 'bg-white';
+  const leftBorder =
+    selected || isPreviewing ? '3px solid var(--color-brand)' : '3px solid transparent';
 
   return (
     <div
       className={`flex h-16 items-center gap-3 border-b border-line-3 px-4 transition-colors hover:bg-brand-tint sm:gap-4 sm:px-5 ${rowBg}`}
-      style={{ borderLeft: selected ? '3px solid var(--color-brand)' : '3px solid transparent' }}
+      style={{ borderLeft: leftBorder }}
     >
       <Checkbox
         checked={selected}
@@ -53,11 +65,14 @@ export function AttendeeRow({
         label={`Select ${attendee.fullName}`}
       />
 
+      <span className="w-8 shrink-0 font-display text-[12px] font-bold text-faint">
+        {highlight(regNumber, search)}
+      </span>
+
       <div className="min-w-0 flex-1">
         <div className="truncate font-display text-base font-semibold leading-tight text-ink">
-          {attendee.fullName}
+          {highlight(attendee.fullName, search)}
         </div>
-        {meta && <div className="truncate text-[13px] leading-[1.3] text-muted">{meta}</div>}
       </div>
 
       <div className="hidden w-35 items-center sm:flex">
@@ -78,26 +93,21 @@ export function AttendeeRow({
         {printed ? (
           <Button
             variant="outline"
-            onClick={handlePrint}
-            disabled={print.isPending || !template}
+            onClick={() => onPreview(attendee)}
+            disabled={!template}
             className="h-9.5 rounded-[9px] px-3.5 text-[13px] sm:px-4"
           >
             Reprint
           </Button>
         ) : (
           <Button
-            onClick={handlePrint}
-            disabled={print.isPending || !template}
+            onClick={() => onPreview(attendee)}
+            disabled={!template}
             className="h-11 gap-1.75 rounded-[9px] px-3.5 text-sm tracking-[.01em] shadow-[0_6px_16px_rgba(111,162,63,.26)] sm:px-5"
           >
             <PrinterIcon size={15} />
             Print
           </Button>
-        )}
-        {error && (
-          <span className="whitespace-nowrap text-[11px] font-semibold text-danger">
-            Printer not connected
-          </span>
         )}
       </div>
     </div>
