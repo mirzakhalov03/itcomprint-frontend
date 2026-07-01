@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/api';
-import { buildBadgeTSPL, renderBadgeLines } from '../printer/buildBadgeTSPL';
+import { renderBadgeToCanvas, canvasToMonochromeBitmap } from '../printer/renderBadge';
+import { buildBadgeTSPL } from '../printer/buildBadgeTSPL';
 import { usePrinterStore } from '../store/printerStore';
 import { toast } from '../store/toastStore';
 import type { Attendee, BadgeTemplate } from '../types';
@@ -19,11 +20,15 @@ export function usePrintAttendee() {
       if (adapter.status !== 'connected') {
         throw new Error('Printer not connected. Click "Connect printer" first.');
       }
+      const canvas = await renderBadgeToCanvas(attendee, template);
+      const bitmap = canvasToMonochromeBitmap(canvas);
+      const tspl = buildBadgeTSPL(bitmap, template.labelWidthMm, template.labelHeightMm);
+      const previewDataUrl = canvas.toDataURL('image/png');
       await adapter.print({
         name: attendee.fullName,
-        tspl: buildBadgeTSPL(attendee, template),
+        tspl,
+        previewDataUrl,
         eventName,
-        lines: renderBadgeLines(attendee, template),
         labelWidthMm: template.labelWidthMm,
         labelHeightMm: template.labelHeightMm,
       });

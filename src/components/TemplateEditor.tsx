@@ -1,9 +1,15 @@
-import { useState } from 'react';
-import { BadgePreview } from './BadgePreview';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import type { DragEvent } from 'react';
 import { Button } from './ui/Button';
 import { Input } from './ui/Input';
 import { ArrowLeftIcon } from './icons';
-import { renderBadgeLines, SAMPLE_ATTENDEE } from '../printer/buildBadgeTSPL';
+import {
+  renderBadgeToCanvas,
+  normalizeLegacyZone,
+  FONT_FAMILIES,
+  FONT_SIZES,
+  SAMPLE_ATTENDEE,
+} from '../printer/renderBadge';
 import {
   useCreateTemplate,
   useUpdateTemplate,
@@ -14,10 +20,23 @@ import { toast } from '../store/toastStore';
 import { errMessage } from '../lib/errors';
 import type { BadgeTemplate, TemplateZone } from '../types';
 
-const newZone = (): TemplateZone => ({
+const newFieldZone = (): TemplateZone => ({
   id: crypto.randomUUID(),
+  type: 'field',
   field: 'fullName',
-  fontSize: 3,
+  fontFamily: 'Inter',
+  fontSize: 16,
+  bold: false,
+  align: 'center',
+  hidden: false,
+});
+
+const newStaticZone = (): TemplateZone => ({
+  id: crypto.randomUUID(),
+  type: 'static',
+  staticText: '',
+  fontFamily: 'Inter',
+  fontSize: 14,
   bold: false,
   align: 'center',
   hidden: false,
@@ -28,7 +47,7 @@ const blankDraft = (): BadgeTemplate => ({
   name: '',
   labelWidthMm: 80,
   labelHeightMm: 60,
-  zones: [newZone()],
+  zones: [newFieldZone()],
   isDefault: false,
 });
 
@@ -39,16 +58,58 @@ export function TemplateEditor({
   initial: BadgeTemplate | 'new';
   onClose: () => void;
 }) {
-  const [draft, setDraft] = useState<BadgeTemplate>(initial === 'new' ? blankDraft() : initial);
+  const raw = initial === 'new' ? blankDraft() : initial;
+  const [draft, setDraft] = useState<BadgeTemplate>({
+    ...raw,
+    zones: raw.zones.map(normalizeLegacyZone),
+  });
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
+  const dragSrcId = useRef<string | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const { data: fieldKeys = [] } = useTemplateFieldKeys();
   const create = useCreateTemplate();
   const update = useUpdateTemplate();
   const remove = useDeleteTemplate();
   const isNew = draft._id === '';
+  const selected = draft.zones.find((z) => z.id === selectedId) ?? null;
 
+  // ── Canvas preview ─────────────────────────────────────────────────────────
+  const updatePreview = useCallback(async () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    try {
+      const rendered = await renderBadgeToCanvas(SAMPLE_ATTENDEE, draft);
+      canvas.width = rendered.width;
+      canvas.height = rendered.height;
+      canvas.getContext('2d')!.drawImage(rendered, 0, 0);
+    } catch {
+      // fonts may not be ready on first paint — the next draft change retries
+    }
+  }, [draft]);
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(updatePreview, 150);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [updatePreview]);
+
+  // ── Zone mutations ──────────────────────────────────────────────────────────
   function patchZone(id: string, patch: Partial<TemplateZone>) {
-    setDraft((d) => ({ ...d, zones: d.zones.map((z) => (z.id === id ? { ...z, ...patch } : z)) }));
+    setDraft((d) => ({
+      ...d,
+      zones: d.zones.map((z) => (z.id === id ? { ...z, ...patch } : z)),
+    }));
   }
+
+  function patchSelected(patch: Partial<TemplateZone>) {
+    if (selectedId) patchZone(selectedId, patch);
+  }
+
   function moveZone(index: number, dir: -1 | 1) {
     setDraft((d) => {
       const zones = [...d.zones];
@@ -59,6 +120,50 @@ export function TemplateEditor({
     });
   }
 
+  function removeZone(id: string) {
+    if (selectedId === id) setSelectedId(null);
+    setDraft((d) => ({ ...d, zones: d.zones.filter((z) => z.id !== id) }));
+  }
+
+  function addZone(zone: TemplateZone) {
+    setDraft((d) => ({ ...d, zones: [...d.zones, zone] }));
+    setSelectedId(zone.id);
+  }
+
+  // ── Drag-and-drop ───────────────────────────────────────────────────────────
+  function onDragStart(e: DragEvent, id: string) {
+    dragSrcId.current = id;
+    e.dataTransfer.effectAllowed = 'move';
+  }
+
+  function onDragOver(e: DragEvent, id: string) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDragOverId(id);
+  }
+
+  function onDrop(e: DragEvent, targetId: string) {
+    e.preventDefault();
+    setDragOverId(null);
+    const srcId = dragSrcId.current;
+    if (!srcId || srcId === targetId) return;
+    setDraft((d) => {
+      const zones = [...d.zones];
+      const srcIdx = zones.findIndex((z) => z.id === srcId);
+      const tgtIdx = zones.findIndex((z) => z.id === targetId);
+      if (srcIdx === -1 || tgtIdx === -1) return d;
+      const [removed] = zones.splice(srcIdx, 1);
+      zones.splice(tgtIdx, 0, removed);
+      return { ...d, zones };
+    });
+  }
+
+  function onDragEnd() {
+    dragSrcId.current = null;
+    setDragOverId(null);
+  }
+
+  // ── Save / delete ───────────────────────────────────────────────────────────
   async function save() {
     const payload = {
       name: draft.name.trim(),
@@ -89,10 +194,11 @@ export function TemplateEditor({
 
   const saving = create.isPending || update.isPending;
 
+  // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
-      {/* Editor column */}
-      <div className="flex flex-col gap-5">
+      {/* ── Left: editor column ── */}
+      <div className="flex flex-col gap-4">
         <button
           onClick={onClose}
           className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted hover:text-ink"
@@ -100,6 +206,7 @@ export function TemplateEditor({
           <ArrowLeftIcon size={16} /> All templates
         </button>
 
+        {/* Template name */}
         <label className="flex flex-col gap-1.5">
           <span className="font-display text-xs font-semibold text-ink-3">Template name</span>
           <Input
@@ -108,6 +215,7 @@ export function TemplateEditor({
           />
         </label>
 
+        {/* Label size */}
         <div className="flex gap-3">
           <label className="flex flex-1 flex-col gap-1.5">
             <span className="font-display text-xs font-semibold text-ink-3">Width (mm)</span>
@@ -127,103 +235,259 @@ export function TemplateEditor({
           </label>
         </div>
 
-        <datalist id="field-keys">
-          <option value="fullName" />
-          {fieldKeys.map((k) => (
-            <option key={k} value={k} />
-          ))}
-        </datalist>
+        {/* Formatting toolbar */}
+        <div
+          className={`flex flex-wrap items-center gap-2 rounded-xl border p-2 transition-all ${
+            selected
+              ? 'border-line bg-surface'
+              : 'pointer-events-none border-transparent bg-transparent opacity-30'
+          }`}
+        >
+          {/* Font family */}
+          <select
+            value={selected?.fontFamily ?? 'Inter'}
+            onChange={(e) => patchSelected({ fontFamily: e.target.value })}
+            className="h-8 max-w-[130px] rounded-lg border border-line-2 bg-white px-2 text-sm"
+          >
+            {FONT_FAMILIES.map((f) => (
+              <option key={f} value={f}>
+                {f}
+              </option>
+            ))}
+          </select>
 
-        <div className="flex flex-col gap-3">
-          <span className="font-display text-xs font-semibold uppercase tracking-wide text-faint">
-            Zones
-          </span>
-          {draft.zones.map((z, i) => (
-            <div
-              key={z.id}
-              className="flex flex-wrap items-center gap-2 rounded-xl border border-line bg-surface p-3"
+          {/* Font size */}
+          <select
+            value={selected?.fontSize ?? 16}
+            onChange={(e) => patchSelected({ fontSize: Number(e.target.value) })}
+            className="h-8 w-[70px] rounded-lg border border-line-2 bg-white px-2 text-sm"
+          >
+            {FONT_SIZES.map((s) => (
+              <option key={s} value={s}>
+                {s}pt
+              </option>
+            ))}
+          </select>
+
+          {/* Bold */}
+          <button
+            onClick={() => patchSelected({ bold: !selected?.bold })}
+            className={`h-8 w-8 rounded-lg border text-sm font-bold transition-colors ${
+              selected?.bold
+                ? 'border-brand bg-brand-tint text-brand-deep'
+                : 'border-line-2 bg-white text-ink-3 hover:border-line'
+            }`}
+          >
+            B
+          </button>
+
+          {/* Alignment */}
+          {(['left', 'center', 'right'] as const).map((a) => (
+            <button
+              key={a}
+              title={a}
+              onClick={() => patchSelected({ align: a })}
+              className={`h-8 w-8 rounded-lg border text-xs transition-colors ${
+                selected?.align === a
+                  ? 'border-brand bg-brand-tint text-brand-deep'
+                  : 'border-line-2 bg-white text-ink-3 hover:border-line'
+              }`}
             >
-              <input
-                list="field-keys"
-                value={z.field}
-                onChange={(e) => patchZone(z.id, { field: e.target.value })}
-                placeholder="field"
-                className="h-9 min-w-32 flex-1 rounded-lg border border-line-2 bg-white px-2.5 text-sm outline-none"
-              />
-              <select
-                value={z.fontSize}
-                onChange={(e) => patchZone(z.id, { fontSize: Number(e.target.value) })}
-                className="h-9 rounded-lg border border-line-2 bg-white px-2 text-sm"
-              >
-                {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
-                  <option key={n} value={n}>
-                    Size {n}
-                  </option>
-                ))}
-              </select>
-              <select
-                value={z.align}
-                onChange={(e) =>
-                  patchZone(z.id, { align: e.target.value as TemplateZone['align'] })
-                }
-                className="h-9 rounded-lg border border-line-2 bg-white px-2 text-sm"
-              >
-                <option value="left">Left</option>
-                <option value="center">Center</option>
-                <option value="right">Right</option>
-              </select>
-              <label className="inline-flex items-center gap-1 text-sm text-ink-3">
-                <input
-                  type="checkbox"
-                  checked={z.bold}
-                  onChange={(e) => patchZone(z.id, { bold: e.target.checked })}
-                />
-                Bold
-              </label>
-              <label className="inline-flex items-center gap-1 text-sm text-ink-3">
-                <input
-                  type="checkbox"
-                  checked={z.hidden}
-                  onChange={(e) => patchZone(z.id, { hidden: e.target.checked })}
-                />
-                Hide
-              </label>
-              <div className="ml-auto flex items-center gap-1">
-                <button
-                  onClick={() => moveZone(i, -1)}
-                  className="px-1.5 text-muted hover:text-ink"
-                  aria-label="Move up"
-                >
-                  ↑
-                </button>
-                <button
-                  onClick={() => moveZone(i, 1)}
-                  className="px-1.5 text-muted hover:text-ink"
-                  aria-label="Move down"
-                >
-                  ↓
-                </button>
-                <button
-                  onClick={() =>
-                    setDraft((d) => ({ ...d, zones: d.zones.filter((x) => x.id !== z.id) }))
-                  }
-                  className="px-1.5 text-danger hover:opacity-70"
-                  aria-label="Remove zone"
-                >
-                  ✕
-                </button>
-              </div>
-            </div>
+              {a === 'left' ? '⇤' : a === 'center' ? '↔' : '⇥'}
+            </button>
           ))}
+
+          <div className="h-5 w-px shrink-0 bg-line-2" />
+
+          {/* Zone type */}
+          <select
+            value={selected?.type ?? 'field'}
+            onChange={(e) => {
+              const type = e.target.value as 'field' | 'static';
+              patchSelected(
+                type === 'field' ? { type, field: 'fullName' } : { type, staticText: '' },
+              );
+            }}
+            className="h-8 rounded-lg border border-line-2 bg-white px-2 text-sm"
+          >
+            <option value="field">Field</option>
+            <option value="static">Text</option>
+          </select>
+
+          {/* Field picker */}
+          {selected?.type === 'field' && (
+            <>
+              <datalist id="zone-field-keys">
+                <option value="fullName" />
+                {fieldKeys.map((k) => (
+                  <option key={k} value={k} />
+                ))}
+              </datalist>
+              <input
+                list="zone-field-keys"
+                value={selected.field ?? ''}
+                onChange={(e) => patchSelected({ field: e.target.value })}
+                placeholder="field key"
+                className="h-8 min-w-[110px] rounded-lg border border-line-2 bg-white px-2.5 text-sm outline-none focus:border-brand"
+              />
+            </>
+          )}
+
+          <div className="ml-auto flex items-center gap-1.5">
+            {/* Hide */}
+            <button
+              onClick={() => patchSelected({ hidden: !selected?.hidden })}
+              className={`h-8 rounded-lg border px-2.5 text-xs transition-colors ${
+                selected?.hidden
+                  ? 'border-amber-300 bg-amber-50 text-amber-700'
+                  : 'border-line-2 bg-white text-ink-3 hover:border-line'
+              }`}
+            >
+              {selected?.hidden ? 'Hidden' : 'Hide'}
+            </button>
+            {/* Delete zone */}
+            <button
+              onClick={() => selected && removeZone(selected.id)}
+              className="h-8 rounded-lg border border-line-2 bg-white px-2.5 text-xs text-danger transition-colors hover:border-danger"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+
+        {/* WYSIWYG badge surface */}
+        <div
+          className="relative w-full cursor-default select-none overflow-hidden rounded-xl border-2 border-dashed border-line bg-white"
+          style={{ aspectRatio: `${draft.labelWidthMm} / ${draft.labelHeightMm}` }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setSelectedId(null);
+          }}
+        >
+          {draft.zones.length === 0 ? (
+            <div className="flex h-full items-center justify-center">
+              <span className="text-sm text-faint">No zones yet — add one below</span>
+            </div>
+          ) : (
+            <div className="flex h-full flex-col items-stretch justify-center gap-0.5 px-3 py-2">
+              {draft.zones.map((z, i) => {
+                const norm = normalizeLegacyZone(z);
+                const isSelected = z.id === selectedId;
+                const isDragTarget = z.id === dragOverId;
+
+                const zoneStyle = {
+                  fontSize: `${norm.fontSize}pt`,
+                  fontWeight: norm.bold ? 700 : 400,
+                  textAlign: norm.align as 'left' | 'center' | 'right',
+                  fontFamily: norm.fontFamily,
+                };
+
+                const sampleText =
+                  norm.type === 'static'
+                    ? (norm.staticText ?? '')
+                    : norm.field === 'fullName'
+                      ? SAMPLE_ATTENDEE.fullName
+                      : (SAMPLE_ATTENDEE.extra[norm.field ?? ''] ?? norm.field ?? '');
+
+                return (
+                  <div
+                    key={z.id}
+                    draggable
+                    onDragStart={(e) => onDragStart(e, z.id)}
+                    onDragOver={(e) => onDragOver(e, z.id)}
+                    onDrop={(e) => onDrop(e, z.id)}
+                    onDragEnd={onDragEnd}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedId(z.id);
+                    }}
+                    className={`group relative flex cursor-pointer items-center rounded px-1 py-0.5 transition-all ${
+                      isSelected ? 'ring-2 ring-brand' : 'hover:ring-1 hover:ring-line'
+                    } ${z.hidden ? 'opacity-30' : ''} ${isDragTarget ? 'border-t-2 border-brand' : ''}`}
+                  >
+                    {/* Drag handle */}
+                    <span className="mr-1 shrink-0 cursor-grab text-xs text-faint opacity-0 transition-opacity group-hover:opacity-100">
+                      ⠿
+                    </span>
+
+                    {/* Zone content */}
+                    {norm.type === 'static' && isSelected ? (
+                      <div
+                        contentEditable
+                        suppressContentEditableWarning
+                        className="min-w-0 flex-1 outline-none"
+                        style={zoneStyle}
+                        onBlur={(e) =>
+                          patchZone(z.id, {
+                            staticText: e.currentTarget.textContent ?? '',
+                          })
+                        }
+                      >
+                        {norm.staticText}
+                      </div>
+                    ) : (
+                      <span className="block min-w-0 flex-1 truncate" style={zoneStyle}>
+                        {sampleText || (
+                          <span
+                            className="text-faint italic"
+                            style={{ fontFamily: norm.fontFamily }}
+                          >
+                            {norm.type === 'static' ? 'empty text' : norm.field}
+                          </span>
+                        )}
+                      </span>
+                    )}
+
+                    {/* Up/down arrows — keyboard fallback for drag */}
+                    {isSelected && (
+                      <div className="ml-1 flex shrink-0 items-center gap-0.5">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            moveZone(i, -1);
+                          }}
+                          className="px-1 text-xs text-muted hover:text-ink"
+                          aria-label="Move up"
+                        >
+                          ↑
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            moveZone(i, 1);
+                          }}
+                          className="px-1 text-xs text-muted hover:text-ink"
+                          aria-label="Move down"
+                        >
+                          ↓
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Add zone buttons */}
+        <div className="flex gap-2">
           <Button
             variant="outline"
-            onClick={() => setDraft((d) => ({ ...d, zones: [...d.zones, newZone()] }))}
-            className="h-10 self-start rounded-full px-4 text-sm"
+            onClick={() => addZone(newFieldZone())}
+            className="h-9 rounded-full px-4 text-sm"
           >
-            + Add zone
+            + Add field zone
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => addZone(newStaticZone())}
+            className="h-9 rounded-full px-4 text-sm"
+          >
+            + Add text zone
           </Button>
         </div>
 
+        {/* Save / delete */}
         <div className="flex items-center gap-3">
           <Button onClick={save} disabled={saving} className="h-11 rounded-full px-5 text-sm">
             {saving ? 'Saving…' : 'Save template'}
@@ -241,18 +505,19 @@ export function TemplateEditor({
         </div>
       </div>
 
-      {/* Live preview column */}
+      {/* ── Right: print simulation column ── */}
       <div className="lg:sticky lg:top-4 lg:self-start">
         <span className="mb-2 block font-display text-xs font-semibold uppercase tracking-wide text-faint">
-          Preview
+          Print simulation · 203 DPI
         </span>
-        <BadgePreview
-          lines={renderBadgeLines(SAMPLE_ATTENDEE, draft)}
-          widthMm={draft.labelWidthMm || 80}
-          heightMm={draft.labelHeightMm || 60}
-          className="w-full shadow-[0_8px_24px_rgba(0,0,0,.06)]"
+        <canvas
+          ref={canvasRef}
+          className="w-full rounded-md border border-line shadow-[0_8px_24px_rgba(0,0,0,.06)]"
+          style={{ imageRendering: 'pixelated' }}
         />
-        <p className="mt-2 text-xs text-faint">Sample data shown. Empty fields render blank.</p>
+        <p className="mt-2 text-xs text-faint">
+          Pixel-accurate preview. Updates 150 ms after each change.
+        </p>
       </div>
     </div>
   );

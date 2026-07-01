@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { usePrintAttendee } from '../hooks/usePrintAttendee';
 import { useTemplates, useUpdateTemplate, useTemplateFieldKeys } from '../hooks/useTemplates';
-import { renderBadgeLines } from '../printer/buildBadgeTSPL';
-import { BadgePreview } from './BadgePreview';
+import { normalizeLegacyZone, FONT_SIZES } from '../printer/renderBadge';
 import { Button } from './ui/Button';
 import { CloseIcon, PrinterIcon } from './icons';
 import { toast } from '../store/toastStore';
@@ -34,7 +33,7 @@ export function BadgePrintPanel({
 
   // Initialize draft when template resolves (render-time update avoids useEffect cascade)
   if (template && !draft) {
-    setDraft({ ...template, zones: template.zones.map((z) => ({ ...z })) });
+    setDraft({ ...template, zones: template.zones.map(normalizeLegacyZone) });
   }
 
   const effectiveTemplate = draft ?? template ?? null;
@@ -51,21 +50,28 @@ export function BadgePrintPanel({
     };
   }
 
-  const lines = effectiveTemplate ? renderBadgeLines(mergedAttendee(), effectiveTemplate) : [];
-  const visibleZones = effectiveTemplate?.zones.filter((z) => !z.hidden) ?? [];
+  const previewZones = effectiveTemplate
+    ? effectiveTemplate.zones.map(normalizeLegacyZone).filter((z) => !z.hidden)
+    : [];
+
+  const visibleZones = effectiveTemplate
+    ? effectiveTemplate.zones
+        .map(normalizeLegacyZone)
+        .filter((z) => !z.hidden && z.type === 'field')
+    : [];
 
   // ── Field override helpers ──────────────────────────────────────────────────
 
   function getFieldValue(zone: TemplateZone): string {
-    const key = zone.field === 'fullName' ? '__fullName__' : zone.field;
+    const key = zone.field === 'fullName' ? '__fullName__' : (zone.field ?? '');
     return (
       overrides[key] ??
-      (zone.field === 'fullName' ? attendee.fullName : (attendee.extra[zone.field] ?? ''))
+      (zone.field === 'fullName' ? attendee.fullName : (attendee.extra[zone.field ?? ''] ?? ''))
     );
   }
 
   function setFieldValue(zone: TemplateZone, val: string) {
-    const key = zone.field === 'fullName' ? '__fullName__' : zone.field;
+    const key = zone.field === 'fullName' ? '__fullName__' : (zone.field ?? '');
     setOverrides((prev) => ({ ...prev, [key]: val }));
   }
 
@@ -91,8 +97,10 @@ export function BadgePrintPanel({
   function addZone() {
     const zone: TemplateZone = {
       id: crypto.randomUUID(),
+      type: 'field',
       field: 'fullName',
-      fontSize: 3,
+      fontFamily: 'Inter',
+      fontSize: 16,
       bold: false,
       align: 'center',
       hidden: false,
@@ -159,12 +167,39 @@ export function BadgePrintPanel({
       {/* Live badge preview */}
       <div className="border-b border-line-3 bg-surface-2 px-5 py-5">
         {effectiveTemplate ? (
-          <BadgePreview
-            lines={lines}
-            widthMm={effectiveTemplate.labelWidthMm}
-            heightMm={effectiveTemplate.labelHeightMm}
-            className="mx-auto max-w-[240px] shadow-[0_8px_24px_rgba(0,0,0,.10)]"
-          />
+          <div
+            className="mx-auto flex max-w-[240px] flex-col items-center justify-center overflow-hidden rounded-md border border-line bg-white px-3 py-2 shadow-[0_8px_24px_rgba(0,0,0,.10)]"
+            style={{
+              aspectRatio: `${effectiveTemplate.labelWidthMm} / ${effectiveTemplate.labelHeightMm}`,
+            }}
+          >
+            {previewZones.length === 0 ? (
+              <span className="text-[11px] text-faint">Empty template</span>
+            ) : (
+              previewZones.map((z, i) => {
+                const text =
+                  z.type === 'static'
+                    ? (z.staticText ?? '')
+                    : z.field === 'fullName'
+                      ? mergedAttendee().fullName
+                      : (mergedAttendee().extra[z.field ?? ''] ?? '');
+                return (
+                  <span
+                    key={i}
+                    className="block w-full truncate leading-tight text-ink"
+                    style={{
+                      fontSize: `${z.fontSize}pt`,
+                      fontWeight: z.bold ? 700 : 400,
+                      textAlign: z.align,
+                      fontFamily: z.fontFamily,
+                    }}
+                  >
+                    {text || ' '}
+                  </span>
+                );
+              })
+            )}
+          </div>
         ) : (
           <div className="flex h-24 items-center justify-center rounded-xl border border-dashed border-line-2 text-sm text-faint">
             No template selected
@@ -197,7 +232,7 @@ export function BadgePrintPanel({
               {visibleZones.map((z) => (
                 <label key={z.id} className="flex flex-col gap-1">
                   <span className="text-[12px] font-semibold capitalize text-muted">
-                    {z.field === 'fullName' ? 'Full Name' : z.field}
+                    {z.field === 'fullName' ? 'Full Name' : (z.field ?? '')}
                   </span>
                   <input
                     value={getFieldValue(z)}
@@ -251,7 +286,7 @@ export function BadgePrintPanel({
                   <div className="flex flex-wrap items-center gap-2">
                     <input
                       list="panel-field-keys"
-                      value={z.field}
+                      value={z.field ?? ''}
                       onChange={(e) => patchZone(z.id, { field: e.target.value })}
                       placeholder="field"
                       className="h-8 min-w-0 flex-1 rounded-lg border border-line-2 bg-white px-2.5 text-sm outline-none"
@@ -261,9 +296,9 @@ export function BadgePrintPanel({
                       onChange={(e) => patchZone(z.id, { fontSize: Number(e.target.value) })}
                       className="h-8 rounded-lg border border-line-2 bg-white px-1.5 text-sm"
                     >
-                      {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
-                        <option key={n} value={n}>
-                          S{n}
+                      {FONT_SIZES.map((s) => (
+                        <option key={s} value={s}>
+                          {s}pt
                         </option>
                       ))}
                     </select>

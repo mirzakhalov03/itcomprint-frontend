@@ -28,7 +28,6 @@ export class WebUsbPrinter implements PrinterAdapter {
 
   async print(job: PrintJob): Promise<void> {
     if (!this.device) throw new Error('Printer not connected.');
-    const data = new TextEncoder().encode(job.tspl);
-    await this.device.transferOut(this.endpointNumber, data);
+    await this.device.transferOut(this.endpointNumber, job.tspl);
   }
 }

@@ -37,8 +37,11 @@ export interface NewAttendee {
 
 export interface TemplateZone {
   id: string;
-  field: string; // 'fullName' or an attendee extra-column key
-  fontSize: number; // 1–8 scale
+  type: 'field' | 'static';
+  field?: string; // present when type='field'
+  staticText?: string; // present when type='static'
+  fontFamily: string;
+  fontSize: number; // pt value, 6–96
   bold: boolean;
   align: 'left' | 'center' | 'right';
   hidden: boolean;

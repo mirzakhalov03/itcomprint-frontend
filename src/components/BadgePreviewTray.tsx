@@ -1,14 +1,13 @@
 import { usePreviewStore } from '../store/previewStore';
 import { DownloadIcon, NodeMesh } from './icons';
 import type { PrintJob } from '../printer/PrinterAdapter';
-import { BadgePreview } from './BadgePreview';
 
 function downloadTspl(job: PrintJob) {
-  const blob = new Blob([job.tspl], { type: 'text/plain' });
+  const blob = new Blob([job.tspl], { type: 'application/octet-stream' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `badge-${job.name.replace(/\s+/g, '_')}.tspl.txt`;
+  a.download = `badge-${job.name.replace(/\s+/g, '_')}.tspl.bin`;
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -45,17 +44,19 @@ export function BadgePreviewTray() {
             <div key={i} className="animate-badge-rise w-[220px] shrink-0">
               <div className="flex h-[165px] w-[220px] flex-col overflow-hidden rounded-lg border border-line bg-white shadow-[0_10px_26px_rgba(0,0,0,.4)]">
                 <div className="h-1.5 bg-brand" />
-                <div className="flex flex-1 flex-col px-3 py-2">
+                <div className="flex flex-1 flex-col items-center justify-center px-3 py-2">
                   {job.eventName && (
                     <span className="mb-1 text-center font-display text-[9px] font-semibold tracking-[.1em] text-faint">
                       {job.eventName}
                     </span>
                   )}
-                  <BadgePreview
-                    lines={job.lines}
-                    widthMm={job.labelWidthMm}
-                    heightMm={job.labelHeightMm}
-                    className="flex-1 border-0"
+                  <img
+                    src={job.previewDataUrl}
+                    alt={job.name}
+                    className="max-h-full max-w-full object-contain"
+                    style={{
+                      aspectRatio: `${job.labelWidthMm} / ${job.labelHeightMm}`,
+                    }}
                   />
                 </div>
               </div>
