@@ -110,15 +110,19 @@ export function canvasToMonochromeBitmap(canvas: HTMLCanvasElement): Uint8Array<
   const { data } = ctx.getImageData(0, 0, width, height);
 
   const bytesPerRow = Math.ceil(width / 8);
-  const bitmap = new Uint8Array(bytesPerRow * height);
+  // TSPL BITMAP polarity is inverted: a 0 bit burns a dot, a 1 bit leaves the
+  // label blank. Start all-white (0xff) so every untouched pixel prints nothing —
+  // including the padding bits that round each row up to a whole byte, which
+  // would otherwise burn a black stripe down the right edge.
+  const bitmap = new Uint8Array(bytesPerRow * height).fill(0xff);
 
   for (let row = 0; row < height; row++) {
     for (let col = 0; col < width; col++) {
       const px = (row * width + col) * 4;
       const luminance = 0.299 * data[px] + 0.587 * data[px + 1] + 0.114 * data[px + 2];
       if (luminance <= 128) {
-        // black pixel — set the corresponding bit (MSB first)
-        bitmap[row * bytesPerRow + Math.floor(col / 8)] |= 1 << (7 - (col % 8));
+        // black pixel — clear the bit (MSB first) so the printer burns this dot
+        bitmap[row * bytesPerRow + Math.floor(col / 8)] &= ~(1 << (7 - (col % 8)));
       }
     }
   }
