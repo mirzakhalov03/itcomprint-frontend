@@ -1,0 +1,29 @@
+src/pages/DashboardPage.tsx
+  s_ecd22a873bef3f::t_c50a97e5d62419 5,14-18,22-23,30-59,77,80-91,93
+src/components/LinkSheetDialog.tsx
+  s_9f65baa1b1ad21::t_690c3eef732f7f 1-100
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "24fd307bc237c2b8cd1aaa52923906a417ecf6ed",
+  "prompts": {},
+  "sessions": {
+    "s_9f65baa1b1ad21": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-ae8a9e6dd3281be81",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    },
+    "s_ecd22a873bef3f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "167a55c6-5863-4c01-a38b-1794af1fd70a",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
