@@ -14,3 +14,12 @@ export function useCreateEvent() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['events'] }),
   });
 }
+
+export function useCreateEventFromSheet() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: { name: string; date: string; sheetUrl: string }) =>
+      api.createEventFromSheet(payload),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['events'] }),
+  });
+}
