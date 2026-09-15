@@ -1,0 +1,19 @@
+src/components/AttendeeTable.tsx
+  s_fb341f20a78314::t_41989ff401f43c 12,62,191-205
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "f515f9023c9bcbc8cb744654e07527f9dbd37b7b",
+  "prompts": {},
+  "sessions": {
+    "s_fb341f20a78314": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a1ee6c44c8c3b8ac4",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
