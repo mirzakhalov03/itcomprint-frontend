@@ -9,6 +9,7 @@ import { Button } from './ui/Button';
 import { Checkbox } from './ui/Checkbox';
 import { EmptyState, LoadingPanel } from './ui/EmptyState';
 import { useTemplates } from '../hooks/useTemplates';
+import { useSheetSync } from '../hooks/useSheetSync';
 import { TemplateSelect } from './TemplateSelect';
 import type { Attendee, AppEvent } from '../types';
 
@@ -58,6 +59,7 @@ export function AttendeeTable({
   const eventId = event._id;
   const eventName = event.name;
   const { data: templates = [] } = useTemplates();
+  const { syncNow, isSyncing } = useSheetSync(eventId, !!event.sheetId);
   const activeTemplate =
     templates.find((t) => t._id === event.templateId) ?? templates.find((t) => t.isDefault);
   const [search, setSearch] = useState('');
@@ -185,6 +187,21 @@ export function AttendeeTable({
             onClick={() => setFilter('notprinted')}
           />
         </div>
+
+        {event.sheetId && (
+          <button
+            onClick={syncNow}
+            disabled={isSyncing}
+            className="inline-flex h-8.5 items-center gap-1.5 rounded-lg px-3 font-display text-[13px] font-semibold text-muted transition-colors hover:text-ink disabled:opacity-60"
+            title={
+              event.lastSyncedAt
+                ? `Last synced ${new Date(event.lastSyncedAt).toLocaleTimeString()}`
+                : undefined
+            }
+          >
+            {isSyncing ? 'Syncing…' : 'Sync now'}
+          </button>
+        )}
 
         {selected.size > 0 && (
           <Button
