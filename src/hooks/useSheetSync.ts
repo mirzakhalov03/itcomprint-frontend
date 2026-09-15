@@ -23,14 +23,20 @@ export function useSheetSync(eventId: string | null, enabled: boolean) {
     },
   });
   const mutateRef = useRef(mutation.mutate);
+  const isPendingRef = useRef(mutation.isPending);
   useEffect(() => {
     mutateRef.current = mutation.mutate;
+    isPendingRef.current = mutation.isPending;
   });
 
   useEffect(() => {
     if (!enabled || !eventId) return;
-    mutateRef.current(); // silent — no onError, background tick self-heals next round
-    const id = setInterval(() => mutateRef.current(), POLL_INTERVAL_MS);
+    const tick = () => {
+      if (isPendingRef.current) return; // previous sync still in flight — skip this tick
+      mutateRef.current(); // silent — no onError, background tick self-heals next round
+    };
+    tick(); // initial sync on mount
+    const id = setInterval(tick, POLL_INTERVAL_MS);
     return () => clearInterval(id);
   }, [enabled, eventId]);
 
