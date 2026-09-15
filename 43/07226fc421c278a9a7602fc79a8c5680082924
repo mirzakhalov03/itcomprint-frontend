@@ -1,0 +1,19 @@
+docs/superpowers/specs/2026-09-15-sheet-sync-design.md
+  s_850653be0382b4::t_cc9996e94f1846 1-236
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "4307226fc421c278a9a7602fc79a8c5680082924",
+  "prompts": {},
+  "sessions": {
+    "s_850653be0382b4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5f1efbb4-ae46-4082-9b4a-1f1df516d1be",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
