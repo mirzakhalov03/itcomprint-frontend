@@ -4,6 +4,7 @@ import type {
   AuthUser,
   BadgeTemplate,
   NewAttendee,
+  SheetSyncResult,
   TemplateInput,
 } from '../types';
 
@@ -27,6 +28,15 @@ export const api = {
 
   createEvent: (payload: { name: string; date: string; attendees: NewAttendee[] }) =>
     request<AppEvent>('/events', { method: 'POST', body: JSON.stringify(payload) }),
+
+  createEventFromSheet: (payload: { name: string; date: string; sheetUrl: string }) =>
+    request<AppEvent & SheetSyncResult>('/events/sheet', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+
+  syncEventSheet: (eventId: string) =>
+    request<SheetSyncResult>(`/events/${eventId}/sync-sheet`, { method: 'POST' }),
 
   listAttendees: (eventId: string, params: { search?: string; status?: string }) => {
     const qs = new URLSearchParams();
