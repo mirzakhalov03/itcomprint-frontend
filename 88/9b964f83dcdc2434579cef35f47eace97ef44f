@@ -1,0 +1,29 @@
+src/hooks/useEvents.ts
+  s_850653be0382b4::t_4ad3016cf36a0f 17-25
+src/hooks/useSheetSync.ts
+  s_4ca58fb0a4b3f1::t_a2633931faf39d 1-44
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "889b964f83dcdc2434579cef35f47eace97ef44f",
+  "prompts": {},
+  "sessions": {
+    "s_4ca58fb0a4b3f1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-adbe2e0ce0612f396",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    },
+    "s_850653be0382b4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5f1efbb4-ae46-4082-9b4a-1f1df516d1be",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
