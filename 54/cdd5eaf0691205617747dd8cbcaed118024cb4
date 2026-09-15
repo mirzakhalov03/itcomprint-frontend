@@ -1,0 +1,29 @@
+src/lib/api.ts
+  s_850653be0382b4::t_6f5c66c1009a1b 7,32-40
+src/types.ts
+  s_db42d39724a755::t_08b08aa9b2c4ea 19-21,69-75
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "54cdd5eaf0691205617747dd8cbcaed118024cb4",
+  "prompts": {},
+  "sessions": {
+    "s_850653be0382b4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5f1efbb4-ae46-4082-9b4a-1f1df516d1be",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    },
+    "s_db42d39724a755": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a6781f852fc4fa2b1",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
