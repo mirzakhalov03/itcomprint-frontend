@@ -16,6 +16,9 @@ export interface AppEvent {
   authorName?: string;
   authorPicture?: string;
   templateId: string | null;
+  sheetId: string | null;
+  sheetUrl: string | null;
+  lastSyncedAt: string | null;
 }
 
 export type PrintStatus = 'not_printed' | 'printed';
@@ -63,3 +66,10 @@ export type TemplateInput = Pick<
   BadgeTemplate,
   'name' | 'labelWidthMm' | 'labelHeightMm' | 'zones'
 >;
+
+export interface SheetSyncResult {
+  added: number;
+  updated: number;
+  skipped: number;
+  total?: number;
+}
