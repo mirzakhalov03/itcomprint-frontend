@@ -1,0 +1,33 @@
+src/components/AttendeeTable.tsx
+  s_d8b340aaf2a2c4::t_4f2e28235d5552 1,11,67,70,73,87-90,104-106,112,115,119,126,140-155,157,159-165,183,225,229-230
+src/hooks/usePrintAttendee.ts
+  s_d8b340aaf2a2c4::t_3c960859f93cd6 7,16-31,43,52,54-61
+src/components/AttendeeRow.tsx
+  s_074c7779d95ac9::t_7f8dc7dc17dce3 1,27,115
+src/components/TemplateSelect.tsx
+  s_074c7779d95ac9::t_a846527d2171b1 2,5,11,13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "fba7d4bc29d3c97689ef83bb9de7e08a6c7c1f66",
+  "prompts": {},
+  "sessions": {
+    "s_074c7779d95ac9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a49ef6ee5452b84e6",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    },
+    "s_d8b340aaf2a2c4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "20e219b2-b075-4e5b-82ed-cc8c57230efd",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
