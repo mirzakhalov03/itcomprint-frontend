@@ -1,0 +1,43 @@
+src/components/EditEventDialog.tsx
+  s_d8b340aaf2a2c4::t_bcce623b077f8a 6-7,28-33,48-52
+src/components/EventCard.tsx
+  s_d8b340aaf2a2c4::t_c242ca82fd40b0 14
+src/components/EventDetailsFields.tsx
+  s_d8b340aaf2a2c4::t_6a8cd3f082d188 1-31
+src/components/ImportDialog.tsx
+  s_d8b340aaf2a2c4::t_7e7b206287db80 5-6,9-10,27-28,36-49,51,67-78,84-91,106-171,173-178,180
+src/components/LinkSheetDialog.tsx
+  s_d8b340aaf2a2c4::t_5a24914641108e 5,8-9,20,42-49,64-84,86
+src/components/MoveToTrashDialog.tsx
+  s_d8b340aaf2a2c4::t_8a97fb3f62057c 3-4,11-22
+src/components/PermanentDeleteDialog.tsx
+  s_d8b340aaf2a2c4::t_7ea473078bb9e8 3,16-27
+src/components/SignOutDialog.tsx
+  s_d8b340aaf2a2c4::t_39eaff0fb6e761 2,6-16
+src/components/ui/ConfirmDialog.tsx
+  s_d8b340aaf2a2c4::t_7a416448ccb14d 1-69
+src/components/ui/Dialog.tsx
+  s_d8b340aaf2a2c4::t_76bb50acc6a53d 1-63
+src/pages/OnboardingPage.tsx
+  s_d8b340aaf2a2c4::t_fbcdff8fb450e3 4-5,12-13,21,23-26,41,48
+src/pages/SettingsPage.tsx
+  s_d8b340aaf2a2c4::t_984c1506d764f6 4,13-14,21,23-26,46,50
+src/pages/TrashPage.tsx
+  s_d8b340aaf2a2c4::t_b329493cfabd08 5,14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "04899cb53eb7002be14384c451ba1560e12f97d7",
+  "prompts": {},
+  "sessions": {
+    "s_d8b340aaf2a2c4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "20e219b2-b075-4e5b-82ed-cc8c57230efd",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
