@@ -1,0 +1,71 @@
+docs/CLAUDE.md
+  s_f52226669dc752::t_e36e7b9440e16e 13-14,16,86
+docs/OptionB.md
+  s_f52226669dc752::t_124cb717a7ac20 3,14,16,27,35,44,56-64,67,81,110-111,121,123,129,135,144,155,157,170
+docs/badge-printing-mockup.html
+  s_f52226669dc752::t_61a9a4620411f2 1,3-102,104-110,112-256,258-264,266-273,275-276,278-290
+docs/brand.md
+  s_f52226669dc752::t_4f7f62277fb50c 8,12,21,25,27,31,34,38,42
+docs/design.md
+  s_f52226669dc752::t_a96ab1ed94fc53 9,12,18-19,27-44,54-62,79,90,102,105,110,112,118,123,133,137,143,156-160,169,194
+docs/superpowers/plans/2026-06-15-backend-implementation.md
+  s_f52226669dc752::t_3e3df92ca09b9a 19-26,91,179,222,291,407,460,564,570,585,698,704,712
+docs/superpowers/plans/2026-06-15-frontend-implementation.md
+  s_f52226669dc752::t_d1c53b496f3d2c 117,229,377,450-454,457-460,482,560,631-636,640-645,649-658,661-663,668-678,700,708-714,722-724,759-761,768-770,837-841,870-875,897,925-927,933-936,939-942,965,991-994,999-1003
+docs/superpowers/plans/2026-06-22-auth-foundation.md
+  s_f52226669dc752::t_4bca3f47845686 29,41,53,65,77,86,122-131,137,139,147-148,196,200,255,260,286-290,352,356,476,481,552,560,740-745,753-757,825-829,846-850,861-868,871-878,881-883,892-904,907-909,913-920,923-925,970,977,1062,1087,1094,1253,1261,1370,1399-1400,1430,1437,1499-1502,1504-1506,1562-1566,1650,1655,1673-1678,1708-1711,1734,1746,1776,1798-1800
+docs/superpowers/plans/2026-09-17-optimization-audit-fixes.md
+  s_c5fb63a11c3cd6::t_ba16230aad036a 1-1492
+docs/superpowers/specs/2026-06-15-roadshow-badge-printing-design.md
+  s_f52226669dc752::t_88485d23d36361 57,64,120
+docs/superpowers/specs/2026-06-22-auth-foundation-design.md
+  s_f52226669dc752::t_a4c04c3cc35027 16,26,35,58-65,67-68,71,73,78,84-90,95,99,104,115,117,124,131,139,165
+src/components/PermanentDeleteDialog.tsx
+  s_aa39679ef41a25::t_afbe28a2ea3ac5 1-61
+src/components/ui/NumberField.tsx
+  s_aa39679ef41a25::t_419bf4be173e23 1-47
+src/components/BadgePrintPanel.tsx
+  s_45c6426ee721ed::t_b4ecce7e1aa310 6,169,172,190,255,257,263,265
+src/components/TemplateEditor.tsx
+  s_45c6426ee721ed::t_ba57d70a84d9a0 4-5,223,225-226,231,233-234,361
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "d7e30c8e2c53cda31040f98a002ea2071854798a",
+  "prompts": {},
+  "sessions": {
+    "s_45c6426ee721ed": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a0ad04abd89ae4186",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    },
+    "s_aa39679ef41a25": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d3525a62-49b1-4842-b8d9-a4efc5d79a62",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    },
+    "s_c5fb63a11c3cd6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ad27af34-5d85-441c-9cb4-a0b64a0a42f4",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    },
+    "s_f52226669dc752": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1553490d-57f8-4d9d-ba0c-51a537fe0921",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
