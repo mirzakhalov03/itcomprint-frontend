@@ -488,6 +488,42 @@ export function LandingPage() {
           </p>
         )}
 
+        {/* Bridges the gap between Google resolving and our own session coming
+            back — without this the hero just sits there idle for that round
+            trip, which reads as "flashed back to the home page" once it snaps
+            over to the dashboard. */}
+        {login.isPending && (
+          <div
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 10,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 14,
+              background: 'rgba(28,29,26,.72)',
+              backdropFilter: 'blur(2px)',
+            }}
+          >
+            <div
+              style={{
+                width: 30,
+                height: 30,
+                borderRadius: '50%',
+                border: '3px solid rgba(136,189,85,.25)',
+                borderTopColor: '#88bd55',
+                animation: 'spin .7s linear infinite',
+              }}
+            />
+            <span style={{ fontSize: 13.5, color: '#b0d585', letterSpacing: '.02em' }}>
+              Signing you in…
+            </span>
+            <style>{'@keyframes spin { to { transform: rotate(360deg); } }'}</style>
+          </div>
+        )}
+
         {/* footer */}
         <p
           style={{

@@ -114,6 +114,7 @@ git commit -m "chore(frontend): scaffold Vite React TS + Tailwind"
 ### Task 1: Types, API client, React Query provider
 
 **Files:**
+
 - Create: `frontend/src/types.ts`, `frontend/src/lib/api.ts`, `frontend/src/lib/queryClient.ts`
 - Modify: `frontend/src/main.tsx`
 
@@ -225,6 +226,7 @@ git commit -m "feat(frontend): types, API client, React Query provider"
 ### Task 2: Printer layer (interface, TSPL builder, adapters, factory)
 
 **Files:**
+
 - Create: `frontend/src/printer/PrinterAdapter.ts`, `buildBadgeTSPL.ts`, `PreviewPrinter.ts`, `WebUsbPrinter.ts`, `createPrinter.ts`
 
 - [ ] **Step 1: Write `frontend/src/printer/PrinterAdapter.ts`**
@@ -372,6 +374,7 @@ git commit -m "feat(frontend): printer adapter layer with preview + webusb"
 ### Task 3: Stores (preview + printer connection) and PrinterStatus
 
 **Files:**
+
 - Create: `frontend/src/store/previewStore.ts`, `frontend/src/store/printerStore.ts`, `frontend/src/components/PrinterStatus.tsx`
 
 - [ ] **Step 1: Write `frontend/src/store/previewStore.ts`**
@@ -444,10 +447,17 @@ export function PrinterStatus() {
         }`}
       >
         <span className={`h-2 w-2 rounded-full ${connected ? 'bg-green-500' : 'bg-gray-400'}`} />
-        {adapter.kind === 'preview' ? 'Preview mode' : connected ? 'Printer connected' : 'Printer not connected'}
+        {adapter.kind === 'preview'
+          ? 'Preview mode'
+          : connected
+            ? 'Printer connected'
+            : 'Printer not connected'}
       </span>
       {adapter.kind === 'webusb' && !connected && (
-        <button onClick={() => connect()} className="rounded-md bg-blue-600 px-3 py-1 text-sm font-medium text-white hover:bg-blue-700">
+        <button
+          onClick={() => connect()}
+          className="rounded-md bg-blue-600 px-3 py-1 text-sm font-medium text-white hover:bg-blue-700"
+        >
           Connect printer
         </button>
       )}
@@ -469,6 +479,7 @@ git commit -m "feat(frontend): preview + printer stores and status component"
 ### Task 4: React Query hooks
 
 **Files:**
+
 - Create: `frontend/src/hooks/useEvents.ts`, `useAttendees.ts`, `usePrintAttendee.ts`
 
 - [ ] **Step 1: Write `frontend/src/hooks/useEvents.ts`**
@@ -546,6 +557,7 @@ git commit -m "feat(frontend): React Query hooks for events, attendees, print"
 ### Task 5: Import dialog (SheetJS parse + column mapping)
 
 **Files:**
+
 - Create: `frontend/src/components/ImportDialog.tsx`
 
 - [ ] **Step 1: Write `frontend/src/components/ImportDialog.tsx`**
@@ -616,29 +628,54 @@ export function ImportDialog({ onClose }: { onClose: () => void }) {
           <div className="space-y-3">
             <label className="block text-sm">
               Event name
-              <input value={eventName} onChange={(e) => setEventName(e.target.value)}
-                className="mt-1 w-full rounded-md border px-3 py-2" placeholder="Roadshow June" />
+              <input
+                value={eventName}
+                onChange={(e) => setEventName(e.target.value)}
+                className="mt-1 w-full rounded-md border px-3 py-2"
+                placeholder="Roadshow June"
+              />
             </label>
             <label className="block text-sm">
               Event date
-              <input type="date" value={eventDate} onChange={(e) => setEventDate(e.target.value)}
-                className="mt-1 w-full rounded-md border px-3 py-2" />
+              <input
+                type="date"
+                value={eventDate}
+                onChange={(e) => setEventDate(e.target.value)}
+                className="mt-1 w-full rounded-md border px-3 py-2"
+              />
             </label>
             <label className="block text-sm">
               Which column is the attendee name?
-              <select value={nameCol} onChange={(e) => setNameCol(e.target.value)}
-                className="mt-1 w-full rounded-md border px-3 py-2">
-                {columns.map((c) => <option key={c} value={c}>{c}</option>)}
+              <select
+                value={nameCol}
+                onChange={(e) => setNameCol(e.target.value)}
+                className="mt-1 w-full rounded-md border px-3 py-2"
+              >
+                {columns.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
               </select>
             </label>
-            <p className="text-xs text-gray-500">{rows.length} rows detected. Other columns are kept for search.</p>
+            <p className="text-xs text-gray-500">
+              {rows.length} rows detected. Other columns are kept for search.
+            </p>
           </div>
         )}
 
         <div className="mt-6 flex justify-end gap-3">
-          <button onClick={onClose} className="rounded-md px-4 py-2 text-sm text-gray-600 hover:bg-gray-100">Cancel</button>
-          <button onClick={handleImport} disabled={!canImport || createEvent.isPending}
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">
+          <button
+            onClick={onClose}
+            className="rounded-md px-4 py-2 text-sm text-gray-600 hover:bg-gray-100"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleImport}
+            disabled={!canImport || createEvent.isPending}
+            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          >
             {createEvent.isPending ? 'Importing…' : 'Import'}
           </button>
         </div>
@@ -660,6 +697,7 @@ git commit -m "feat(frontend): spreadsheet import with column mapping"
 ### Task 6: Event selector, attendee table/rows, search + filter, batch print
 
 **Files:**
+
 - Create: `frontend/src/components/EventSelector.tsx`, `AttendeeRow.tsx`, `AttendeeTable.tsx`
 
 - [ ] **Step 1: Write `frontend/src/components/EventSelector.tsx`**
@@ -667,7 +705,13 @@ git commit -m "feat(frontend): spreadsheet import with column mapping"
 ```tsx
 import { useEvents } from '../hooks/useEvents';
 
-export function EventSelector({ value, onChange }: { value: string | null; onChange: (id: string) => void }) {
+export function EventSelector({
+  value,
+  onChange,
+}: {
+  value: string | null;
+  onChange: (id: string) => void;
+}) {
   const { data: events = [] } = useEvents();
   return (
     <select
@@ -675,7 +719,9 @@ export function EventSelector({ value, onChange }: { value: string | null; onCha
       onChange={(e) => onChange(e.target.value)}
       className="rounded-md border px-3 py-2 text-sm"
     >
-      <option value="" disabled>Select an event…</option>
+      <option value="" disabled>
+        Select an event…
+      </option>
       {events.map((ev) => (
         <option key={ev._id} value={ev._id}>
           {ev.name} ({ev.attendeeCount ?? 0})
@@ -710,14 +756,18 @@ export function AttendeeRow({
         <input type="checkbox" checked={selected} onChange={() => onToggle(attendee._id)} />
       </td>
       <td className="px-3 py-2 font-medium">{attendee.fullName}</td>
-      <td className="px-3 py-2 text-sm text-gray-500">{Object.values(attendee.extra).join(' · ')}</td>
+      <td className="px-3 py-2 text-sm text-gray-500">
+        {Object.values(attendee.extra).join(' · ')}
+      </td>
       <td className="px-3 py-2">
         {printed ? (
           <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-800">
             Printed{attendee.printCount > 1 ? ` ×${attendee.printCount}` : ''}
           </span>
         ) : (
-          <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">Not printed</span>
+          <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
+            Not printed
+          </span>
         )}
       </td>
       <td className="px-3 py-2 text-right">
@@ -784,7 +834,11 @@ export function AttendeeTable({ eventId }: { eventId: string }) {
           placeholder="Search name or details…"
           className="grow rounded-md border px-3 py-2 text-sm"
         />
-        <select value={status} onChange={(e) => setStatus(e.target.value)} className="rounded-md border px-3 py-2 text-sm">
+        <select
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
+          className="rounded-md border px-3 py-2 text-sm"
+        >
           <option value="">All</option>
           <option value="not_printed">Not printed</option>
           <option value="printed">Printed</option>
@@ -813,7 +867,12 @@ export function AttendeeTable({ eventId }: { eventId: string }) {
           </thead>
           <tbody>
             {attendees.map((a) => (
-              <AttendeeRow key={a._id} attendee={a} selected={selected.has(a._id)} onToggle={toggle} />
+              <AttendeeRow
+                key={a._id}
+                attendee={a}
+                selected={selected.has(a._id)}
+                onToggle={toggle}
+              />
             ))}
           </tbody>
         </table>
@@ -835,6 +894,7 @@ git commit -m "feat(frontend): event selector, attendee table, search/filter, ba
 ### Task 7: Badge preview tray (PreviewPrinter output)
 
 **Files:**
+
 - Create: `frontend/src/components/BadgePreviewTray.tsx`
 
 - [ ] **Step 1: Write `frontend/src/components/BadgePreviewTray.tsx`**
@@ -862,17 +922,24 @@ export function BadgePreviewTray() {
     <div className="mt-6 rounded-lg border bg-gray-50 p-4">
       <div className="mb-3 flex items-center justify-between">
         <h3 className="text-sm font-semibold text-gray-700">Badge preview ({jobs.length})</h3>
-        <button onClick={clear} className="text-xs text-gray-500 hover:text-gray-800">Clear</button>
+        <button onClick={clear} className="text-xs text-gray-500 hover:text-gray-800">
+          Clear
+        </button>
       </div>
       <div className="flex flex-wrap gap-3">
         {jobs.map((job, i) => (
           <div key={i} className="flex flex-col items-center gap-1">
             {/* 80mm x 60mm at ~3px/mm => 240x180 */}
-            <div className="flex items-center justify-center border-2 border-gray-400 bg-white text-center"
-              style={{ width: 240, height: 180 }}>
+            <div
+              className="flex items-center justify-center border-2 border-gray-400 bg-white text-center"
+              style={{ width: 240, height: 180 }}
+            >
               <span className="px-2 text-xl font-bold uppercase">{job.name}</span>
             </div>
-            <button onClick={() => downloadTspl(job.name, job.tspl)} className="text-xs text-blue-600 hover:underline">
+            <button
+              onClick={() => downloadTspl(job.name, job.tspl)}
+              className="text-xs text-blue-600 hover:underline"
+            >
               Download TSPL
             </button>
           </div>
@@ -895,6 +962,7 @@ git commit -m "feat(frontend): badge preview tray for no-hardware printing"
 ### Task 8: Assemble the app shell
 
 **Files:**
+
 - Modify: `frontend/src/App.tsx`
 
 - [ ] **Step 1: Replace `frontend/src/App.tsx`**
@@ -920,13 +988,19 @@ export default function App() {
 
       <div className="mb-6 flex flex-wrap items-center gap-3">
         <EventSelector value={eventId} onChange={setEventId} />
-        <button onClick={() => setImporting(true)}
-          className="rounded-md border px-3 py-2 text-sm font-medium hover:bg-gray-50">
+        <button
+          onClick={() => setImporting(true)}
+          className="rounded-md border px-3 py-2 text-sm font-medium hover:bg-gray-50"
+        >
           Import spreadsheet
         </button>
       </div>
 
-      {eventId ? <AttendeeTable eventId={eventId} /> : <p className="text-gray-500">Select or import an event to begin.</p>}
+      {eventId ? (
+        <AttendeeTable eventId={eventId} />
+      ) : (
+        <p className="text-gray-500">Select or import an event to begin.</p>
+      )}
 
       <BadgePreviewTray />
 

@@ -1,6 +1,7 @@
-import { lazy, Suspense, useState } from 'react';
+import { lazy, Suspense, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEvents } from '../hooks/useEvents';
+import { useClickOutside } from '../hooks/useClickOutside';
 import { EventCard } from '../components/EventCard';
 import { UploadIcon, ChevronDownIcon } from '../components/icons';
 import { Button } from '../components/ui/Button';
@@ -21,13 +22,15 @@ export function DashboardPage() {
   const { data: events = [], isLoading } = useEvents();
   const [mode, setMode] = useState<NewEventMode>('closed');
   const [chooserOpen, setChooserOpen] = useState(false);
+  const chooserRef = useRef<HTMLDivElement>(null);
+  useClickOutside(chooserRef, chooserOpen, () => setChooserOpen(false));
   const navigate = useNavigate();
 
   return (
     <div>
       <div className="mb-5 flex items-center justify-between">
         <h1 className="font-display text-xl font-bold text-ink">Events</h1>
-        <div className="relative">
+        <div ref={chooserRef} className="relative">
           <Button
             onClick={() => setChooserOpen((v) => !v)}
             className="h-11 gap-2 rounded-full px-[18px] text-sm"
@@ -35,13 +38,13 @@ export function DashboardPage() {
             <UploadIcon size={16} /> New event <ChevronDownIcon size={14} />
           </Button>
           {chooserOpen && (
-            <div className="absolute right-0 z-20 mt-2 w-56 overflow-hidden rounded-xl border border-line bg-white shadow-lg">
+            <div className="absolute right-0 z-20 mt-2 w-56 overflow-hidden rounded-xl border border-brand-line bg-brand-tint shadow-lg">
               <button
                 onClick={() => {
                   setChooserOpen(false);
                   setMode('upload');
                 }}
-                className="block w-full px-4 py-3 text-left text-sm text-ink hover:bg-surface"
+                className="block w-full px-4 py-3 text-left text-sm text-ink hover:bg-white/60"
               >
                 Upload spreadsheet
               </button>
@@ -50,7 +53,7 @@ export function DashboardPage() {
                   setChooserOpen(false);
                   setMode('sheet');
                 }}
-                className="block w-full px-4 py-3 text-left text-sm text-ink hover:bg-surface"
+                className="block w-full px-4 py-3 text-left text-sm text-ink hover:bg-white/60"
               >
                 Link Google Sheet
               </button>

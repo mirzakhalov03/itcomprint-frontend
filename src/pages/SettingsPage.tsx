@@ -1,15 +1,16 @@
 import { useState } from 'react';
-import { useAuth, useLogout, useUpdateName } from '../hooks/useAuth';
+import { useAuth, useUpdateName } from '../hooks/useAuth';
 import { toast } from '../store/toastStore';
 import { Avatar } from '../components/ui/Avatar';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
+import { SignOutDialog } from '../components/SignOutDialog';
 
 export function SettingsPage() {
   const { user } = useAuth();
   const update = useUpdateName();
-  const logout = useLogout();
   const [name, setName] = useState('');
+  const [confirmingSignOut, setConfirmingSignOut] = useState(false);
 
   if (!user) return null;
   const value = name || user.displayName;
@@ -54,12 +55,14 @@ export function SettingsPage() {
         <div className="mt-1 text-sm text-muted">End your session on this device.</div>
         <Button
           variant="danger"
-          onClick={() => logout.mutate()}
+          onClick={() => setConfirmingSignOut(true)}
           className="mt-4 h-11 rounded-full px-5 text-sm"
         >
           Sign out
         </Button>
       </div>
+
+      {confirmingSignOut && <SignOutDialog onClose={() => setConfirmingSignOut(false)} />}
     </div>
   );
 }

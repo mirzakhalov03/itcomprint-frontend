@@ -10,10 +10,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Two separate git repositories.** There is no monorepo and no root package manager — `cd` into each app.
 
-| Path | Repo | Stack |
-| --- | --- | --- |
+| Path        | Repo                                | Stack                                                                                           |
+| ----------- | ----------------------------------- | ----------------------------------------------------------------------------------------------- |
 | `frontend/` | `mirzakhalov03/itcomprint-frontend` | Vite + React 19 + TypeScript + Tailwind v4. Zustand (client state), React Query (server state). |
-| `backend/` | `mirzakhalov03/itcomprint-backend` | Express 5 + Mongoose 9 + Zod 4 on Node/TypeScript (ESM, `module: NodeNext`). |
+| `backend/`  | `mirzakhalov03/itcomprint-backend`  | Express 5 + Mongoose 9 + Zod 4 on Node/TypeScript (ESM, `module: NodeNext`).                    |
 
 The folder containing both is **not** a repo — it is just a working directory. All cross-app documentation (this file, the design system, and every spec/plan) lives in **`frontend/docs/`** and is versioned with the frontend. The root `CLAUDE.md` is a symlink to `frontend/docs/CLAUDE.md` so it still loads when working from the parent folder.
 
@@ -83,7 +83,7 @@ A `BadgeTemplate` is a label size (`labelWidthMm`/`labelHeightMm`) plus an order
 
 ### Data flow
 
-- **Import is client-side**: `ImportDialog` parses the spreadsheet with `xlsx` in the browser (lazy-loaded — it is a ~370KB chunk), the operator picks the name column, and the whole event + attendee array is POSTed in one request. There is intentionally **no per-attendee create endpoint** — events are always created *with* their attendees (`createEventWithAttendees` → `insertMany`). Walk-in attendees are therefore not supported.
+- **Import is client-side**: `ImportDialog` parses the spreadsheet with `xlsx` in the browser (lazy-loaded — it is a ~370KB chunk), the operator picks the name column, and the whole event + attendee array is POSTed in one request. There is intentionally **no per-attendee create endpoint** — events are always created _with_ their attendees (`createEventWithAttendees` → `insertMany`). Walk-in attendees are therefore not supported.
 - **Attendees load once per event; search and filtering are client-side** (`useAttendees` fetches the full roster, `AttendeeTable` filters in memory) so keystrokes never hit the network. The backend's `searchText` field and `{eventId, searchText}` compound index back the equivalent server-side query, which the UI does not currently call.
 - **Print and reprint are the same endpoint**: `POST /attendees/:id/print` `$inc`s `printCount` and sets `printStatus: 'printed'`. The UI shows "Print" → "Reprint" based on status.
 - `listEvents` derives `attendeeCount` and `printedCount` via aggregation; neither is stored.

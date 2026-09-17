@@ -92,6 +92,15 @@ export const ChevronDownIcon = (p: IconProps) => (
   </Svg>
 );
 
+export const RefreshIcon = (p: IconProps) => (
+  <Svg {...p} strokeWidth={p.strokeWidth ?? 2.3}>
+    <path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-6.36-2.64" />
+    <path d="M3 12a9 9 0 0 1 9-9 9 9 0 0 1 6.36 2.64" />
+    <polyline points="21 3 21 9 15 9" />
+    <polyline points="3 21 3 15 9 15" />
+  </Svg>
+);
+
 export const CheckIcon = (p: IconProps) => (
   <Svg {...p} strokeWidth={p.strokeWidth ?? 3}>
     <polyline points="20 6 9 17 4 12" />
@@ -143,6 +152,44 @@ export const BarChartIcon = (p: IconProps) => (
     <line x1="18" y1="20" x2="18" y2="10" />
     <line x1="12" y1="20" x2="12" y2="4" />
     <line x1="6" y1="20" x2="6" y2="14" />
+  </Svg>
+);
+
+export const MoreVerticalIcon = (p: IconProps) => (
+  <Svg {...p} strokeWidth={p.strokeWidth ?? 2.6}>
+    <circle cx="12" cy="5" r="1" />
+    <circle cx="12" cy="12" r="1" />
+    <circle cx="12" cy="19" r="1" />
+  </Svg>
+);
+
+export const PencilIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+  </Svg>
+);
+
+export const TrashIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <polyline points="3 6 5 6 21 6" />
+    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+    <line x1="10" y1="11" x2="10" y2="17" />
+    <line x1="14" y1="11" x2="14" y2="17" />
+  </Svg>
+);
+
+export const RotateCcwIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <polyline points="1 4 1 10 7 10" />
+    <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+  </Svg>
+);
+
+export const LogOutIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+    <polyline points="16 17 21 12 16 7" />
+    <line x1="21" y1="12" x2="9" y2="12" />
   </Svg>
 );
 

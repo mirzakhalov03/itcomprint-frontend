@@ -8,6 +8,7 @@ const TITLES: Record<string, string> = {
   '/app': 'Dashboard',
   '/app/printer': 'Printer',
   '/app/settings': 'Settings',
+  '/app/trash': 'Trash',
 };
 
 /** Persistent shell: dark sidebar + dark header bar + light routed workspace. */

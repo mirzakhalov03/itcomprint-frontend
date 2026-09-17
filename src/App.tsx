@@ -7,6 +7,7 @@ import { DashboardPage } from './pages/DashboardPage';
 import { PrinterPage } from './pages/PrinterPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { TemplatesPage } from './pages/TemplatesPage';
+import { TrashPage } from './pages/TrashPage';
 import { RequireAuth } from './components/RequireAuth';
 
 export default function App() {
@@ -36,6 +37,7 @@ export default function App() {
           <Route path="printer" element={<PrinterPage />} />
           <Route path="templates" element={<TemplatesPage />} />
           <Route path="settings" element={<SettingsPage />} />
+          <Route path="trash" element={<TrashPage />} />
         </Route>
 
         {/* Kiosk is full-screen — a sibling route, NOT under the layout */}

@@ -3,6 +3,7 @@ import { usePrintAttendee } from '../hooks/usePrintAttendee';
 import { useTemplates, useUpdateTemplate, useTemplateFieldKeys } from '../hooks/useTemplates';
 import { normalizeLegacyZone, FONT_SIZES } from '../printer/renderBadge';
 import { Button } from './ui/Button';
+import { NumberField } from './ui/NumberField';
 import { CloseIcon, PrinterIcon } from './icons';
 import { toast } from '../store/toastStore';
 import { errMessage } from '../lib/errors';
@@ -165,10 +166,10 @@ export function BadgePrintPanel({
       </div>
 
       {/* Live badge preview */}
-      <div className="border-b border-line-3 bg-surface-2 px-5 py-5">
+      <div className="flex justify-center border-b border-line-3 bg-surface-2 px-5 py-5">
         {effectiveTemplate ? (
           <div
-            className="mx-auto flex max-w-[240px] flex-col items-center justify-center overflow-hidden rounded-md border border-line bg-white px-3 py-2 shadow-[0_8px_24px_rgba(0,0,0,.10)]"
+            className="flex max-h-[220px] max-w-[240px] flex-col items-center justify-center overflow-hidden rounded-md border border-line bg-white px-3 py-2 shadow-[0_8px_24px_rgba(0,0,0,.10)]"
             style={{
               aspectRatio: `${effectiveTemplate.labelWidthMm} / ${effectiveTemplate.labelHeightMm}`,
             }}
@@ -186,7 +187,7 @@ export function BadgePrintPanel({
                 return (
                   <span
                     key={i}
-                    className="block w-full truncate leading-tight text-ink"
+                    className="block w-full break-words leading-tight text-ink"
                     style={{
                       fontSize: `${z.fontSize}pt`,
                       fontWeight: z.bold ? 700 : 400,
@@ -251,19 +252,17 @@ export function BadgePrintPanel({
             <div className="flex gap-3">
               <label className="flex flex-1 flex-col gap-1">
                 <span className="text-[12px] font-semibold text-muted">Width (mm)</span>
-                <input
-                  type="number"
+                <NumberField
                   value={draft.labelWidthMm}
-                  onChange={(e) => setDraft({ ...draft, labelWidthMm: Number(e.target.value) })}
+                  onChange={(v) => setDraft({ ...draft, labelWidthMm: v })}
                   className="h-9 rounded-lg border border-line-2 bg-white px-3 text-sm text-ink outline-none focus:border-brand"
                 />
               </label>
               <label className="flex flex-1 flex-col gap-1">
                 <span className="text-[12px] font-semibold text-muted">Height (mm)</span>
-                <input
-                  type="number"
+                <NumberField
                   value={draft.labelHeightMm}
-                  onChange={(e) => setDraft({ ...draft, labelHeightMm: Number(e.target.value) })}
+                  onChange={(v) => setDraft({ ...draft, labelHeightMm: v })}
                   className="h-9 rounded-lg border border-line-2 bg-white px-3 text-sm text-ink outline-none focus:border-brand"
                 />
               </label>

@@ -4,7 +4,7 @@ import { api } from '../lib/api';
 import { toast } from '../store/toastStore';
 import { errMessage } from '../lib/errors';
 
-const POLL_INTERVAL_MS = 7000;
+const POLL_INTERVAL_MS = 30000;
 
 /**
  * Polls a sheet-linked event's roster while `enabled` (the Kiosk page is

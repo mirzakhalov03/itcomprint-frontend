@@ -1,5 +1,13 @@
 import { NavLink } from 'react-router-dom';
-import { NodeMesh, GridIcon, PrinterIcon, TemplateIcon, SettingsIcon, CloseIcon } from './icons';
+import {
+  NodeMesh,
+  GridIcon,
+  PrinterIcon,
+  TemplateIcon,
+  SettingsIcon,
+  TrashIcon,
+  CloseIcon,
+} from './icons';
 import { UserMenu } from './UserMenu';
 
 const navItem = ({ isActive }: { isActive: boolean }) =>
@@ -58,6 +66,9 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
         </NavLink>
         <NavLink to="/app/settings" className={navItem} onClick={onClose}>
           <SettingsIcon size={18} /> Settings
+        </NavLink>
+        <NavLink to="/app/trash" className={navItem} onClick={onClose}>
+          <TrashIcon size={18} /> Trash
         </NavLink>
       </nav>
 

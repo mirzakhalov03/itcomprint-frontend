@@ -51,6 +51,35 @@ function resolveZoneText(
   return attendee.extra[zone.field ?? ''] ?? '';
 }
 
+// Names always print on two lines, regardless of width — first word on line 1,
+// the rest on line 2 (empty if there's no space) — never collapsed to one line.
+function splitNameTwoLines(text: string): [string, string] {
+  const spaceIdx = text.indexOf(' ');
+  if (spaceIdx === -1) return [text, ''];
+  return [text.slice(0, spaceIdx), text.slice(spaceIdx + 1)];
+}
+
+// Greedy word-wrap: as many words per line as fit maxWidth. A single word wider
+// than maxWidth stays alone on its line — fillText's maxWidth arg compresses it
+// as a last resort so it still doesn't bleed off the label edge.
+function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
+  const words = text.split(' ').filter(Boolean);
+  if (words.length === 0) return [''];
+  const lines: string[] = [];
+  let current = words[0];
+  for (const word of words.slice(1)) {
+    const candidate = `${current} ${word}`;
+    if (ctx.measureText(candidate).width <= maxWidth) {
+      current = candidate;
+    } else {
+      lines.push(current);
+      current = word;
+    }
+  }
+  lines.push(current);
+  return lines;
+}
+
 export async function renderBadgeToCanvas(
   attendee: Pick<Attendee, 'fullName' | 'extra'>,
   template: BadgeTemplate,
@@ -77,28 +106,44 @@ export async function renderBadgeToCanvas(
   await document.fonts.ready;
 
   const GAP_DOTS = 4;
-  // Convert pt to dots: 1 inch = 72pt = DPI dots
-  const lineHeights = visible.map((z) => Math.ceil((z.fontSize / 72) * DPI * 1.3));
+  const PADDING = Math.round(widthDots * 0.04);
+  const maxWidth = widthDots - PADDING * 2;
+  ctx.textBaseline = 'top';
+
+  // First pass: set each zone's font (needed for accurate measurement) and wrap
+  // its text — a zone's height now depends on how many lines it wrapped to.
+  const zoneLines = visible.map((z) => {
+    // Convert pt to dots: 1 inch = 72pt = DPI dots
+    const fontSizeDots = (z.fontSize / 72) * DPI;
+    ctx.font = `${z.bold ? 'bold ' : ''}${fontSizeDots}px '${z.fontFamily}'`;
+    const text = resolveZoneText(z, attendee);
+    return {
+      lines: z.field === 'fullName' ? splitNameTwoLines(text) : wrapText(ctx, text, maxWidth),
+      lineHeight: Math.ceil(fontSizeDots * 1.3),
+      fontSizeDots,
+    };
+  });
+
   const totalH =
-    lineHeights.reduce((a, b) => a + b, 0) + GAP_DOTS * Math.max(0, visible.length - 1);
+    zoneLines.reduce((sum, z) => sum + z.lineHeight * z.lines.length, 0) +
+    GAP_DOTS * Math.max(0, visible.length - 1);
   let y = Math.max(4, Math.round((heightDots - totalH) / 2));
 
   ctx.fillStyle = '#000000';
 
   for (let i = 0; i < visible.length; i++) {
     const z = visible[i];
-    const fontSizeDots = (z.fontSize / 72) * DPI;
+    const { lines, lineHeight, fontSizeDots } = zoneLines[i];
     ctx.font = `${z.bold ? 'bold ' : ''}${fontSizeDots}px '${z.fontFamily}'`;
-    ctx.textBaseline = 'top';
     ctx.textAlign = z.align;
-
-    const PADDING = Math.round(widthDots * 0.04);
-    const maxWidth = widthDots - PADDING * 2;
     const x =
       z.align === 'left' ? PADDING : z.align === 'right' ? widthDots - PADDING : widthDots / 2;
 
-    ctx.fillText(resolveZoneText(z, attendee), x, y, maxWidth);
-    y += lineHeights[i] + (i < visible.length - 1 ? GAP_DOTS : 0);
+    for (const line of lines) {
+      ctx.fillText(line, x, y, maxWidth);
+      y += lineHeight;
+    }
+    y += i < visible.length - 1 ? GAP_DOTS : 0;
   }
 
   return canvas;

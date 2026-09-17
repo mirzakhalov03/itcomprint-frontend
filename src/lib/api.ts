@@ -70,6 +70,19 @@ export const api = {
       body: JSON.stringify({ templateId }),
     }),
 
+  updateEvent: (eventId: string, payload: { name: string; date: string }) =>
+    request<AppEvent>(`/events/${eventId}`, { method: 'PATCH', body: JSON.stringify(payload) }),
+
+  trashEvent: (eventId: string) => request<AppEvent>(`/events/${eventId}`, { method: 'DELETE' }),
+
+  listTrash: () => request<AppEvent[]>('/events/trash'),
+
+  restoreEvent: (eventId: string) =>
+    request<AppEvent>(`/events/${eventId}/restore`, { method: 'POST' }),
+
+  permanentDeleteEvent: (eventId: string) =>
+    request<{ ok: boolean }>(`/events/${eventId}/permanent`, { method: 'DELETE' }),
+
   googleLogin: (idToken: string) =>
     request<{ user: AuthUser; isNewUser: boolean }>('/auth/google', {
       method: 'POST',

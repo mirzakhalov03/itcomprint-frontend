@@ -54,12 +54,14 @@ interface PrinterAdapter {
 ```
 
 Two implementations:
+
 1. **`PreviewPrinter` (default now):** renders the badge as an on-screen **80×60mm preview** and lets the user **download/inspect the raw TSPL**. Exercises every flow (single, batch, reprint, status) with no hardware.
 2. **`WebUsbPrinter` (written now, activated later):** `navigator.usb.requestDevice()` with a Gainscha VID/PID filter (one-time permission, persists), then sends the TSPL via a **bulk OUT transfer**. Verified when hardware arrives (§9).
 
 Adapter is selected by a config/dev toggle; default **Preview** until the printer is on hand.
 
 ### TSPL builder
+
 A pure util `buildBadgeTSPL(name: string): string` emits, roughly:
 
 ```
@@ -115,6 +117,7 @@ Repo layout (frontend and backend are worked on separately; specs/plans live at 
 ## 9. Deferred hardware spike (do when printer arrives)
 
 Before relying on real printing, confirm on the Gainscha:
+
 1. USB **vendor/product ID** (for the WebUSB filter).
 2. Raw **TSPL prints correctly** over a WebUSB **bulk OUT** transfer.
 3. Correct **dpi** (203 vs 300) → finalize TSPL centering constants.

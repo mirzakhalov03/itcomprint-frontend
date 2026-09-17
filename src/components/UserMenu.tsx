@@ -1,9 +1,12 @@
-import { useAuth, useLogout } from '../hooks/useAuth';
+import { useState } from 'react';
+import { useAuth } from '../hooks/useAuth';
 import { Avatar } from './ui/Avatar';
+import { LogOutIcon } from './icons';
+import { SignOutDialog } from './SignOutDialog';
 
 export function UserMenu() {
   const { user } = useAuth();
-  const logout = useLogout();
+  const [confirming, setConfirming] = useState(false);
   if (!user) return null;
 
   return (
@@ -11,11 +14,14 @@ export function UserMenu() {
       <Avatar user={user} size="sm" />
       <span className="hidden text-sm font-medium text-white sm:inline">{user.displayName}</span>
       <button
-        onClick={() => logout.mutate()}
-        className="rounded-md border border-white/20 px-2.5 py-1 text-xs font-medium text-faint hover:text-white"
+        onClick={() => setConfirming(true)}
+        title="Sign out"
+        aria-label="Sign out"
+        className="flex h-8 w-8 items-center justify-center rounded-md border border-white/20 text-faint hover:text-white"
       >
-        Sign out
+        <LogOutIcon size={15} />
       </button>
+      {confirming && <SignOutDialog onClose={() => setConfirming(false)} />}
     </div>
   );
 }

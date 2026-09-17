@@ -19,6 +19,7 @@ export interface AppEvent {
   sheetId: string | null;
   sheetUrl: string | null;
   lastSyncedAt: string | null;
+  deletedAt: string | null;
 }
 
 export type PrintStatus = 'not_printed' | 'printed';
@@ -31,6 +32,7 @@ export interface Attendee {
   printStatus: PrintStatus;
   printCount: number;
   lastPrintedAt: string | null;
+  registrantId: string | null;
 }
 
 export interface NewAttendee {

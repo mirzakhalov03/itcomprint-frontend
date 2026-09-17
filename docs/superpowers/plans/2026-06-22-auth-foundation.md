@@ -26,6 +26,7 @@
 ## File Structure
 
 **Backend (create)**
+
 - `backend/src/models/user.model.ts` — User schema
 - `backend/src/utils/jwt.ts` — sign/verify session JWT
 - `backend/src/utils/authCookie.ts` — set/clear the session cookie
@@ -37,6 +38,7 @@
 - `backend/src/types/express.d.ts` — `req.user` type augmentation
 
 **Backend (modify)**
+
 - `backend/src/config/env.ts` — add `GOOGLE_CLIENT_ID`, `JWT_SECRET`, `COOKIE_DOMAIN`
 - `backend/src/app.ts` — `cookie-parser`, CORS `credentials: true`
 - `backend/src/routes/index.ts` — mount `/auth`, guard `/events` + `/attendees`
@@ -48,6 +50,7 @@
 - `backend/.env.example` — document new vars
 
 **Frontend (create)**
+
 - `frontend/src/lib/google.ts` — Google Identity Services script loader
 - `frontend/src/types/google.d.ts` — minimal `window.google` typing
 - `frontend/src/hooks/useAuth.ts` — auth query + mutations
@@ -59,6 +62,7 @@
 - `frontend/src/pages/KioskPage.tsx` — the current App body, moved
 
 **Frontend (modify)**
+
 - `frontend/src/types.ts` — `AuthUser`, event author fields
 - `frontend/src/lib/api.ts` — `credentials: 'include'`, auth methods
 - `frontend/src/App.tsx` — becomes the router shell
@@ -70,6 +74,7 @@
 ## Task 1: Backend dependencies, env config, app middleware, harness env seeding
 
 **Files:**
+
 - Modify: `backend/package.json` (via npm)
 - Modify: `backend/src/config/env.ts`
 - Modify: `backend/src/app.ts`
@@ -78,6 +83,7 @@
 - Modify: `backend/.env.example`
 
 **Interfaces:**
+
 - Produces: `env.GOOGLE_CLIENT_ID: string`, `env.JWT_SECRET: string`, `env.COOKIE_DOMAIN: string | undefined`. App now parses cookies and allows credentialed CORS.
 
 - [ ] **Step 1: Install dependencies**
@@ -113,24 +119,24 @@ import cookieParser from 'cookie-parser';
 Add `credentials: true` to the `cors(...)` options object (alongside the `origin` function):
 
 ```ts
-  app.use(
-    cors({
-      credentials: true,
-      origin(origin, callback) {
-        // Allow non-browser clients (no Origin header) and any configured origin.
-        if (!origin || corsOrigins.includes(origin)) return callback(null, true);
-        callback(new Error(`Origin ${origin} not allowed by CORS`));
-      },
-    }),
-  );
+app.use(
+  cors({
+    credentials: true,
+    origin(origin, callback) {
+      // Allow non-browser clients (no Origin header) and any configured origin.
+      if (!origin || corsOrigins.includes(origin)) return callback(null, true);
+      callback(new Error(`Origin ${origin} not allowed by CORS`));
+    },
+  }),
+);
 ```
 
 Add `cookieParser()` immediately after the `cors(...)` block and before `express.json`:
 
 ```ts
-  app.use(cookieParser());
+app.use(cookieParser());
 
-  app.use(express.json({ limit: '5mb' })); // imports can be large
+app.use(express.json({ limit: '5mb' })); // imports can be large
 ```
 
 - [ ] **Step 4: Seed new env in the verify harness so it keeps booting**
@@ -138,8 +144,8 @@ Add `cookieParser()` immediately after the `cors(...)` block and before `express
 In `backend/scripts/verify.ts`, inside `main()` where the other `process.env.*` lines are (after `process.env.PORT = '4055';`), add:
 
 ```ts
-  process.env.GOOGLE_CLIENT_ID = 'test-client-id';
-  process.env.JWT_SECRET = 'test-secret-at-least-16-chars-long';
+process.env.GOOGLE_CLIENT_ID = 'test-client-id';
+process.env.JWT_SECRET = 'test-secret-at-least-16-chars-long';
 ```
 
 - [ ] **Step 5: Seed new env in the smoke harness**
@@ -187,9 +193,11 @@ git commit -m "chore(auth): add auth deps, env vars, cookie-parser, credentialed
 ## Task 2: User model
 
 **Files:**
+
 - Create: `backend/src/models/user.model.ts`
 
 **Interfaces:**
+
 - Produces: `UserModel`, `UserDoc` with fields `googleId, email, displayName, googleName, picture, onboardedAt: Date | null, createdAt, lastLoginAt`.
 
 - [ ] **Step 1: Create the model**
@@ -244,10 +252,12 @@ git commit -m "feat(auth): add User model"
 ## Task 3: JWT and cookie utilities
 
 **Files:**
+
 - Create: `backend/src/utils/jwt.ts`
 - Create: `backend/src/utils/authCookie.ts`
 
 **Interfaces:**
+
 - Produces: `signSession(uid: string): string`, `verifySession(token: string): { uid: string } | null`, `SESSION_MAX_AGE_MS: number`, `SESSION_COOKIE: 'session'`, `setSessionCookie(res, token): void`, `clearSessionCookie(res): void`.
 
 - [ ] **Step 1: Create the JWT util**
@@ -273,7 +283,11 @@ export function signSession(uid: string): string {
 export function verifySession(token: string): SessionPayload | null {
   try {
     const decoded = jwt.verify(token, env.JWT_SECRET);
-    if (typeof decoded === 'object' && decoded !== null && typeof (decoded as { uid?: unknown }).uid === 'string') {
+    if (
+      typeof decoded === 'object' &&
+      decoded !== null &&
+      typeof (decoded as { uid?: unknown }).uid === 'string'
+    ) {
       return { uid: (decoded as { uid: string }).uid };
     }
     return null;
@@ -335,9 +349,11 @@ git commit -m "feat(auth): add session JWT and cookie helpers"
 ## Task 4: Auth service
 
 **Files:**
+
 - Create: `backend/src/services/auth.services.ts`
 
 **Interfaces:**
+
 - Consumes: `UserModel`, `UserDoc` (Task 2); `env`, `isTest` (Task 1).
 - Produces:
   - `verifyGoogleIdToken(idToken: string): Promise<GoogleProfile>` where `GoogleProfile = { sub, email, name, picture }`
@@ -457,10 +473,12 @@ git commit -m "feat(auth): add auth service (google verify, user upsert)"
 ## Task 5: requireAuth middleware and `req.user` typing
 
 **Files:**
+
 - Create: `backend/src/middlewares/requireAuth.middleware.ts`
 - Create: `backend/src/types/express.d.ts`
 
 **Interfaces:**
+
 - Consumes: `verifySession` (Task 3), `SESSION_COOKIE` (Task 3), `getUserById` (Task 4).
 - Produces: `requireAuth(req, res, next): Promise<void>` that sets `req.user: UserDoc` or responds `401`. Augments Express `Request` with `user?: UserDoc`.
 
@@ -531,6 +549,7 @@ git commit -m "feat(auth): add requireAuth guard and req.user typing"
 ## Task 6: Auth validators, controllers, routes, mount, and route protection (+ full verify harness)
 
 **Files:**
+
 - Create: `backend/src/validators/auth.validators.ts`
 - Create: `backend/src/controllers/auth.controllers.ts`
 - Create: `backend/src/routes/auth.routes.ts`
@@ -538,6 +557,7 @@ git commit -m "feat(auth): add requireAuth guard and req.user typing"
 - Modify: `backend/scripts/verify.ts` (full rewrite)
 
 **Interfaces:**
+
 - Consumes: auth service (Task 4), `signSession` + cookie helpers (Task 3), `requireAuth` (Task 5), `validate` + `asyncHandler` (existing).
 - Produces endpoints: `POST /api/auth/google`, `GET /api/auth/me`, `PATCH /api/auth/me`, `POST /api/auth/logout`. `/api/events` and `/api/attendees` now require a session.
 
@@ -717,7 +737,12 @@ async function main() {
     check('GET /events without session → 401', noAuth.status === 401, noAuth.status);
 
     // google login (stubbed via test bypass) → new user + cookie
-    const profile = { sub: 'g-1', email: 'op@itcom.uz', name: 'Operator One', picture: 'http://img/1.png' };
+    const profile = {
+      sub: 'g-1',
+      email: 'op@itcom.uz',
+      name: 'Operator One',
+      picture: 'http://img/1.png',
+    };
     const loginRes = await fetch(`${base}/auth/google`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -725,7 +750,11 @@ async function main() {
     });
     captureCookie(loginRes);
     const login = await loginRes.json();
-    check('POST /auth/google → 200, isNewUser=true', loginRes.status === 200 && login.isNewUser === true, login);
+    check(
+      'POST /auth/google → 200, isNewUser=true',
+      loginRes.status === 200 && login.isNewUser === true,
+      login,
+    );
     check('login set a session cookie', sessionCookie.startsWith('session='), sessionCookie);
     check('new user onboardedAt is null', login.user.onboardedAt === null, login.user);
 
@@ -793,7 +822,11 @@ async function main() {
 
     // list events → attendeeCount present
     const events = await afetch('/events').then((r) => r.json());
-    check('GET /events → array with attendeeCount=2', Array.isArray(events) && events[0]?.attendeeCount === 2, events);
+    check(
+      'GET /events → array with attendeeCount=2',
+      Array.isArray(events) && events[0]?.attendeeCount === 2,
+      events,
+    );
 
     // get one
     const one = await afetch(`/events/${eventId}`).then((r) => r.json());
@@ -810,7 +843,11 @@ async function main() {
     // unknown route → JSON 404
     const unknownRoute = await afetch('/nope');
     const unknownBody = await unknownRoute.json().catch(() => null);
-    check('GET /api/nope → JSON 404', unknownRoute.status === 404 && unknownBody?.error === 'NotFound', unknownBody);
+    check(
+      'GET /api/nope → JSON 404',
+      unknownRoute.status === 404 && unknownBody?.error === 'NotFound',
+      unknownBody,
+    );
 
     // malformed JSON body → 400
     const badJson = await afetch('/events', {
@@ -821,15 +858,29 @@ async function main() {
     check('POST /events with bad JSON → 400', badJson.status === 400, badJson.status);
 
     // search by name
-    const searchJane = await afetch(`/events/${eventId}/attendees?search=jane`).then((r) => r.json());
-    check('GET attendees?search=jane → only Jane', searchJane.length === 1 && searchJane[0].fullName === 'jane doe', searchJane);
+    const searchJane = await afetch(`/events/${eventId}/attendees?search=jane`).then((r) =>
+      r.json(),
+    );
+    check(
+      'GET attendees?search=jane → only Jane',
+      searchJane.length === 1 && searchJane[0].fullName === 'jane doe',
+      searchJane,
+    );
 
     // search hits denormalized extra (role=Speaker)
-    const searchRole = await afetch(`/events/${eventId}/attendees?search=speaker`).then((r) => r.json());
-    check('GET attendees?search=speaker → only John', searchRole.length === 1 && searchRole[0].fullName === 'john smith', searchRole);
+    const searchRole = await afetch(`/events/${eventId}/attendees?search=speaker`).then((r) =>
+      r.json(),
+    );
+    check(
+      'GET attendees?search=speaker → only John',
+      searchRole.length === 1 && searchRole[0].fullName === 'john smith',
+      searchRole,
+    );
 
     // filter by status
-    const notPrinted = await afetch(`/events/${eventId}/attendees?status=not_printed`).then((r) => r.json());
+    const notPrinted = await afetch(`/events/${eventId}/attendees?status=not_printed`).then((r) =>
+      r.json(),
+    );
     check('GET attendees?status=not_printed → both', notPrinted.length === 2, notPrinted);
 
     // invalid status → 400
@@ -838,20 +889,40 @@ async function main() {
 
     // print (first time)
     const janeId = searchJane[0]._id;
-    const printed1 = await afetch(`/attendees/${janeId}/print`, { method: 'POST' }).then((r) => r.json());
-    check('POST print → printStatus=printed, count=1', printed1.printStatus === 'printed' && printed1.printCount === 1, printed1);
-    check('POST print → lastPrintedAt set', printed1.lastPrintedAt !== null, printed1.lastPrintedAt);
+    const printed1 = await afetch(`/attendees/${janeId}/print`, { method: 'POST' }).then((r) =>
+      r.json(),
+    );
+    check(
+      'POST print → printStatus=printed, count=1',
+      printed1.printStatus === 'printed' && printed1.printCount === 1,
+      printed1,
+    );
+    check(
+      'POST print → lastPrintedAt set',
+      printed1.lastPrintedAt !== null,
+      printed1.lastPrintedAt,
+    );
 
     // reprint
-    const printed2 = await afetch(`/attendees/${janeId}/print`, { method: 'POST' }).then((r) => r.json());
+    const printed2 = await afetch(`/attendees/${janeId}/print`, { method: 'POST' }).then((r) =>
+      r.json(),
+    );
     check('POST print again (reprint) → count=2', printed2.printCount === 2, printed2);
 
     // status filter reflects the print
-    const printedList = await afetch(`/events/${eventId}/attendees?status=printed`).then((r) => r.json());
-    check('GET attendees?status=printed → only Jane', printedList.length === 1 && printedList[0]._id === janeId, printedList);
+    const printedList = await afetch(`/events/${eventId}/attendees?status=printed`).then((r) =>
+      r.json(),
+    );
+    check(
+      'GET attendees?status=printed → only Jane',
+      printedList.length === 1 && printedList[0]._id === janeId,
+      printedList,
+    );
 
     // print unknown attendee → 404
-    const printMissing = await afetch('/attendees/0123456789abcdef01234567/print', { method: 'POST' });
+    const printMissing = await afetch('/attendees/0123456789abcdef01234567/print', {
+      method: 'POST',
+    });
     check('POST print unknown attendee → 404', printMissing.status === 404, printMissing.status);
 
     // --- LOGOUT ---
@@ -896,12 +967,14 @@ git commit -m "feat(auth): auth endpoints + guard events/attendees + verify cove
 ## Task 7: Stamp the author on events
 
 **Files:**
+
 - Modify: `backend/src/models/event.model.ts`
 - Modify: `backend/src/services/event.services.ts:9-21`
 - Modify: `backend/src/controllers/event.controllers.ts:4-7`
 - Modify: `backend/scripts/verify.ts` (add one assertion)
 
 **Interfaces:**
+
 - Consumes: `req.user` (Task 5), `CreateEventInput` (existing).
 - Produces: `createEventWithAttendees(input, author: { id: string; name: string; picture: string })`. Events now carry `authorId`, `authorName`, `authorPicture`.
 
@@ -986,7 +1059,7 @@ export async function create(req: Request, res: Response) {
 In `backend/scripts/verify.ts`, immediately after the `check('POST /events → attendeeCount=2', ...)` line, add:
 
 ```ts
-    check('POST /events → authorName stamped', created.authorName === 'Operator Uno', created);
+check('POST /events → authorName stamped', created.authorName === 'Operator Uno', created);
 ```
 
 (The harness confirms the name to "Operator Uno" before creating the event, so this matches.)
@@ -1011,12 +1084,14 @@ git commit -m "feat(auth): stamp author identity on created events"
 ## Task 8: Frontend — types, API client, auth hooks
 
 **Files:**
+
 - Modify: `frontend/src/types.ts`
 - Modify: `frontend/src/lib/api.ts`
 - Create: `frontend/src/hooks/useAuth.ts`
 - Modify: `frontend/package.json` (via npm)
 
 **Interfaces:**
+
 - Produces: `AuthUser` type; `api.googleLogin`, `api.me`, `api.updateMe`, `api.logout`; hooks `useAuth()`, `useGoogleLogin()`, `useUpdateName()`, `useLogout()`.
 
 - [ ] **Step 1: Install react-router-dom**
@@ -1175,6 +1250,7 @@ git commit -m "feat(auth): frontend auth types, API client, hooks"
 ## Task 9: Frontend — Google script loader and the Login page
 
 **Files:**
+
 - Create: `frontend/src/lib/google.ts`
 - Create: `frontend/src/types/google.d.ts`
 - Create: `frontend/src/components/GoogleSignInButton.tsx`
@@ -1182,6 +1258,7 @@ git commit -m "feat(auth): frontend auth types, API client, hooks"
 - Modify: `frontend/.env` (add `VITE_GOOGLE_CLIENT_ID`)
 
 **Interfaces:**
+
 - Consumes: `useGoogleLogin` (Task 8).
 - Produces: `loadGoogleScript(): Promise<void>`, `<GoogleSignInButton />`, `<LoginPage />`.
 
@@ -1290,9 +1367,7 @@ export function GoogleSignInButton() {
   return (
     <div className="flex flex-col items-center gap-3">
       <div ref={ref} />
-      {login.isError && (
-        <p className="text-sm text-amber">Sign-in failed. Please try again.</p>
-      )}
+      {login.isError && <p className="text-sm text-amber">Sign-in failed. Please try again.</p>}
     </div>
   );
 }
@@ -1321,8 +1396,8 @@ export function LoginPage() {
         ROADSHOW BADGES
       </h1>
       <p className="mt-2 max-w-md text-sm text-faint">
-        The badge-printing platform for IT Community of Uzbekistan events. Sign in to manage
-        events and print attendee badges.
+        The badge-printing platform for IT Community of Uzbekistan events. Sign in to manage events
+        and print attendee badges.
       </p>
       <div className="mt-8">
         <GoogleSignInButton />
@@ -1352,12 +1427,14 @@ git commit -m "feat(auth): Google sign-in button and login page"
 ## Task 10: Frontend — guard, onboarding, router restructure
 
 **Files:**
+
 - Create: `frontend/src/components/RequireAuth.tsx`
 - Create: `frontend/src/pages/OnboardingPage.tsx`
 - Create: `frontend/src/pages/KioskPage.tsx`
 - Modify: `frontend/src/App.tsx`
 
 **Interfaces:**
+
 - Consumes: `useAuth`, `useUpdateName` (Task 8); `LoginPage` (Task 9).
 - Produces: `<RequireAuth>`, `<OnboardingPage>`, `<KioskPage>`, and the route table in `App.tsx`.
 
@@ -1419,9 +1496,14 @@ export function OnboardingPage() {
 
   return (
     <div className="flex h-screen items-center justify-center bg-surface px-6">
-      <form onSubmit={submit} className="w-full max-w-sm rounded-2xl border border-line bg-white p-8">
+      <form
+        onSubmit={submit}
+        className="w-full max-w-sm rounded-2xl border border-line bg-white p-8"
+      >
         <h1 className="font-display text-xl font-bold text-ink">Welcome 👋</h1>
-        <p className="mt-1.5 text-sm text-muted">Confirm the name we should show as the event author.</p>
+        <p className="mt-1.5 text-sm text-muted">
+          Confirm the name we should show as the event author.
+        </p>
         <input
           autoFocus
           value={value}
@@ -1477,7 +1559,11 @@ export function KioskPage() {
       <div className="flex-1 overflow-y-auto px-6 pb-7 pt-5">
         <div className="mx-auto max-w-[1120px]">
           {activeEventId ? (
-            <AttendeeTable key={activeEventId} eventId={activeEventId} eventName={selectedEvent?.name} />
+            <AttendeeTable
+              key={activeEventId}
+              eventId={activeEventId}
+              eventName={selectedEvent?.name}
+            />
           ) : (
             <div className="rounded-2xl border border-line bg-white px-6 py-20 text-center">
               <div className="font-display text-[17px] font-bold text-ink-3">No event selected</div>
@@ -1561,10 +1647,12 @@ git commit -m "feat(auth): routing, RequireAuth guard, onboarding page"
 ## Task 11: Frontend — user menu and logout in the header
 
 **Files:**
+
 - Create: `frontend/src/components/UserMenu.tsx`
 - Modify: `frontend/src/components/Header.tsx:53`
 
 **Interfaces:**
+
 - Consumes: `useAuth`, `useLogout` (Task 8).
 - Produces: `<UserMenu />` mounted in the header next to `<PrinterStatus />`.
 
@@ -1582,7 +1670,12 @@ export function UserMenu() {
   return (
     <div className="relative flex items-center gap-3">
       {user.picture ? (
-        <img src={user.picture} alt="" className="h-8 w-8 rounded-full object-cover" referrerPolicy="no-referrer" />
+        <img
+          src={user.picture}
+          alt=""
+          className="h-8 w-8 rounded-full object-cover"
+          referrerPolicy="no-referrer"
+        />
       ) : (
         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand text-sm font-bold text-white">
           {user.displayName.charAt(0).toUpperCase()}
@@ -1612,10 +1705,10 @@ import { UserMenu } from './UserMenu';
 Replace the line `      <PrinterStatus />` (near the end of the header) with:
 
 ```tsx
-      <div className="relative flex items-center gap-5">
-        <PrinterStatus />
-        <UserMenu />
-      </div>
+<div className="relative flex items-center gap-5">
+  <PrinterStatus />
+  <UserMenu />
+</div>
 ```
 
 - [ ] **Step 3: Checkpoint — build + lint**
@@ -1638,6 +1731,7 @@ git commit -m "feat(auth): user chip and sign-out in the header"
 ## Task 12: Docs + end-to-end manual verification
 
 **Files:**
+
 - Modify: `CLAUDE.md`
 - Modify: `backend/CLAUDE.md`
 
@@ -1649,6 +1743,7 @@ Under "Data flow" (or a new "Auth" subsection in Architecture), add a short note
 
 ```markdown
 ### Auth (self-hosted Google)
+
 Sign-in is Google Identity Services on the frontend → ID token → `POST /api/auth/google`, which the backend verifies with `google-auth-library`, upserts a `User`, and returns a signed-JWT session in an httpOnly cookie (`session`). The frontend reads `GET /api/auth/me` via the `['auth','me']` React Query key; `<RequireAuth>` gates `/app` and `/onboarding`, redirecting logged-out users to `/login` and unconfirmed-name users to `/onboarding`. `/events` and `/attendees` require the session; events are stamped with the author's denormalized `authorName`/`authorPicture`. Sign-in is open to any Google account today — the guard and `verifyGoogleIdToken` are structured so a domain/allowlist restriction is a small later change.
 ```
 
@@ -1678,6 +1773,7 @@ cd frontend && npm run dev
 ```
 
 Walk the flow in the browser and confirm each:
+
 - Visiting `http://localhost:5173/app` while logged out redirects to `/login`.
 - The Google button renders; signing in lands a **new** account on `/onboarding` with the name pre-filled.
 - Confirming the name lands on `/app` (the kiosk) and the header shows your name + picture.
@@ -1699,4 +1795,7 @@ git commit -m "docs(auth): document auth flow, endpoints, and env vars"
 - **Spec coverage:** User model (T2) · Google verify + test bypass (T4) · session cookie/JWT (T3) · endpoints (T6) · guard (T5/T6) · onboarding name step (T6 backend, T10 frontend) · event author denormalized (T7) · routing (T10) · React Query `['auth','me']` (T8) · cross-origin cookie config (T3) · verify.ts coverage (T6/T7) · env fail-fast (T1) · Google Cloud prerequisite (T12). All spec sections map to a task.
 - **Type consistency:** `GoogleProfile`, `SessionPayload`, `AuthUser`, `toPublicUser` shape (`id/email/displayName/picture/onboardedAt`), cookie name `session`, query key `['auth','me']`, and test-token prefix `test|` are used identically across tasks.
 - **Ordering safety:** required env vars are seeded into `verify.ts` (T1) and `smoke.ts` (T1) the moment they become required, so every intermediate checkpoint stays green. Route protection (T6) and the author stamp (T7) update the harness in the same task that introduces the behavior.
+
+```
+
 ```

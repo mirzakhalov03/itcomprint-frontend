@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import type { DragEvent } from 'react';
 import { Button } from './ui/Button';
-import { Input } from './ui/Input';
+import { Input, inputBaseClass } from './ui/Input';
+import { NumberField } from './ui/NumberField';
 import { ArrowLeftIcon } from './icons';
 import {
   renderBadgeToCanvas,
@@ -219,18 +220,18 @@ export function TemplateEditor({
         <div className="flex gap-3">
           <label className="flex flex-1 flex-col gap-1.5">
             <span className="font-display text-xs font-semibold text-ink-3">Width (mm)</span>
-            <Input
-              type="number"
+            <NumberField
               value={draft.labelWidthMm}
-              onChange={(e) => setDraft({ ...draft, labelWidthMm: Number(e.target.value) })}
+              onChange={(v) => setDraft({ ...draft, labelWidthMm: v })}
+              className={inputBaseClass}
             />
           </label>
           <label className="flex flex-1 flex-col gap-1.5">
             <span className="font-display text-xs font-semibold text-ink-3">Height (mm)</span>
-            <Input
-              type="number"
+            <NumberField
               value={draft.labelHeightMm}
-              onChange={(e) => setDraft({ ...draft, labelHeightMm: Number(e.target.value) })}
+              onChange={(v) => setDraft({ ...draft, labelHeightMm: v })}
+              className={inputBaseClass}
             />
           </label>
         </div>
@@ -357,7 +358,7 @@ export function TemplateEditor({
 
         {/* WYSIWYG badge surface */}
         <div
-          className="relative w-full cursor-default select-none overflow-hidden rounded-xl border-2 border-dashed border-line bg-white"
+          className="relative mx-auto max-h-[480px] w-full max-w-full cursor-default select-none overflow-hidden rounded-xl border-2 border-dashed border-line bg-white"
           style={{ aspectRatio: `${draft.labelWidthMm} / ${draft.labelHeightMm}` }}
           onClick={(e) => {
             if (e.target === e.currentTarget) setSelectedId(null);

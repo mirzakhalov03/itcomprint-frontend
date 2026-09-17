@@ -16,14 +16,14 @@
 
 ## API surface (target)
 
-| Method | Path | Purpose |
-|---|---|---|
-| `POST` | `/api/events` | Create an event + its attendees (bulk) from imported data |
-| `GET` | `/api/events` | List events (with attendee counts) |
-| `GET` | `/api/events/:id` | Get one event |
-| `GET` | `/api/events/:id/attendees` | List attendees; query `?search=&status=printed|not_printed` |
-| `POST` | `/api/attendees/:id/print` | Atomically mark printed: `$inc printCount`, set `printStatus='printed'`, `lastPrintedAt=now`. Used for both first print and reprint. |
-| `GET` | `/api/health` | Liveness check |
+| Method | Path                        | Purpose                                                                                                                              |
+| ------ | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------ |
+| `POST` | `/api/events`               | Create an event + its attendees (bulk) from imported data                                                                            |
+| `GET`  | `/api/events`               | List events (with attendee counts)                                                                                                   |
+| `GET`  | `/api/events/:id`           | Get one event                                                                                                                        |
+| `GET`  | `/api/events/:id/attendees` | List attendees; query `?search=&status=printed                                                                                       | not_printed` |
+| `POST` | `/api/attendees/:id/print`  | Atomically mark printed: `$inc printCount`, set `printStatus='printed'`, `lastPrintedAt=now`. Used for both first print and reprint. |
+| `GET`  | `/api/health`               | Liveness check                                                                                                                       |
 
 ### Shared JSON shapes (must match the frontend plan)
 
@@ -88,6 +88,7 @@ backend/
 ### Task 0: Initialize the backend project
 
 **Files:**
+
 - Create: `backend/package.json`, `backend/tsconfig.json`, `backend/.env.example`, `backend/.gitignore`
 
 - [ ] **Step 1: Init git at root (if not already) and create the backend package**
@@ -175,6 +176,7 @@ git commit -m "chore(backend): scaffold Express + TS + Mongoose project"
 ### Task 1: Environment config + MongoDB connection
 
 **Files:**
+
 - Create: `backend/src/config/env.ts`, `backend/src/config/db.ts`
 
 - [ ] **Step 1: Write `backend/src/config/env.ts`**
@@ -217,6 +219,7 @@ git commit -m "feat(backend): env validation and mongo connection"
 ### Task 2: Mongoose models
 
 **Files:**
+
 - Create: `backend/src/models/event.model.ts`, `backend/src/models/attendee.model.ts`
 
 - [ ] **Step 1: Write `backend/src/models/event.model.ts`**
@@ -285,6 +288,7 @@ git commit -m "feat(backend): Event and Attendee models"
 ### Task 3: App wiring, middleware, server entry
 
 **Files:**
+
 - Create: `backend/src/utils/asyncHandler.ts`, `backend/src/middlewares/error.middleware.ts`, `backend/src/middlewares/validate.middleware.ts`, `backend/src/app.ts`, `backend/src/server.ts`, `backend/src/routes/index.ts`
 
 - [ ] **Step 1: Write `backend/src/utils/asyncHandler.ts`**
@@ -400,6 +404,7 @@ git commit -m "feat(backend): app wiring, middleware, health endpoint"
 ### Task 4: Validators
 
 **Files:**
+
 - Create: `backend/src/validators/event.validators.ts`, `backend/src/validators/attendee.validators.ts`
 
 - [ ] **Step 1: Write `backend/src/validators/event.validators.ts`**
@@ -452,6 +457,7 @@ git commit -m "feat(backend): Zod validators for events and attendees"
 ### Task 5: Event service, controller, routes
 
 **Files:**
+
 - Create: `backend/src/services/event.services.ts`, `backend/src/controllers/event.controllers.ts`, `backend/src/routes/event.routes.ts`
 - Modify: `backend/src/routes/index.ts`
 
@@ -555,11 +561,13 @@ curl -s -X POST http://localhost:4000/api/events \
   -H 'Content-Type: application/json' \
   -d '{"name":"Roadshow June","date":"2026-06-20","attendees":[{"fullName":"john smith","extra":{"role":"Speaker"}},{"fullName":"jane doe","extra":{}}]}'
 ```
+
 Expected: `201` with JSON containing `"attendeeCount":2`.
 
 ```bash
 curl -s http://localhost:4000/api/events
 ```
+
 Expected: an array with the event and `"attendeeCount":2`.
 
 - [ ] **Step 6: Commit**
@@ -574,6 +582,7 @@ git commit -m "feat(backend): event create/list/get endpoints"
 ### Task 6: Attendee service, controller, routes (search, filter, print)
 
 **Files:**
+
 - Create: `backend/src/services/attendee.services.ts`, `backend/src/controllers/attendee.controllers.ts`, `backend/src/routes/attendee.routes.ts`
 - Modify: `backend/src/routes/index.ts`
 
@@ -686,11 +695,13 @@ Grab an event id from `GET /api/events`, then (replace `EVENT_ID`):
 ```bash
 curl -s "http://localhost:4000/api/events/EVENT_ID/attendees?search=jane"
 ```
+
 Expected: array containing only Jane Doe.
 
 ```bash
 curl -s "http://localhost:4000/api/events/EVENT_ID/attendees?status=not_printed"
 ```
+
 Expected: both attendees (none printed yet).
 
 Grab an attendee id from that response, then (replace `ATTENDEE_ID`):
@@ -698,6 +709,7 @@ Grab an attendee id from that response, then (replace `ATTENDEE_ID`):
 ```bash
 curl -s -X POST http://localhost:4000/api/attendees/ATTENDEE_ID/print
 ```
+
 Expected: that attendee with `"printStatus":"printed"`, `"printCount":1`, and a non-null `lastPrintedAt`. Run it again → `"printCount":2` (this is the reprint path).
 
 - [ ] **Step 7: Commit**
