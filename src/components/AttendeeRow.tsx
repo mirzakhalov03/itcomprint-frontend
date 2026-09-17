@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { memo, type ReactNode } from 'react';
 import { CheckIcon, PrinterIcon } from './icons';
 import { Button } from './ui/Button';
 import { Checkbox } from './ui/Checkbox';
@@ -24,7 +24,7 @@ function highlight(text: string, query: string): ReactNode {
   return <>{parts}</>;
 }
 
-export function AttendeeRow({
+export const AttendeeRow = memo(function AttendeeRow({
   attendee,
   search = '',
   template,
@@ -112,4 +112,4 @@ export function AttendeeRow({
       </div>
     </div>
   );
-}
+});
