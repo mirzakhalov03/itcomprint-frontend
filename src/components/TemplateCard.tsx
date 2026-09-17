@@ -1,4 +1,5 @@
 import { normalizeLegacyZone, SAMPLE_ATTENDEE } from '../printer/renderBadge';
+import { resolveZoneText } from '../printer/zones';
 import type { BadgeTemplate } from '../types';
 
 function BadgeCardPreview({ template }: { template: BadgeTemplate }) {
@@ -12,12 +13,9 @@ function BadgeCardPreview({ template }: { template: BadgeTemplate }) {
         <span className="text-[11px] text-faint">Empty template</span>
       ) : (
         zones.map((z, i) => {
+          // Thumbnails show the field key when the sample has no value, so the card isn't blank.
           const text =
-            z.type === 'static'
-              ? z.staticText || ''
-              : z.field === 'fullName'
-                ? SAMPLE_ATTENDEE.fullName
-                : (SAMPLE_ATTENDEE.extra[z.field ?? ''] ?? z.field ?? '');
+            resolveZoneText(z, SAMPLE_ATTENDEE) || (z.type === 'field' ? (z.field ?? '') : '');
           return (
             <span
               key={i}
