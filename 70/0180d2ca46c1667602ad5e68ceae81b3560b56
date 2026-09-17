@@ -1,0 +1,19 @@
+src/hooks/useSheetSync.ts
+  s_f63c20aeed8d1e::t_aea42f37232d5d 2,6-8,10-12,15-17,21-36,40-46,57,59-60,62-63,65
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "700180d2ca46c1667602ad5e68ceae81b3560b56",
+  "prompts": {},
+  "sessions": {
+    "s_f63c20aeed8d1e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a990d4ee9ccfe2d33",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
