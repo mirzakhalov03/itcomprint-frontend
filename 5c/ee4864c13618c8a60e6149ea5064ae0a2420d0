@@ -1,0 +1,19 @@
+docs/CLAUDE.md
+  s_d8b340aaf2a2c4::t_f1936d783db157 13-16,70,83,88,90,118
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "5cee4864c13618c8a60e6149ea5064ae0a2420d0",
+  "prompts": {},
+  "sessions": {
+    "s_d8b340aaf2a2c4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "20e219b2-b075-4e5b-82ed-cc8c57230efd",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
