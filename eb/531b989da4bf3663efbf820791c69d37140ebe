@@ -1,0 +1,31 @@
+src/App.tsx
+  s_284e00edd52778::t_2c972a3ad9c68f 2,56
+src/hooks/useAttendees.ts
+  s_284e00edd52778::t_c152357f7d5e28 1,4-7,10,13
+src/hooks/useEventTemplate.ts
+  s_284e00edd52778::t_e61d3a11e04453 1-10
+src/hooks/useEvents.ts
+  s_284e00edd52778::t_4fb95286ada569 1,5-6,8
+src/lib/api.ts
+  s_284e00edd52778::t_82afe645db69df 13-45,52-53,72,120,131
+src/lib/format.ts
+  s_284e00edd52778::t_b3887e58ada7c4 1-18
+src/types.ts
+  s_284e00edd52778::t_334f890d9892e2 23,77-78
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "eb531b989da4bf3663efbf820791c69d37140ebe",
+  "prompts": {},
+  "sessions": {
+    "s_284e00edd52778": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-ab27a3e878edcbc3f",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
