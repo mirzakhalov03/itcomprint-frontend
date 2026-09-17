@@ -224,7 +224,7 @@ export function LandingPage() {
             }}
           />
           <img
-            src="https://itcom.uz/wp-content/uploads/2025/11/logo-itCommunity-green-horizontal.png"
+            src="/brand/itcom-logo-horizontal.png"
             alt="IT Community"
             style={{ position: 'relative', height: 48, width: 'auto', objectFit: 'contain' }}
           />
