@@ -1,21 +1,16 @@
 import { useSetEventTemplate } from '../hooks/useTemplates';
+import { useEventTemplate } from '../hooks/useEventTemplate';
 import { toast } from '../store/toastStore';
 import { errMessage } from '../lib/errors';
-import type { AppEvent, BadgeTemplate } from '../types';
+import type { AppEvent } from '../types';
 
 /**
  * Picks which template this event prints with. The value is the event's
  * templateId, or the default template's id when the event has none set.
  */
-export function TemplateSelect({
-  event,
-  templates,
-}: {
-  event: AppEvent;
-  templates: BadgeTemplate[];
-}) {
+export function TemplateSelect({ event }: { event: AppEvent }) {
   const setTemplate = useSetEventTemplate();
-  const defaultId = templates.find((t) => t.isDefault)?._id ?? '';
+  const { templates, defaultId } = useEventTemplate(event);
   const value = event.templateId ?? defaultId;
 
   function onChange(e: React.ChangeEvent<HTMLSelectElement>) {
