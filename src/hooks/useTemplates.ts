@@ -11,7 +11,11 @@ export function useTemplates() {
 }
 
 export function useTemplateFieldKeys() {
-  return useQuery({ queryKey: ['template-field-keys'], queryFn: api.templateFieldKeys });
+  return useQuery({
+    queryKey: ['template-field-keys'],
+    queryFn: api.templateFieldKeys,
+    staleTime: 5 * 60_000,
+  });
 }
 
 export function useCreateTemplate() {

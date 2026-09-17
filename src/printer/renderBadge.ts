@@ -1,4 +1,5 @@
 import type { Attendee, BadgeTemplate, TemplateZone } from '../types';
+import { resolveZoneText } from './zones';
 
 const DPI = 203;
 
@@ -40,15 +41,6 @@ export function normalizeLegacyZone(z: TemplateZone): TemplateZone {
     fontFamily: z.fontFamily ?? 'Inter',
     fontSize: isLegacy ? (LEGACY_FONT_SIZE_MAP[z.fontSize] ?? z.fontSize) : z.fontSize,
   };
-}
-
-function resolveZoneText(
-  zone: TemplateZone,
-  attendee: Pick<Attendee, 'fullName' | 'extra'>,
-): string {
-  if (zone.type === 'static') return zone.staticText ?? '';
-  if (zone.field === 'fullName') return attendee.fullName;
-  return attendee.extra[zone.field ?? ''] ?? '';
 }
 
 // Names always print on two lines, regardless of width — first word on line 1,

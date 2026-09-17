@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { usePrintAttendee } from '../hooks/usePrintAttendee';
-import { useTemplates, useUpdateTemplate, useTemplateFieldKeys } from '../hooks/useTemplates';
+import { useUpdateTemplate, useTemplateFieldKeys } from '../hooks/useTemplates';
+import { useEventTemplate } from '../hooks/useEventTemplate';
+import { useBadgeCanvas } from '../hooks/useBadgeCanvas';
 import { normalizeLegacyZone, FONT_SIZES } from '../printer/renderBadge';
 import { Button } from './ui/Button';
 import { NumberField } from './ui/NumberField';
@@ -20,10 +22,8 @@ export function BadgePrintPanel({
   event: AppEvent;
   onClose: () => void;
 }) {
-  const { data: templates = [] } = useTemplates();
+  const { template } = useEventTemplate(event);
   const { data: fieldKeys = [] } = useTemplateFieldKeys();
-  const template =
-    templates.find((t) => t._id === event.templateId) ?? templates.find((t) => t.isDefault);
 
   const print = usePrintAttendee();
   const updateTemplate = useUpdateTemplate();
@@ -32,28 +32,27 @@ export function BadgePrintPanel({
   const [overrides, setOverrides] = useState<Record<string, string>>({});
   const [draft, setDraft] = useState<BadgeTemplate | null>(null);
 
-  // Initialize draft when template resolves (render-time update avoids useEffect cascade)
-  if (template && !draft) {
+  // Re-seed on template switch or remote save so printing never uses a stale layout (render-phase update).
+  const templateKey = template ? `${template._id}:${template.updatedAt ?? ''}` : null;
+  const [draftKey, setDraftKey] = useState<string | null>(null);
+  if (template && templateKey !== draftKey) {
+    setDraftKey(templateKey);
     setDraft({ ...template, zones: template.zones.map(normalizeLegacyZone) });
   }
 
   const effectiveTemplate = draft ?? template ?? null;
 
-  // Attendee with field overrides applied — used for both preview and printing
-  function mergedAttendee() {
-    const extraOverrides = Object.fromEntries(
-      Object.entries(overrides).filter(([k]) => k !== '__fullName__'),
-    );
+  // Attendee with field overrides applied — memoized so the canvas preview only re-renders on real changes
+  const merged = useMemo(() => {
+    const { __fullName__: fullName, ...extraOverrides } = overrides;
     return {
       ...attendee,
-      fullName: overrides['__fullName__'] ?? attendee.fullName,
+      fullName: fullName ?? attendee.fullName,
       extra: { ...attendee.extra, ...extraOverrides },
     };
-  }
+  }, [attendee, overrides]);
 
-  const previewZones = effectiveTemplate
-    ? effectiveTemplate.zones.map(normalizeLegacyZone).filter((z) => !z.hidden)
-    : [];
+  const { canvasRef } = useBadgeCanvas(merged, effectiveTemplate, 120);
 
   const visibleZones = effectiveTemplate
     ? effectiveTemplate.zones
@@ -133,7 +132,7 @@ export function BadgePrintPanel({
     if (!effectiveTemplate) return toast('No template selected');
     try {
       await print.mutateAsync({
-        attendee: mergedAttendee(),
+        attendee: merged,
         eventName: event.name,
         template: effectiveTemplate,
       });
@@ -168,39 +167,14 @@ export function BadgePrintPanel({
       {/* Live badge preview */}
       <div className="flex justify-center border-b border-line-3 bg-surface-2 px-5 py-5">
         {effectiveTemplate ? (
-          <div
-            className="flex max-h-[220px] max-w-[240px] flex-col items-center justify-center overflow-hidden rounded-md border border-line bg-white px-3 py-2 shadow-[0_8px_24px_rgba(0,0,0,.10)]"
+          <canvas
+            ref={canvasRef}
+            aria-label={`Badge preview for ${merged.fullName}`}
+            className="h-auto w-full max-w-[280px] rounded-md border border-line bg-white shadow-[0_8px_24px_rgba(0,0,0,.10)]"
             style={{
               aspectRatio: `${effectiveTemplate.labelWidthMm} / ${effectiveTemplate.labelHeightMm}`,
             }}
-          >
-            {previewZones.length === 0 ? (
-              <span className="text-[11px] text-faint">Empty template</span>
-            ) : (
-              previewZones.map((z, i) => {
-                const text =
-                  z.type === 'static'
-                    ? (z.staticText ?? '')
-                    : z.field === 'fullName'
-                      ? mergedAttendee().fullName
-                      : (mergedAttendee().extra[z.field ?? ''] ?? '');
-                return (
-                  <span
-                    key={i}
-                    className="block w-full break-words leading-tight text-ink"
-                    style={{
-                      fontSize: `${z.fontSize}pt`,
-                      fontWeight: z.bold ? 700 : 400,
-                      textAlign: z.align,
-                      fontFamily: z.fontFamily,
-                    }}
-                  >
-                    {text || ' '}
-                  </span>
-                );
-              })
-            )}
-          </div>
+          />
         ) : (
           <div className="flex h-24 items-center justify-center rounded-xl border border-dashed border-line-2 text-sm text-faint">
             No template selected

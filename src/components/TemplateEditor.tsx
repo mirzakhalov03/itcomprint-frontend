@@ -1,16 +1,17 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef } from 'react';
 import type { DragEvent } from 'react';
 import { Button } from './ui/Button';
 import { Input, inputBaseClass } from './ui/Input';
 import { NumberField } from './ui/NumberField';
 import { ArrowLeftIcon } from './icons';
 import {
-  renderBadgeToCanvas,
   normalizeLegacyZone,
   FONT_FAMILIES,
   FONT_SIZES,
   SAMPLE_ATTENDEE,
 } from '../printer/renderBadge';
+import { newFieldZone, newStaticZone, resolveZoneText } from '../printer/zones';
+import { useBadgeCanvas } from '../hooks/useBadgeCanvas';
 import {
   useCreateTemplate,
   useUpdateTemplate,
@@ -20,28 +21,6 @@ import {
 import { toast } from '../store/toastStore';
 import { errMessage } from '../lib/errors';
 import type { BadgeTemplate, TemplateZone } from '../types';
-
-const newFieldZone = (): TemplateZone => ({
-  id: crypto.randomUUID(),
-  type: 'field',
-  field: 'fullName',
-  fontFamily: 'Inter',
-  fontSize: 16,
-  bold: false,
-  align: 'center',
-  hidden: false,
-});
-
-const newStaticZone = (): TemplateZone => ({
-  id: crypto.randomUUID(),
-  type: 'static',
-  staticText: '',
-  fontFamily: 'Inter',
-  fontSize: 14,
-  bold: false,
-  align: 'center',
-  hidden: false,
-});
 
 const blankDraft = (): BadgeTemplate => ({
   _id: '',
@@ -67,8 +46,7 @@ export function TemplateEditor({
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [dragOverId, setDragOverId] = useState<string | null>(null);
   const dragSrcId = useRef<string | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { canvasRef } = useBadgeCanvas(SAMPLE_ATTENDEE, draft);
 
   const { data: fieldKeys = [] } = useTemplateFieldKeys();
   const create = useCreateTemplate();
@@ -76,28 +54,6 @@ export function TemplateEditor({
   const remove = useDeleteTemplate();
   const isNew = draft._id === '';
   const selected = draft.zones.find((z) => z.id === selectedId) ?? null;
-
-  // ── Canvas preview ─────────────────────────────────────────────────────────
-  const updatePreview = useCallback(async () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    try {
-      const rendered = await renderBadgeToCanvas(SAMPLE_ATTENDEE, draft);
-      canvas.width = rendered.width;
-      canvas.height = rendered.height;
-      canvas.getContext('2d')!.drawImage(rendered, 0, 0);
-    } catch {
-      // fonts may not be ready on first paint — the next draft change retries
-    }
-  }, [draft]);
-
-  useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(updatePreview, 150);
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, [updatePreview]);
 
   // ── Zone mutations ──────────────────────────────────────────────────────────
   function patchZone(id: string, patch: Partial<TemplateZone>) {
@@ -382,12 +338,7 @@ export function TemplateEditor({
                   fontFamily: norm.fontFamily,
                 };
 
-                const sampleText =
-                  norm.type === 'static'
-                    ? (norm.staticText ?? '')
-                    : norm.field === 'fullName'
-                      ? SAMPLE_ATTENDEE.fullName
-                      : (SAMPLE_ATTENDEE.extra[norm.field ?? ''] ?? norm.field ?? '');
+                const sampleText = resolveZoneText(norm, SAMPLE_ATTENDEE);
 
                 return (
                   <div
