@@ -40,7 +40,7 @@ Tasks in the **same lane run sequentially**. Different lanes can run **in parall
 Wave A ─┬─ Backend lane:  BE-1 → BE-2 → BE-3            (backend repo, one working tree)
         └─ Frontend:      FE-0 (foundation, blocks Wave B)
 Wave B ─── FE-1 ‖ FE-2 ‖ FE-3 ‖ FE-4 ‖ FE-5              (frontend worktrees, parallel)
-Wave C ─── Merge Wave B → OPS-1 (needs user approval) → DOC-1 → INT-1 (integration)
+Wave C ─── Merge Wave B → DOC-1 → INT-1 (integration) → OPS-1 (FINAL: ask the user; never auto-run)
 ```
 
 **File ownership (a task may only edit the files listed on its row):**
@@ -56,7 +56,7 @@ Wave C ─── Merge Wave B → OPS-1 (needs user approval) → DOC-1 → INT-
 | FE-3  | M `hooks/useSheetSync.ts`                                                                                                                                                                                                                                                                                                                                    |
 | FE-4  | C `components/ui/Dialog.tsx`, `components/ui/ConfirmDialog.tsx`, `components/EventDetailsFields.tsx`; M `components/EditEventDialog.tsx`, `ImportDialog.tsx`, `LinkSheetDialog.tsx`, `MoveToTrashDialog.tsx`, `PermanentDeleteDialog.tsx`, `SignOutDialog.tsx`, `EventCard.tsx`, `pages/OnboardingPage.tsx`, `pages/SettingsPage.tsx`, `pages/TrashPage.tsx` |
 | FE-5  | D `public/icons.svg`, `src/assets/vite.svg`, `public/brand/itcomuz-icon.png`; C `public/brand/itcom-logo-horizontal.png`; M `pages/LandingPage.tsx` (logo `src` only), `index.html`                                                                                                                                                                          |
-| OPS-1 | Production MongoDB (manual, **user approval required**)                                                                                                                                                                                                                                                                                                      |
+| OPS-1 | Production MongoDB. **Last task:** ask the user, never auto-run                                                                                                                                                                                                                                                                                              |
 | DOC-1 | M `frontend/docs/CLAUDE.md`, `backend/CLAUDE.md`                                                                                                                                                                                                                                                                                                             |
 
 **Cross-lane contracts** (names later tasks rely on):
@@ -1425,37 +1425,12 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
 
 ---
 
-## Task OPS-1: Production data cleanup (orchestrator; ASK THE USER FIRST)
-
-**Why:** Mongoose `autoIndex` creates new indexes but never drops removed ones, and it doesn't strip removed fields. The unique default-template index from BE-3 fails to build if duplicate defaults already exist. These steps touch the production Atlas cluster, so **present them to the user and run nothing without explicit approval.** Also offer that the user can run them.
-
-- [ ] **Step 1: Check for duplicate defaults** (read-only):
-
-```js
-db.badgetemplates.countDocuments({ isDefault: true }); // must be 1; if 2+, ask the user which one to keep
-```
-
-- [ ] **Step 2: After approval, drop the dead index and field:**
-
-```js
-db.attendees.dropIndex('eventId_1_searchText_1');
-db.attendees.updateMany({ searchText: { $exists: true } }, { $unset: { searchText: '' } });
-db.badgetemplates.dropIndex('isDefault_1'); // replaced by the partial unique index; ignore "index not found"
-db.users.getIndexes(); // googleId should have one unique index after the next boot
-```
-
-Run Step 2 **before** deploying BE-3. The new index gets its own name (`one_default_template`), but dropping the old `isDefault_1` first keeps the index set clean.
-
-- [ ] **Step 3:** After the next backend deploy, check the logs for `[db] connected` and no index build errors.
-
----
-
 ## Task DOC-1: Bring CLAUDE.md in line with the code (D3)
 
 **Depends on:** all tasks merged. **Files:** `frontend/docs/CLAUDE.md` (the root `CLAUDE.md` symlinks to it) and `backend/CLAUDE.md`.
 
 - [ ] **Step 1: `frontend/docs/CLAUDE.md` edits:**
-  - Repos table, backend row: replace `(ESM, \`module: NodeNext\`)`with`(CommonJS output — no \`"type": "module"\`; \`module: NodeNext\`)`.
+  - Repos table, backend row: replace the text `ESM, module: NodeNext` with `CommonJS output (no "type": "module"), module: NodeNext`.
   - Data flow: replace the sentence starting "The backend's `searchText` field…" with: "The roster endpoint takes no query params: search and filtering are client-side only."
   - Data flow, new bullet: "**Printing patches the cache**: `usePrintAttendee` writes the returned attendee into `['attendees', eventId]` instead of refetching. **Sheet-linked kiosks are live**: `useSheetSync` pulls the sheet every 30 s and polls the roster (10 s) and events (30 s), so stations see each other's prints and template switches. Polling pauses in hidden tabs."
   - Badge templates: replace "`listTemplates()` calls `ensureDefaultTemplate()` first" with "`ensureDefaultTemplate()` upserts the default once at boot (`server.ts`); a partial unique index allows only one". Add: "Kiosk and editor previews render through `useBadgeCanvas` (the real print raster). Zone text lives in `printer/zones.ts`."
@@ -1468,10 +1443,42 @@ Run Step 2 **before** deploying BE-3. The new index gets its own name (`one_defa
 
 ## Task INT-1: Integration pass (orchestrator)
 
+**Depends on:** DOC-1.
+
 - [ ] **Step 1:** In the backend, run `npm run validate && npm run verify && npm run smoke`. All must pass.
 - [ ] **Step 2:** In the frontend (after all Wave-B merges), run `npm run validate && npm run build`. Compare chunk sizes with the baseline from Task 0 Step 3: the main chunk must not grow by more than ~2 KB gz.
 - [ ] **Step 3: End-to-end walkthrough** (both apps running locally). Import an XLSX event, print one badge, batch print three, edit the event, move it to trash, restore it, then delete it permanently. Link a sheet event and run the two-window check from FE-3. Open the template editor and the kiosk Template tab (unchanged). Every action must give a visible, readable toast.
 - [ ] **Step 4:** Use superpowers:finishing-a-development-branch for both repos (the user decides between PR and merge).
+
+---
+
+## Task OPS-1 (FINAL): Production data cleanup (orchestrator; ask the user, never run it yourself)
+
+**This is the last thing in the plan.** It doesn't block anything: every task above verifies against an in-memory database. It only matters **before the backend is deployed**, which this plan never does.
+
+**Why:** Mongoose `autoIndex` creates new indexes but never drops removed ones, and it doesn't strip removed fields. BE-3's one-default-template index fails to build if production already has duplicate defaults. These steps write to the production Atlas cluster, with no undo.
+
+- [ ] **Step 1: Hand over to the user.** After INT-1, present this task and ask:
+
+  > "Last step: optional production DB cleanup (OPS-1). Run it before deploying the new backend. Do you want to run it yourself, have me walk you through it, or skip it for now?"
+
+  Run nothing against production without an explicit yes in that reply. If the user skips, mark the task skipped and end the run.
+
+- [ ] **Step 2: Check for duplicate defaults** (read-only):
+
+```js
+db.badgetemplates.countDocuments({ isDefault: true }); // must be 1; if 2+, the user picks which to keep
+```
+
+- [ ] **Step 3: Drop the dead index and field** (only after approval, and before deploying BE-3):
+
+```js
+db.attendees.dropIndex('eventId_1_searchText_1');
+db.attendees.updateMany({ searchText: { $exists: true } }, { $unset: { searchText: '' } });
+db.badgetemplates.dropIndex('isDefault_1'); // replaced by 'one_default_template'; ignore "index not found"
+```
+
+- [ ] **Step 4:** After the backend deploy, check the logs for `[db] connected` and no index build errors.
 
 ---
 
