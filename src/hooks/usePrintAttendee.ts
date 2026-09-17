@@ -51,7 +51,10 @@ export function usePrintAttendee() {
       });
       return markPrinted(attendee);
     },
-    onSuccess: (updated) => {
+    onSuccess: async (updated) => {
+      // Cancel any in-flight roster fetch (e.g. useSheetSync's poll) on this key first —
+      // otherwise its pre-print response can land after our patch and revert it to "not printed".
+      await qc.cancelQueries({ queryKey: ['attendees', updated.eventId] });
       // Patch the one row instead of refetching every cached roster.
       qc.setQueryData<Attendee[]>(['attendees', updated.eventId], (list) =>
         list?.map((a) => (a._id === updated._id ? updated : a)),

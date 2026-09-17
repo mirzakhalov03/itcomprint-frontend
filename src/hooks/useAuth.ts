@@ -32,7 +32,9 @@ export function useLogout() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: () => api.logout(),
-    onSuccess: () => {
+    // onSettled (not onSuccess): a 401 here just means the session was already
+    // dead server-side, so local state must clear regardless or the UI stays "signed in".
+    onSettled: () => {
       qc.setQueryData(['auth', 'me'], null);
       qc.removeQueries({ queryKey: ['events'] });
       qc.removeQueries({ queryKey: ['attendees'] });
