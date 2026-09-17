@@ -2,26 +2,16 @@ import { useState } from 'react';
 import { useTrash, useRestoreEvent } from '../hooks/useEvents';
 import { toast } from '../store/toastStore';
 import { errMessage } from '../lib/errors';
+import { fmtDate, daysUntil, TRASH_RETENTION_DAYS } from '../lib/format';
 import { PermanentDeleteDialog } from '../components/PermanentDeleteDialog';
 import { CalendarIcon, UsersIcon, RotateCcwIcon, TrashIcon } from '../components/icons';
 import { Button } from '../components/ui/Button';
 import { EmptyState, LoadingPanel } from '../components/ui/EmptyState';
 import type { AppEvent } from '../types';
 
-const TRASH_RETENTION_DAYS = 45;
-
-const fmtDate = (iso: string) =>
-  new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-
-function daysLeft(deletedAt: string): number {
-  const elapsedMs = Date.now() - new Date(deletedAt).getTime();
-  const elapsedDays = Math.floor(elapsedMs / (24 * 60 * 60 * 1000));
-  return Math.max(TRASH_RETENTION_DAYS - elapsedDays, 0);
-}
-
 function TrashRow({ event, onDelete }: { event: AppEvent; onDelete: () => void }) {
   const restoreEvent = useRestoreEvent();
-  const remaining = event.deletedAt ? daysLeft(event.deletedAt) : 0;
+  const remaining = event.purgeAt ? daysUntil(event.purgeAt) : 0;
 
   async function handleRestore() {
     try {
