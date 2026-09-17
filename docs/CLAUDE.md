@@ -10,10 +10,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Two separate git repositories.** There is no monorepo and no root package manager — `cd` into each app.
 
-| Path        | Repo                                | Stack                                                                                           |
-| ----------- | ----------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `frontend/` | `mirzakhalov03/itcomprint-frontend` | Vite + React 19 + TypeScript + Tailwind v4. Zustand (client state), React Query (server state). |
-| `backend/`  | `mirzakhalov03/itcomprint-backend`  | Express 5 + Mongoose 9 + Zod 4 on Node/TypeScript (ESM, `module: NodeNext`).                    |
+| Path        | Repo                                | Stack                                                                                                        |
+| ----------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `frontend/` | `mirzakhalov03/itcomprint-frontend` | Vite + React 19 + TypeScript + Tailwind v4. Zustand (client state), React Query (server state).              |
+| `backend/`  | `mirzakhalov03/itcomprint-backend`  | Express 5 + Mongoose 9 + Zod 4 on Node/TypeScript (CommonJS output (no "type": "module"), module: NodeNext). |
 
 The folder containing both is **not** a repo — it is just a working directory. All cross-app documentation (this file, the design system, and every spec/plan) lives in **`frontend/docs/`** and is versioned with the frontend. The root `CLAUDE.md` is a symlink to `frontend/docs/CLAUDE.md` so it still loads when working from the parent folder.
 
@@ -67,7 +67,7 @@ UI code never branches on printer type. **`DPI = 203` is still an unverified ass
 
 A `BadgeTemplate` is a label size (`labelWidthMm`/`labelHeightMm`) plus an ordered list of **zones**. A zone is either a `field` (pulls `fullName` or an `extra` key off the attendee) or `static` text, each with `fontFamily`, `fontSize` (pt), `bold`, `align`, `hidden`.
 
-- **A default template is auto-seeded**: `listTemplates()` calls `ensureDefaultTemplate()` first, so `GET /templates` always returns at least "Default badge". The default cannot be deleted (400).
+- **A default template is auto-seeded**: `ensureDefaultTemplate()` upserts the default once at boot (`server.ts`); a partial unique index allows only one, so `GET /templates` always returns at least "Default badge". The default cannot be deleted (400). Kiosk and editor previews render through `useBadgeCanvas` (the real print raster). Zone text lives in `printer/zones.ts`.
 - **Events reference a template** via `templateId`; `null` means "use the default". Deleting a custom template resets referencing events back to `null`.
 - `GET /templates/field-keys` aggregates the **distinct `extra` keys across all attendees** to populate the editor's field picker.
 - `TemplateEditor` renders live through the same `renderBadgeToCanvas` against `SAMPLE_ATTENDEE`, so the editor preview and the printed badge cannot drift.
@@ -80,12 +80,14 @@ A `BadgeTemplate` is a label size (`labelWidthMm`/`labelHeightMm`) plus an order
 - `/app` — `DashboardLayout` (persistent sidebar) wrapping `DashboardPage` (index), `/app/printer`, `/app/templates`, `/app/settings`
 - `/app/events/:id` — `KioskPage`, a **sibling route deliberately outside the layout** so the kiosk is full-screen with no sidebar. It is a split view: `AttendeeTable` beside `BadgePrintPanel`.
 - Everything else redirects to `/app`. `<RequireAuth>` gates all authed routes.
+- `<Toast />` is mounted once in `App.tsx`. Modals use `components/ui/Dialog.tsx` / `ConfirmDialog.tsx`.
 
 ### Data flow
 
 - **Import is client-side**: `ImportDialog` parses the spreadsheet with `xlsx` in the browser (lazy-loaded — it is a ~370KB chunk), the operator picks the name column, and the whole event + attendee array is POSTed in one request. There is intentionally **no per-attendee create endpoint** — events are always created _with_ their attendees (`createEventWithAttendees` → `insertMany`). Walk-in attendees are therefore not supported.
-- **Attendees load once per event; search and filtering are client-side** (`useAttendees` fetches the full roster, `AttendeeTable` filters in memory) so keystrokes never hit the network. The backend's `searchText` field and `{eventId, searchText}` compound index back the equivalent server-side query, which the UI does not currently call.
+- **Attendees load once per event; search and filtering are client-side** (`useAttendees` fetches the full roster, `AttendeeTable` filters in memory) so keystrokes never hit the network. The roster endpoint takes no query params: search and filtering are client-side only.
 - **Print and reprint are the same endpoint**: `POST /attendees/:id/print` `$inc`s `printCount` and sets `printStatus: 'printed'`. The UI shows "Print" → "Reprint" based on status.
+- **Printing patches the cache**: `usePrintAttendee` writes the returned attendee into `['attendees', eventId]` instead of refetching. **Sheet-linked kiosks are live**: `useSheetSync` pulls the sheet every 30 s and polls the roster (10 s) and events (30 s), so stations see each other's prints and template switches. Polling pauses in hidden tabs.
 - `listEvents` derives `attendeeCount` and `printedCount` via aggregation; neither is stored.
 
 ### Auth (self-hosted Google)
@@ -113,4 +115,4 @@ Strict MVC: `routes → controllers → services → models`, with `validators/`
 
 - **The hardware spike has never been run.** `VITE_PRINTER_MODE=preview` everywhere; the Gainscha's real DPI, USB VID/PID, and the Windows WinUSB binding are all unconfirmed. Nothing has physically printed.
 - **No walk-in attendee support** — see Data flow above.
-- Batch print in `AttendeeTable` runs sequentially and aborts the whole run on the first failure.
+- Batch print runs sequentially; failures don't stop the run and stay selected for retry.
