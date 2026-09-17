@@ -1,0 +1,39 @@
+src/components/TemplateCard.tsx
+  s_d8b340aaf2a2c4::t_fd00dd8509dd00 2,16,18
+src/components/TemplateEditor.tsx
+  s_d8b340aaf2a2c4::t_b64c48987759f2 1,13-14,49,341
+src/components/BadgePrintPanel.tsx
+  s_074c7779d95ac9::t_2081355f7a526d 1,3-5,25,35-39,45-47,50,53,55,135,170-173,177
+src/hooks/useBadgeCanvas.ts
+  s_074c7779d95ac9::t_8efa0b7978b24f 1-38
+src/hooks/useTemplates.ts
+  s_074c7779d95ac9::t_d37b8b6ae40dee 14-18
+src/printer/renderBadge.ts
+  s_074c7779d95ac9::t_bf1239517bc8f6 2
+src/printer/zones.ts
+  s_074c7779d95ac9::t_f034cee4718a4e 1-28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "0733f87a5aa4e8ae3f44a5c7d444a5c8a8e240a7",
+  "prompts": {},
+  "sessions": {
+    "s_074c7779d95ac9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a49ef6ee5452b84e6",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    },
+    "s_d8b340aaf2a2c4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "20e219b2-b075-4e5b-82ed-cc8c57230efd",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
