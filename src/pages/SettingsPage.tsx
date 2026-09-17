@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth, useUpdateName } from '../hooks/useAuth';
 import { toast } from '../store/toastStore';
+import { errMessage } from '../lib/errors';
 import { Avatar } from '../components/ui/Avatar';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -9,17 +10,20 @@ import { SignOutDialog } from '../components/SignOutDialog';
 export function SettingsPage() {
   const { user } = useAuth();
   const update = useUpdateName();
-  const [name, setName] = useState('');
+  // RequireAuth guarantees `user` is loaded before this mounts.
+  const [name, setName] = useState(user?.displayName ?? '');
   const [confirmingSignOut, setConfirmingSignOut] = useState(false);
 
   if (!user) return null;
-  const value = name || user.displayName;
 
   const save = (e: React.FormEvent) => {
     e.preventDefault();
-    const trimmed = value.trim();
+    const trimmed = name.trim();
     if (!trimmed) return;
-    update.mutate(trimmed, { onSuccess: () => toast('Name updated') });
+    update.mutate(trimmed, {
+      onSuccess: () => toast('Name updated'),
+      onError: (err) => toast(errMessage(err, "Couldn't save your name — try again.")),
+    });
   };
 
   return (
@@ -39,11 +43,11 @@ export function SettingsPage() {
           <span className="font-display text-xs font-semibold text-ink-3">
             Display name (shown as event author)
           </span>
-          <Input value={value} onChange={(e) => setName(e.target.value)} />
+          <Input value={name} onChange={(e) => setName(e.target.value)} />
         </label>
         <Button
           type="submit"
-          disabled={update.isPending || !value.trim()}
+          disabled={update.isPending || !name.trim()}
           className="mt-4 h-11 rounded-full px-5 text-sm"
         >
           {update.isPending ? 'Saving…' : 'Save'}

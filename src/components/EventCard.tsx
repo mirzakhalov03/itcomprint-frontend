@@ -11,10 +11,8 @@ import {
 import { EditEventDialog } from './EditEventDialog';
 import { MoveToTrashDialog } from './MoveToTrashDialog';
 import { useClickOutside } from '../hooks/useClickOutside';
+import { fmtDate } from '../lib/format';
 import type { AppEvent } from '../types';
-
-const fmtDate = (iso: string) =>
-  new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
 /** Card menu items stop propagation/default so they don't trigger the card's Link navigation. */
 function stop(e: MouseEvent) {
