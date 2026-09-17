@@ -1,9 +1,11 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/api';
 import type { AppEvent, NewAttendee } from '../types';
 
+export const eventsQueryOptions = queryOptions({ queryKey: ['events'], queryFn: api.listEvents });
+
 export function useEvents() {
-  return useQuery({ queryKey: ['events'], queryFn: api.listEvents, refetchOnWindowFocus: true });
+  return useQuery({ ...eventsQueryOptions, refetchOnWindowFocus: true });
 }
 
 export function useCreateEvent() {

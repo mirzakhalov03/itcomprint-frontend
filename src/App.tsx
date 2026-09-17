@@ -1,4 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { Toast } from './components/Toast';
 import { LandingPage } from './pages/LandingPage';
 import { OnboardingPage } from './pages/OnboardingPage';
 import { KioskPage } from './pages/KioskPage';
@@ -52,6 +53,7 @@ export default function App() {
 
         <Route path="*" element={<Navigate to="/app" replace />} />
       </Routes>
+      <Toast />
     </BrowserRouter>
   );
 }

@@ -10,16 +10,47 @@ import type {
 
 const BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:4000/api';
 
+export class ApiError extends Error {
+  readonly status: number;
+  // erasableSyntaxOnly forbids TS parameter properties, so assign explicitly.
+  constructor(status: number, message: string) {
+    super(message);
+    this.status = status;
+    this.name = 'ApiError';
+  }
+}
+
+// Used when the server sends no usable `message` (e.g. auth guard 401, Zod 400, body-parser 413).
+const FALLBACK_MESSAGES: Record<number, string> = {
+  400: 'Some details look invalid — check them and try again.',
+  401: 'Your session expired — sign in again.',
+  413: 'That spreadsheet is too large — split it into smaller files.',
+};
+
+async function toApiError(res: Response): Promise<ApiError> {
+  let message: string | undefined;
+  try {
+    const body = (await res.json()) as { message?: unknown };
+    if (typeof body.message === 'string') message = body.message;
+  } catch {
+    // non-JSON body (proxy error page, empty 5xx)
+  }
+  // body-parser's 413 message ("request entity too large") isn't operator-friendly.
+  if (res.status === 413) message = undefined;
+  return new ApiError(
+    res.status,
+    message ?? FALLBACK_MESSAGES[res.status] ?? `Something went wrong (${res.status}) — try again.`,
+  );
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     ...init,
   });
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`API ${res.status}: ${body}`);
-  }
+  if (!res.ok) throw await toApiError(res);
+  if (res.status === 204) return undefined as T;
   return res.json() as Promise<T>;
 }
 
@@ -38,20 +69,12 @@ export const api = {
   syncEventSheet: (eventId: string) =>
     request<SheetSyncResult>(`/events/${eventId}/sync-sheet`, { method: 'POST' }),
 
-  listAttendees: (eventId: string, params: { search?: string; status?: string }) => {
-    const qs = new URLSearchParams();
-    if (params.search) qs.set('search', params.search);
-    if (params.status) qs.set('status', params.status);
-    const suffix = qs.toString() ? `?${qs.toString()}` : '';
-    return request<Attendee[]>(`/events/${eventId}/attendees${suffix}`);
-  },
+  listAttendees: (eventId: string) => request<Attendee[]>(`/events/${eventId}/attendees`),
 
   printAttendee: (attendeeId: string) =>
     request<Attendee>(`/attendees/${attendeeId}/print`, { method: 'POST' }),
 
   listTemplates: () => request<BadgeTemplate[]>('/templates'),
-
-  getTemplate: (id: string) => request<BadgeTemplate>(`/templates/${id}`),
 
   templateFieldKeys: () => request<string[]>('/templates/field-keys'),
 
@@ -94,7 +117,7 @@ export const api = {
   me: async (): Promise<AuthUser | null> => {
     const res = await fetch(`${BASE}/auth/me`, { credentials: 'include' });
     if (res.status === 401) return null;
-    if (!res.ok) throw new Error(`API ${res.status}`);
+    if (!res.ok) throw await toApiError(res);
     const data = (await res.json()) as { user: AuthUser };
     return data.user;
   },
@@ -105,8 +128,5 @@ export const api = {
       body: JSON.stringify({ displayName }),
     }),
 
-  // logout returns 204 (no body), so don't route it through request().
-  logout: async (): Promise<void> => {
-    await fetch(`${BASE}/auth/logout`, { method: 'POST', credentials: 'include' });
-  },
+  logout: () => request<void>('/auth/logout', { method: 'POST' }),
 };

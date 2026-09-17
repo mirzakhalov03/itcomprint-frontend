@@ -4,7 +4,6 @@ interface ToastState {
   message: string | null;
   /** Show a transient toast; auto-dismisses after `ms`. */
   show: (message: string, ms?: number) => void;
-  hide: () => void;
 }
 
 let timer: ReturnType<typeof setTimeout> | undefined;
@@ -15,10 +14,6 @@ export const useToastStore = create<ToastState>((set) => ({
     clearTimeout(timer);
     set({ message });
     timer = setTimeout(() => set({ message: null }), ms);
-  },
-  hide: () => {
-    clearTimeout(timer);
-    set({ message: null });
   },
 }));
 

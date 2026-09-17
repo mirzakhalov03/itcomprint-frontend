@@ -3,7 +3,6 @@ import { Link, useParams } from 'react-router-dom';
 import { AttendeeTable } from '../components/AttendeeTable';
 import { BadgePrintPanel } from '../components/BadgePrintPanel';
 import { BadgePreviewTray } from '../components/BadgePreviewTray';
-import { Toast } from '../components/Toast';
 import { AppHeader } from '../components/AppHeader';
 import { ArrowLeftIcon } from '../components/icons';
 import { EmptyState, LoadingPanel } from '../components/ui/EmptyState';
@@ -80,7 +79,6 @@ export function KioskPage() {
       </div>
 
       <BadgePreviewTray />
-      <Toast />
     </div>
   );
 }

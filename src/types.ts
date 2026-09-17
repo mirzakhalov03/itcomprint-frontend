@@ -20,6 +20,7 @@ export interface AppEvent {
   sheetUrl: string | null;
   lastSyncedAt: string | null;
   deletedAt: string | null;
+  purgeAt?: string; // trash listing only
 }
 
 export type PrintStatus = 'not_printed' | 'printed';
@@ -73,5 +74,6 @@ export interface SheetSyncResult {
   added: number;
   updated: number;
   skipped: number;
-  total?: number;
+  total: number;
+  lastSyncedAt: string;
 }
