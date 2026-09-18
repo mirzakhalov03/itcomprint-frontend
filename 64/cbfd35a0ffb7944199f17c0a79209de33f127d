@@ -1,0 +1,93 @@
+docs/CLAUDE.md
+  s_adf48a95805c2c::t_77cc926075985b 89
+index.html
+  s_c9a589e2fd2a6f::t_14c4424e4ea427 6-9
+src/components/AttendeeRow.tsx
+  s_c9a589e2fd2a6f::t_7d050fc590224b 59,72-77,81-93
+src/components/AttendeeTable.tsx
+  s_c9a589e2fd2a6f::t_cebf8e0a35684c 7,13,15,44,70,77,110-123,176-213,215-220,222,224-256,258-282,285-327,329,332-344,347
+src/components/BadgePreviewTray.tsx
+  s_c9a589e2fd2a6f::t_fa1b106777e39d 1,3-4,19-22,26,30-39,46-49,58-81,83-89,91-93
+src/components/BadgePrintPanel.tsx
+  s_c9a589e2fd2a6f::t_ca341f05588430 2,29,146-154,156,158,160,173-174,181,186,216,228,371,374-375,380-390
+src/components/DashboardLayout.tsx
+  s_c9a589e2fd2a6f::t_307529c6152730 26
+src/components/EventCard.tsx
+  s_96925e4b7e5136::t_bfad439c0c96a0 90-93,96-100
+src/components/SheetIssuesNotice.tsx
+  s_b878ebdf58a8f2::t_b0c32a76eb103c 1-46
+src/components/TemplateSelect.tsx
+  s_c9a589e2fd2a6f::t_797a4028829d8b 5,12,28,36
+src/components/Toast.tsx
+  s_c9a589e2fd2a6f::t_393c2970f6c054 11,13
+src/components/icons.tsx
+  s_96925e4b7e5136::t_b99fdf51b40e47 133-139
+src/components/ui/Checkbox.tsx
+  s_c9a589e2fd2a6f::t_7b4acddb35dbf0 21-22
+src/components/ui/Dialog.tsx
+  s_c9a589e2fd2a6f::t_b9370550b3c84e 1,4,31
+src/hooks/usePrintAttendee.ts
+  s_adf48a95805c2c::t_82fa2deecb8b01 1,32-43,67,72-83
+src/hooks/useSheetSync.ts
+  s_b878ebdf58a8f2::t_4d7f65cdbe9327 1,8,22-25,44-45,78
+src/index.css
+  s_c9a589e2fd2a6f::t_fbb6429da4d555 39,62-76,105-112,128-130
+src/pages/DashboardPage.tsx
+  s_96925e4b7e5136::t_38bbdff72e703f 1,9,22-64,72,113-116
+src/pages/LandingPage.tsx
+  s_c9a589e2fd2a6f::t_ed111726d43078 193,201-203,210-211,213,215,218,221-224,227-242,244,247-258,263-267,269-270,272-274,276-283,288-292,295-298,301-305,308,310-313,315-320,323-329,331-334,337-364,366-369,372-427,430-477,479-494,496-500,502,506,509-518,520-537,542
+src/types.ts
+  s_b878ebdf58a8f2::t_69320e7a450dae 73-80,84,87
+src/components/ScrollJumpButton.tsx
+  s_c9a589e2fd2a6f::t_c42014dda28e6f 1-84
+src/components/ui/Sheet.tsx
+  s_c9a589e2fd2a6f::t_078bf6281b3c1b 1-34
+src/hooks/useEscapeKey.ts
+  s_c9a589e2fd2a6f::t_ecafea5d764ad5 1-13
+src/hooks/useMediaQuery.ts
+  s_c9a589e2fd2a6f::t_4d0679fe0111f3 1-17
+src/lib/api.ts
+  s_c9a589e2fd2a6f::t_e12ba6f78aa3af 77-79
+src/pages/KioskPage.tsx
+  s_c9a589e2fd2a6f::t_c1001987dc1095 1,6,10,12,21-33,36,51-78,80,83-94
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "64cbfd35a0ffb7944199f17c0a79209de33f127d",
+  "prompts": {},
+  "sessions": {
+    "s_96925e4b7e5136": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "75b40c69-6210-47b4-9018-3085d5c89950",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    },
+    "s_adf48a95805c2c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "250f3a14-c280-4b77-ab1a-24a9e43ee689",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    },
+    "s_b878ebdf58a8f2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a523d94a-123f-4ae8-a8dd-644b1fed2354",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    },
+    "s_c9a589e2fd2a6f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e295bc0d-a36a-4156-a6ed-feed3bf262d3",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
