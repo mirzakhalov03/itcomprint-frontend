@@ -56,7 +56,7 @@ export const AttendeeRow = memo(function AttendeeRow({
 
   return (
     <div
-      className={`flex h-13 items-center gap-3 border-b border-line-3 px-4 transition-colors hover:bg-brand-tint sm:gap-4 sm:px-5 ${rowBg}`}
+      className={`flex h-14 items-center gap-3 sm:h-13 border-b border-line-3 px-4 transition-colors hover:bg-brand-tint sm:gap-4 sm:px-5 ${rowBg}`}
       style={{ borderLeft: leftBorder }}
     >
       <Checkbox
@@ -69,11 +69,28 @@ export const AttendeeRow = memo(function AttendeeRow({
         {highlight(regNumber, search)}
       </span>
 
-      <div className="min-w-0 flex-1">
+      {/* The name opens the badge too: a bigger target than the button, handy on touch. */}
+      <button
+        onClick={() => onPreview(attendee)}
+        disabled={!template}
+        className="min-w-0 flex-1 self-stretch text-left disabled:cursor-default"
+      >
         <div className="truncate font-display text-sm font-semibold leading-tight text-ink">
           {highlight(attendee.fullName, search)}
         </div>
-      </div>
+        {/* Status column is hidden below sm, so the status rides under the name there. */}
+        {printed ? (
+          <div className="mt-0.5 inline-flex items-center gap-1 font-display text-[11px] font-bold text-brand-deep sm:hidden">
+            <CheckIcon size={10} strokeWidth={3} />
+            {attendee.printCount > 1 ? `Printed ×${attendee.printCount}` : 'Printed'}
+          </div>
+        ) : (
+          <div className="mt-0.5 inline-flex items-center gap-1.25 font-display text-[11px] font-bold text-amber-ink sm:hidden">
+            <span className="h-1.5 w-1.5 rounded-full bg-amber" />
+            Not printed
+          </div>
+        )}
+      </button>
 
       <div className="hidden w-35 items-center sm:flex">
         {printed ? (

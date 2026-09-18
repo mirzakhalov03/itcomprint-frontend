@@ -1,6 +1,7 @@
-import { useEffect, useId, type ReactNode } from 'react';
+import { useId, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { cn } from '../../lib/cn';
+import { useEscapeKey } from '../../hooks/useEscapeKey';
 
 const SIZES = { sm: 'max-w-[380px]', md: 'max-w-[420px]', lg: 'max-w-[520px]' } as const;
 
@@ -27,13 +28,7 @@ export function Dialog({
 }) {
   const titleId = useId();
 
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape' && !busy) onClose();
-    }
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, [busy, onClose]);
+  useEscapeKey(onClose, !busy);
 
   return createPortal(
     <div

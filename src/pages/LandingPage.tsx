@@ -190,6 +190,7 @@ export function LandingPage() {
       />
 
       {/* CENTER STACK */}
+      {/* Scrolls on short phones; auto margins center the stack without clipping it when it overflows. */}
       <main
         style={{
           position: 'absolute',
@@ -197,341 +198,348 @@ export function LandingPage() {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'center',
-          gap: 'clamp(14px,2.4vh,28px)',
-          padding: 'clamp(24px,5vw,48px) clamp(20px,5vw,48px) 84px',
+          padding: 'clamp(24px,5vw,48px) clamp(20px,5vw,48px) 24px',
+          overflowX: 'hidden', // the scaled-up invisible Google button is wider than a phone
+          overflowY: 'auto',
           textAlign: 'center',
           zIndex: 5,
         }}
       >
-        {/* logo + glow */}
         <div
           style={{
-            position: 'relative',
+            margin: 'auto 0',
+            width: '100%',
             display: 'flex',
+            flexDirection: 'column',
             alignItems: 'center',
-            justifyContent: 'center',
+            gap: 'clamp(14px,2.4vh,28px)',
           }}
         >
+          {/* logo + glow */}
           <div
-            style={{
-              position: 'absolute',
-              width: 340,
-              height: 200,
-              background: 'radial-gradient(closest-side, rgba(136,189,85,.22), transparent 70%)',
-              filter: 'blur(8px)',
-              opacity: 0.6,
-            }}
-          />
-          <img
-            src="/brand/itcom-logo-horizontal.png"
-            alt="IT Community"
-            style={{ position: 'relative', height: 48, width: 'auto', objectFit: 'contain' }}
-          />
-        </div>
-
-        {/* eyebrow */}
-        <div
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 9,
-            padding: '7px 15px',
-            border: '1px solid rgba(136,189,85,.28)',
-            borderRadius: 999,
-            background: 'rgba(136,189,85,.06)',
-            fontSize: 12.5,
-            letterSpacing: '.14em',
-            textTransform: 'uppercase',
-            color: '#b0d585',
-            fontWeight: 600,
-          }}
-        >
-          <span
-            style={{
-              width: 7,
-              height: 7,
-              borderRadius: '50%',
-              background: '#88bd55',
-              boxShadow: '0 0 10px #88bd55',
-            }}
-          />
-          Registration Platform
-        </div>
-
-        {/* headline */}
-        <h1
-          style={{
-            margin: 0,
-            fontFamily: "'Montserrat', sans-serif",
-            fontWeight: 700,
-            fontSize: 'clamp(40px,5.6vw,76px)',
-            lineHeight: 1.02,
-            letterSpacing: '-.02em',
-            color: '#fcfdfb',
-            maxWidth: '16ch',
-          }}
-        >
-          <span
-            style={{
-              background:
-                'linear-gradient(100deg, rgb(136, 189, 85) 0%, rgb(176, 213, 133) 40%, rgb(252, 253, 251) 75%)',
-              WebkitBackgroundClip: 'text',
-              backgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-            }}
-          >
-            Event
-          </span>{' '}
-          Check-ins,
-          <br />
-          <span
-            style={{
-              background:
-                'linear-gradient(100deg, rgb(252, 253, 251) 30%, rgb(176, 213, 133) 60%, rgb(136, 189, 85) 100%)',
-              WebkitBackgroundClip: 'text',
-              backgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-            }}
-          >
-            Simplified.
-          </span>
-        </h1>
-
-        {/* supporting */}
-        <p
-          style={{
-            margin: 0,
-            maxWidth: '54ch',
-            fontSize: 'clamp(15px,1.35vw,18px)',
-            lineHeight: 1.6,
-            color: '#9aa094',
-            fontWeight: 400,
-          }}
-        >
-          Register attendees, print badges, and run check-in from one control center. What once took
-          a minute now takes under ten seconds.
-        </p>
-
-        {/* metrics */}
-        <div style={{ display: 'flex', alignItems: 'stretch', gap: 0, marginTop: 4 }}>
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 5,
-              padding: '0 clamp(14px,4.5vw,30px)',
-            }}
-          >
-            <span
-              style={{
-                fontFamily: "'Montserrat', sans-serif",
-                fontWeight: 700,
-                fontSize: 30,
-                color: '#fcfdfb',
-              }}
-            >
-              &lt;10s
-            </span>
-            <span
-              style={{
-                fontSize: 12.5,
-                letterSpacing: '.05em',
-                color: '#6d7368',
-                textTransform: 'uppercase',
-              }}
-            >
-              Average check-in
-            </span>
-          </div>
-          <div
-            style={{
-              width: 1,
-              background: 'linear-gradient(180deg,transparent,rgba(154,160,148,.22),transparent)',
-            }}
-          />
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 5,
-              padding: '0 clamp(14px,4.5vw,30px)',
-            }}
-          >
-            <span
-              style={{
-                fontFamily: "'Montserrat', sans-serif",
-                fontWeight: 700,
-                fontSize: 30,
-                color: '#fcfdfb',
-              }}
-            >
-              3×
-            </span>
-            <span
-              style={{
-                fontSize: 12.5,
-                letterSpacing: '.05em',
-                color: '#6d7368',
-                textTransform: 'uppercase',
-              }}
-            >
-              Faster registration
-            </span>
-          </div>
-          <div
-            style={{
-              width: 1,
-              background: 'linear-gradient(180deg,transparent,rgba(154,160,148,.22),transparent)',
-            }}
-          />
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 5,
-              padding: '0 clamp(14px,4.5vw,30px)',
-            }}
-          >
-            <span
-              style={{
-                fontFamily: "'Montserrat', sans-serif",
-                fontWeight: 700,
-                fontSize: 30,
-                color: '#88bd55',
-              }}
-            >
-              0
-            </span>
-            <span
-              style={{
-                fontSize: 12.5,
-                letterSpacing: '.05em',
-                color: '#6d7368',
-                textTransform: 'uppercase',
-              }}
-            >
-              Queue bottlenecks
-            </span>
-          </div>
-        </div>
-
-        {/* CTA — on-design button with the real Google button overlaid invisibly */}
-        <div style={{ position: 'relative', marginTop: 10 }}>
-          <button
-            type="button"
-            onMouseEnter={() => setHover(true)}
-            onMouseLeave={() => setHover(false)}
             style={{
               position: 'relative',
-              overflow: 'hidden',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 13,
-              padding: '15px 28px',
-              border: 'none',
-              borderRadius: 13,
-              background: '#fcfdfb',
-              color: '#1c1d1a',
-              fontFamily: "'Open Sans', sans-serif",
-              fontSize: 16,
-              fontWeight: 600,
-              cursor: 'pointer',
-              boxShadow: hover
-                ? '0 18px 48px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.08), 0 0 44px rgba(136,189,85,.32)'
-                : '0 10px 34px rgba(0,0,0,.4), 0 0 0 1px rgba(255,255,255,.06), 0 0 30px rgba(136,189,85,.16)',
-              transform: hover ? 'translateY(-3px)' : 'translateY(0)',
-              transition: 'transform .25s cubic-bezier(.16,.84,.44,1), box-shadow .25s ease',
-            }}
-          >
-            <svg width="20" height="20" viewBox="0 0 48 48" style={{ position: 'relative' }}>
-              <path
-                fill="#EA4335"
-                d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.9 2.4 30.4 0 24 0 14.6 0 6.4 5.4 2.5 13.2l7.9 6.2C12.3 13.5 17.6 9.5 24 9.5z"
-              />
-              <path
-                fill="#4285F4"
-                d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.5 3-2.2 5.5-4.7 7.2l7.3 5.7C43.7 38 46.5 31.9 46.5 24.5z"
-              />
-              <path
-                fill="#FBBC05"
-                d="M10.4 28.6c-.5-1.5-.8-3-.8-4.6s.3-3.1.8-4.6l-7.9-6.2C.9 16.3 0 20 0 24s.9 7.7 2.5 10.8l7.9-6.2z"
-              />
-              <path
-                fill="#34A853"
-                d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.3-5.7c-2 1.4-4.7 2.3-8.6 2.3-6.4 0-11.7-4-13.6-9.7l-7.9 6.2C6.4 42.6 14.6 48 24 48z"
-              />
-            </svg>
-            <span style={{ position: 'relative' }}>Continue with Google</span>
-          </button>
-
-          {/* Invisible, real Google Identity button — scaled to cover the CTA */}
-          <div
-            ref={gsiRef}
-            aria-hidden
-            style={{
-              position: 'absolute',
-              inset: 0,
-              opacity: 0.0001,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              transform: 'scale(2)',
-              cursor: 'pointer',
-            }}
-          />
-        </div>
-
-        {login.isError && (
-          <p style={{ margin: 0, fontSize: 13, color: '#f0a830' }}>
-            Sign-in failed. Please try again.
-          </p>
-        )}
-
-        {/* Bridges the gap between Google resolving and our own session coming
-            back — without this the hero just sits there idle for that round
-            trip, which reads as "flashed back to the home page" once it snaps
-            over to the dashboard. */}
-        {login.isPending && (
-          <div
-            style={{
-              position: 'fixed',
-              inset: 0,
-              zIndex: 10,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 14,
-              background: 'rgba(28,29,26,.72)',
-              backdropFilter: 'blur(2px)',
             }}
           >
             <div
               style={{
-                width: 30,
-                height: 30,
-                borderRadius: '50%',
-                border: '3px solid rgba(136,189,85,.25)',
-                borderTopColor: '#88bd55',
-                animation: 'spin .7s linear infinite',
+                position: 'absolute',
+                width: 340,
+                height: 200,
+                background: 'radial-gradient(closest-side, rgba(136,189,85,.22), transparent 70%)',
+                filter: 'blur(8px)',
+                opacity: 0.6,
               }}
             />
-            <span style={{ fontSize: 13.5, color: '#b0d585', letterSpacing: '.02em' }}>
-              Signing you in…
-            </span>
-            <style>{'@keyframes spin { to { transform: rotate(360deg); } }'}</style>
+            <img
+              src="/brand/itcom-logo-horizontal.png"
+              alt="IT Community"
+              style={{ position: 'relative', height: 48, width: 'auto', objectFit: 'contain' }}
+            />
           </div>
-        )}
+
+          {/* eyebrow */}
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 9,
+              padding: '7px 15px',
+              border: '1px solid rgba(136,189,85,.28)',
+              borderRadius: 999,
+              background: 'rgba(136,189,85,.06)',
+              fontSize: 12.5,
+              letterSpacing: '.14em',
+              textTransform: 'uppercase',
+              color: '#b0d585',
+              fontWeight: 600,
+            }}
+          >
+            <span
+              style={{
+                width: 7,
+                height: 7,
+                borderRadius: '50%',
+                background: '#88bd55',
+                boxShadow: '0 0 10px #88bd55',
+              }}
+            />
+            Registration Platform
+          </div>
+
+          {/* headline */}
+          <h1
+            style={{
+              margin: 0,
+              fontFamily: "'Montserrat', sans-serif",
+              fontWeight: 700,
+              fontSize: 'clamp(40px,5.6vw,76px)',
+              lineHeight: 1.02,
+              letterSpacing: '-.02em',
+              color: '#fcfdfb',
+              maxWidth: '16ch',
+            }}
+          >
+            <span
+              style={{
+                background:
+                  'linear-gradient(100deg, rgb(136, 189, 85) 0%, rgb(176, 213, 133) 40%, rgb(252, 253, 251) 75%)',
+                WebkitBackgroundClip: 'text',
+                backgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}
+            >
+              Event
+            </span>{' '}
+            <span style={{ whiteSpace: 'nowrap' }}>Check-ins,</span>
+            <br />
+            <span
+              style={{
+                background:
+                  'linear-gradient(100deg, rgb(252, 253, 251) 30%, rgb(176, 213, 133) 60%, rgb(136, 189, 85) 100%)',
+                WebkitBackgroundClip: 'text',
+                backgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}
+            >
+              Simplified.
+            </span>
+          </h1>
+
+          {/* supporting */}
+          <p
+            style={{
+              margin: 0,
+              maxWidth: '54ch',
+              fontSize: 'clamp(15px,1.35vw,18px)',
+              lineHeight: 1.6,
+              color: '#9aa094',
+              fontWeight: 400,
+            }}
+          >
+            Register attendees, print badges, and run check-in from one control center. What once
+            took a minute now takes under ten seconds.
+          </p>
+
+          {/* metrics */}
+          <div style={{ display: 'flex', alignItems: 'stretch', gap: 0, marginTop: 4 }}>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 5,
+                padding: '0 clamp(10px,3.5vw,30px)',
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: "'Montserrat', sans-serif",
+                  fontWeight: 700,
+                  fontSize: 30,
+                  color: '#fcfdfb',
+                }}
+              >
+                &lt;10s
+              </span>
+              <span
+                style={{
+                  fontSize: 'clamp(10.5px,3vw,12.5px)',
+                  letterSpacing: '.05em',
+                  color: '#6d7368',
+                  textTransform: 'uppercase',
+                }}
+              >
+                Average check-in
+              </span>
+            </div>
+            <div
+              style={{
+                width: 1,
+                background: 'linear-gradient(180deg,transparent,rgba(154,160,148,.22),transparent)',
+              }}
+            />
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 5,
+                padding: '0 clamp(10px,3.5vw,30px)',
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: "'Montserrat', sans-serif",
+                  fontWeight: 700,
+                  fontSize: 30,
+                  color: '#fcfdfb',
+                }}
+              >
+                3×
+              </span>
+              <span
+                style={{
+                  fontSize: 'clamp(10.5px,3vw,12.5px)',
+                  letterSpacing: '.05em',
+                  color: '#6d7368',
+                  textTransform: 'uppercase',
+                }}
+              >
+                Faster registration
+              </span>
+            </div>
+            <div
+              style={{
+                width: 1,
+                background: 'linear-gradient(180deg,transparent,rgba(154,160,148,.22),transparent)',
+              }}
+            />
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 5,
+                padding: '0 clamp(10px,3.5vw,30px)',
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: "'Montserrat', sans-serif",
+                  fontWeight: 700,
+                  fontSize: 30,
+                  color: '#88bd55',
+                }}
+              >
+                0
+              </span>
+              <span
+                style={{
+                  fontSize: 'clamp(10.5px,3vw,12.5px)',
+                  letterSpacing: '.05em',
+                  color: '#6d7368',
+                  textTransform: 'uppercase',
+                }}
+              >
+                Queue bottlenecks
+              </span>
+            </div>
+          </div>
+
+          {/* CTA — on-design button with the real Google button overlaid invisibly */}
+          <div style={{ position: 'relative', marginTop: 10 }}>
+            <button
+              type="button"
+              onMouseEnter={() => setHover(true)}
+              onMouseLeave={() => setHover(false)}
+              style={{
+                position: 'relative',
+                overflow: 'hidden',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 13,
+                padding: '15px 28px',
+                border: 'none',
+                borderRadius: 13,
+                background: '#fcfdfb',
+                color: '#1c1d1a',
+                fontFamily: "'Open Sans', sans-serif",
+                fontSize: 16,
+                fontWeight: 600,
+                cursor: 'pointer',
+                boxShadow: hover
+                  ? '0 18px 48px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.08), 0 0 44px rgba(136,189,85,.32)'
+                  : '0 10px 34px rgba(0,0,0,.4), 0 0 0 1px rgba(255,255,255,.06), 0 0 30px rgba(136,189,85,.16)',
+                transform: hover ? 'translateY(-3px)' : 'translateY(0)',
+                transition: 'transform .25s cubic-bezier(.16,.84,.44,1), box-shadow .25s ease',
+              }}
+            >
+              <svg width="20" height="20" viewBox="0 0 48 48" style={{ position: 'relative' }}>
+                <path
+                  fill="#EA4335"
+                  d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.9 2.4 30.4 0 24 0 14.6 0 6.4 5.4 2.5 13.2l7.9 6.2C12.3 13.5 17.6 9.5 24 9.5z"
+                />
+                <path
+                  fill="#4285F4"
+                  d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.5 3-2.2 5.5-4.7 7.2l7.3 5.7C43.7 38 46.5 31.9 46.5 24.5z"
+                />
+                <path
+                  fill="#FBBC05"
+                  d="M10.4 28.6c-.5-1.5-.8-3-.8-4.6s.3-3.1.8-4.6l-7.9-6.2C.9 16.3 0 20 0 24s.9 7.7 2.5 10.8l7.9-6.2z"
+                />
+                <path
+                  fill="#34A853"
+                  d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.3-5.7c-2 1.4-4.7 2.3-8.6 2.3-6.4 0-11.7-4-13.6-9.7l-7.9 6.2C6.4 42.6 14.6 48 24 48z"
+                />
+              </svg>
+              <span style={{ position: 'relative' }}>Continue with Google</span>
+            </button>
+
+            {/* Invisible, real Google Identity button — scaled to cover the CTA */}
+            <div
+              ref={gsiRef}
+              aria-hidden
+              style={{
+                position: 'absolute',
+                inset: 0,
+                opacity: 0.0001,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transform: 'scale(2)',
+                cursor: 'pointer',
+              }}
+            />
+          </div>
+
+          {login.isError && (
+            <p style={{ margin: 0, fontSize: 13, color: '#f0a830' }}>
+              Sign-in failed. Please try again.
+            </p>
+          )}
+
+          {/* Bridges the gap between Google resolving and our own session coming
+            back — without this the hero just sits there idle for that round
+            trip, which reads as "flashed back to the home page" once it snaps
+            over to the dashboard. */}
+          {login.isPending && (
+            <div
+              style={{
+                position: 'fixed',
+                inset: 0,
+                zIndex: 10,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 14,
+                background: 'rgba(28,29,26,.72)',
+                backdropFilter: 'blur(2px)',
+              }}
+            >
+              <div
+                style={{
+                  width: 30,
+                  height: 30,
+                  borderRadius: '50%',
+                  border: '3px solid rgba(136,189,85,.25)',
+                  borderTopColor: '#88bd55',
+                  animation: 'spin .7s linear infinite',
+                }}
+              />
+              <span style={{ fontSize: 13.5, color: '#b0d585', letterSpacing: '.02em' }}>
+                Signing you in…
+              </span>
+              <style>{'@keyframes spin { to { transform: rotate(360deg); } }'}</style>
+            </div>
+          )}
+        </div>
 
         {/* footer */}
         <p
           style={{
-            position: 'absolute',
-            bottom: 24,
-            left: 0,
-            right: 0,
-            margin: 0,
+            margin: '32px 0 0',
             fontSize: 12,
             letterSpacing: '.04em',
             color: '#6d7368',

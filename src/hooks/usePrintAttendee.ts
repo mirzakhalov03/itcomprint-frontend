@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { api } from '../lib/api';
 import { renderBadgeToCanvas, canvasToMonochromeBitmap } from '../printer/renderBadge';
 import { buildBadgeTSPL } from '../printer/buildBadgeTSPL';
@@ -29,6 +29,18 @@ async function markPrinted(attendee: Attendee): Promise<Attendee> {
   }
 }
 
+async function patchAttendee(qc: QueryClient, updated: Attendee) {
+  // Cancel any in-flight roster fetch (e.g. useSheetSync's poll) on this key first —
+  // otherwise its stale response can land after our patch and revert the status.
+  await qc.cancelQueries({ queryKey: ['attendees', updated.eventId] });
+  // Patch the one row instead of refetching every cached roster.
+  qc.setQueryData<Attendee[]>(['attendees', updated.eventId], (list) =>
+    list?.map((a) => (a._id === updated._id ? updated : a)),
+  );
+  // Dashboard counts are now stale; refresh them on next view, not now.
+  void qc.invalidateQueries({ queryKey: ['events'], exact: true, refetchType: 'none' });
+}
+
 export function usePrintAttendee() {
   const qc = useQueryClient();
   return useMutation({
@@ -52,16 +64,20 @@ export function usePrintAttendee() {
       return markPrinted(attendee);
     },
     onSuccess: async (updated) => {
-      // Cancel any in-flight roster fetch (e.g. useSheetSync's poll) on this key first —
-      // otherwise its pre-print response can land after our patch and revert it to "not printed".
-      await qc.cancelQueries({ queryKey: ['attendees', updated.eventId] });
-      // Patch the one row instead of refetching every cached roster.
-      qc.setQueryData<Attendee[]>(['attendees', updated.eventId], (list) =>
-        list?.map((a) => (a._id === updated._id ? updated : a)),
-      );
-      // Dashboard counts are now stale; refresh them on next view, not now.
-      void qc.invalidateQueries({ queryKey: ['events'], exact: true, refetchType: 'none' });
+      await patchAttendee(qc, updated);
       if (usePrinterStore.getState().adapter.kind === 'webusb') toast('Sent to printer');
+    },
+  });
+}
+
+// Reverts a mistaken print so the attendee counts as "missed" again in the stats.
+export function useUnprintAttendee() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (attendee: Attendee) => api.unprintAttendee(attendee._id),
+    onSuccess: async (updated) => {
+      await patchAttendee(qc, updated);
+      toast(`${updated.fullName} marked as not printed`);
     },
   });
 }

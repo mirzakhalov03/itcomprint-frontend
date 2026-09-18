@@ -70,10 +70,20 @@ export type TemplateInput = Pick<
   'name' | 'labelWidthMm' | 'labelHeightMm' | 'zones'
 >;
 
+/** A half-filled sheet row the sync couldn't import; `row` is the 1-based sheet row. */
+export interface SheetIssue {
+  row: number;
+  registrantId: string;
+  fullName: string;
+  reason: 'missing_name' | 'missing_id' | 'duplicate_id';
+}
+
 export interface SheetSyncResult {
   added: number;
   updated: number;
+  removed: number;
   skipped: number;
   total: number;
+  issues: SheetIssue[];
   lastSyncedAt: string;
 }

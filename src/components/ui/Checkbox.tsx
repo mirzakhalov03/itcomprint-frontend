@@ -18,7 +18,8 @@ export function Checkbox({
       aria-checked={checked}
       aria-label={label}
       className={cn(
-        'flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-md transition-all',
+        // after: pad the touch target to ~38px without changing the visual size.
+        'relative flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-md transition-all after:absolute after:-inset-2',
         checked ? 'border border-brand bg-brand' : 'border-[1.5px] border-[#c8ccc2] bg-white',
       )}
     >

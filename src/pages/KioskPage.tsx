@@ -1,12 +1,15 @@
-import { useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { AttendeeTable } from '../components/AttendeeTable';
 import { BadgePrintPanel } from '../components/BadgePrintPanel';
 import { BadgePreviewTray } from '../components/BadgePreviewTray';
+import { ScrollJumpButton } from '../components/ScrollJumpButton';
 import { AppHeader } from '../components/AppHeader';
 import { ArrowLeftIcon } from '../components/icons';
 import { EmptyState, LoadingPanel } from '../components/ui/EmptyState';
+import { Sheet } from '../components/ui/Sheet';
 import { useEvents } from '../hooks/useEvents';
+import { useIsDesktop } from '../hooks/useMediaQuery';
 import type { Attendee } from '../types';
 
 /** Full-screen, single-event badge-printing view. Event comes from the URL. */
@@ -15,9 +18,22 @@ export function KioskPage() {
   const { data: events = [], isLoading } = useEvents();
   const event = events.find((e) => e._id === id);
   const [previewAttendee, setPreviewAttendee] = useState<Attendee | null>(null);
+  const isDesktop = useIsDesktop();
+  const closePanel = useCallback(() => setPreviewAttendee(null), []);
+  const splitView = !!previewAttendee && isDesktop;
+  const listRef = useRef<HTMLDivElement>(null);
+
+  const panel = previewAttendee && event && (
+    <BadgePrintPanel
+      key={previewAttendee._id}
+      attendee={previewAttendee}
+      event={event}
+      onClose={closePanel}
+    />
+  );
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-surface text-ink">
+    <div className="flex h-dvh flex-col overflow-hidden bg-surface text-ink">
       <AppHeader
         title={event?.name ?? 'Event'}
         leftSlot={
@@ -32,50 +48,50 @@ export function KioskPage() {
       />
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Left: scrollable table */}
-        <div
-          className={`overflow-y-auto px-4 pb-7 pt-5 sm:px-6 ${previewAttendee ? 'w-[65%]' : 'flex-1'}`}
-        >
-          <div className={previewAttendee ? '' : 'mx-auto max-w-[1120px]'}>
-            {event ? (
-              <AttendeeTable
-                key={event._id}
-                event={event}
-                onPreview={setPreviewAttendee}
-                previewId={previewAttendee?._id}
-              />
-            ) : isLoading ? (
-              <LoadingPanel>Loading event…</LoadingPanel>
-            ) : (
-              <EmptyState
-                title="Event not found"
-                subtitle={
-                  <>
-                    It may have been removed.{' '}
-                    <Link to="/app" className="font-semibold text-brand-deep underline">
-                      Back to dashboard
-                    </Link>
-                    .
-                  </>
-                }
-              />
-            )}
+        {/* Left: scrollable table. Wrapper is `relative` so the jump button floats over, not with, the list. */}
+        <div className={`relative min-w-0 ${splitView ? 'w-[65%]' : 'flex-1'}`}>
+          <div ref={listRef} className="h-full overflow-y-auto px-3 pb-7 pt-3 sm:px-6 sm:pt-5">
+            <div className={splitView ? '' : 'mx-auto max-w-[1120px]'}>
+              {event ? (
+                <AttendeeTable
+                  key={event._id}
+                  event={event}
+                  onPreview={setPreviewAttendee}
+                  previewId={previewAttendee?._id}
+                />
+              ) : isLoading ? (
+                <LoadingPanel>Loading event…</LoadingPanel>
+              ) : (
+                <EmptyState
+                  title="Event not found"
+                  subtitle={
+                    <>
+                      It may have been removed.{' '}
+                      <Link to="/app" className="font-semibold text-brand-deep underline">
+                        Back to dashboard
+                      </Link>
+                      .
+                    </>
+                  }
+                />
+              )}
+            </div>
           </div>
+          <ScrollJumpButton targetRef={listRef} />
         </div>
 
-        {/* Right: badge preview + print panel */}
-        {previewAttendee && event && (
-          <div
-            key={previewAttendee._id}
-            className="flex w-[35%] flex-col overflow-hidden border-l border-line bg-white"
-          >
-            <BadgePrintPanel
-              attendee={previewAttendee}
-              event={event}
-              onClose={() => setPreviewAttendee(null)}
-            />
-          </div>
-        )}
+        {/* Right: badge preview + print panel. Handheld screens get it as a bottom sheet. */}
+        {previewAttendee &&
+          panel &&
+          (isDesktop ? (
+            <div className="flex w-[35%] flex-col overflow-hidden border-l border-line bg-white">
+              {panel}
+            </div>
+          ) : (
+            <Sheet label={`Print badge for ${previewAttendee.fullName}`} onClose={closePanel}>
+              {panel}
+            </Sheet>
+          ))}
       </div>
 
       <BadgePreviewTray />

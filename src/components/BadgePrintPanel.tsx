@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { usePrintAttendee } from '../hooks/usePrintAttendee';
+import { usePrintAttendee, useUnprintAttendee } from '../hooks/usePrintAttendee';
 import { useUpdateTemplate, useTemplateFieldKeys } from '../hooks/useTemplates';
 import { useEventTemplate } from '../hooks/useEventTemplate';
 import { useBadgeCanvas } from '../hooks/useBadgeCanvas';
@@ -26,6 +26,7 @@ export function BadgePrintPanel({
   const { data: fieldKeys = [] } = useTemplateFieldKeys();
 
   const print = usePrintAttendee();
+  const unprint = useUnprintAttendee();
   const updateTemplate = useUpdateTemplate();
 
   const [tab, setTab] = useState<Tab>('fields');
@@ -142,10 +143,21 @@ export function BadgePrintPanel({
     }
   }
 
-  const isReprint = attendee.printStatus === 'printed';
+  async function handleUnprint() {
+    try {
+      await unprint.mutateAsync(attendee);
+      onClose();
+    } catch (e) {
+      toast(errMessage(e, 'Could not mark as not printed'));
+    }
+  }
 
+  const isReprint = attendee.printStatus === 'printed';
+  const busy = print.isPending || unprint.isPending;
+
+  // flex-1 + min-h-0 (not h-full) so it fills the desktop column and shrinks inside the mobile sheet.
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex min-h-0 flex-1 flex-col">
       {/* Header */}
       <div className="flex items-start justify-between border-b border-line px-5 py-4">
         <div className="min-w-0 flex-1">
@@ -158,19 +170,20 @@ export function BadgePrintPanel({
         </div>
         <button
           onClick={onClose}
-          className="ml-3 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-faint hover:bg-surface hover:text-ink"
+          aria-label="Close"
+          className="ml-3 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-faint hover:bg-surface hover:text-ink"
         >
           <CloseIcon size={15} />
         </button>
       </div>
 
       {/* Live badge preview */}
-      <div className="flex justify-center border-b border-line-3 bg-surface-2 px-5 py-5">
+      <div className="flex shrink-0 justify-center border-b border-line-3 bg-surface-2 px-5 py-4 lg:py-5">
         {effectiveTemplate ? (
           <canvas
             ref={canvasRef}
             aria-label={`Badge preview for ${merged.fullName}`}
-            className="h-auto w-full max-w-[280px] rounded-md border border-line bg-white shadow-[0_8px_24px_rgba(0,0,0,.10)]"
+            className="h-auto w-full max-w-[240px] rounded-md lg:max-w-[280px] border border-line bg-white shadow-[0_8px_24px_rgba(0,0,0,.10)]"
             style={{
               aspectRatio: `${effectiveTemplate.labelWidthMm} / ${effectiveTemplate.labelHeightMm}`,
             }}
@@ -200,7 +213,7 @@ export function BadgePrintPanel({
       </div>
 
       {/* Tab content */}
-      <div className="flex-1 overflow-y-auto px-5 py-4">
+      <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
         {tab === 'fields' ? (
           visibleZones.length > 0 ? (
             <div className="flex flex-col gap-3">
@@ -212,7 +225,7 @@ export function BadgePrintPanel({
                   <input
                     value={getFieldValue(z)}
                     onChange={(e) => setFieldValue(z, e.target.value)}
-                    className="h-9 rounded-lg border border-line-2 bg-white px-3 text-sm text-ink outline-none transition-colors focus:border-brand"
+                    className="h-10 rounded-lg border border-line-2 bg-white px-3 text-sm text-ink outline-none transition-colors focus:border-brand lg:h-9"
                   />
                 </label>
               ))}
@@ -355,15 +368,26 @@ export function BadgePrintPanel({
       </div>
 
       {/* Print action */}
-      <div className="border-t border-line px-5 py-4">
+      <div className="flex shrink-0 gap-2 border-t border-line px-5 pb-safe pt-4">
         <Button
           onClick={handlePrint}
-          disabled={print.isPending || !effectiveTemplate}
-          className="h-11 w-full gap-2 rounded-xl text-sm tracking-[.01em] shadow-[0_6px_16px_rgba(111,162,63,.26)]"
+          disabled={busy || !effectiveTemplate}
+          className="h-12 flex-1 gap-2 rounded-xl lg:h-11 text-sm tracking-[.01em] shadow-[0_6px_16px_rgba(111,162,63,.26)]"
         >
           <PrinterIcon size={15} />
           {print.isPending ? 'Printing…' : isReprint ? 'Reprint Badge' : 'Print Badge'}
         </Button>
+        {isReprint && (
+          <Button
+            variant="secondary"
+            onClick={handleUnprint}
+            disabled={busy}
+            title="Printed by mistake? Count this attendee as not arrived again."
+            className="h-12 shrink-0 rounded-xl px-4 lg:h-11 text-[13px]"
+          >
+            {unprint.isPending ? 'Saving…' : 'Mark unprinted'}
+          </Button>
+        )}
       </div>
     </div>
   );

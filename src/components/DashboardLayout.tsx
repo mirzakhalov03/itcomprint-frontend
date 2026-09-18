@@ -23,7 +23,7 @@ export function DashboardLayout() {
   useEffect(() => setMenuOpen(false), [pathname]);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-surface text-ink">
+    <div className="flex h-dvh overflow-hidden bg-surface text-ink">
       <Sidebar open={menuOpen} onClose={() => setMenuOpen(false)} />
 
       {/* Scrim behind the drawer on small screens */}

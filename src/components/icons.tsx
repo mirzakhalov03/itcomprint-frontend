@@ -130,6 +130,13 @@ export const ArrowLeftIcon = (p: IconProps) => (
   </Svg>
 );
 
+export const ArrowUpIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <line x1="12" y1="19" x2="12" y2="5" />
+    <polyline points="5 12 12 5 19 12" />
+  </Svg>
+);
+
 export const TemplateIcon = (p: IconProps) => (
   <Svg {...p}>
     <rect x="3" y="3" width="18" height="18" rx="2" />

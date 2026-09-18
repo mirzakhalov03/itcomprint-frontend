@@ -29,7 +29,6 @@ export function EventCard({ event }: { event: AppEvent }) {
 
   const total = event.attendeeCount ?? 0;
   const printed = event.printedCount ?? 0;
-  const remaining = Math.max(total - printed, 0);
 
   return (
     <>
@@ -88,13 +87,18 @@ export function EventCard({ event }: { event: AppEvent }) {
         </div>
 
         <div className="mt-4 flex items-center gap-4 border-t border-line-3 pt-3.5 text-[13px]">
-          <span className="inline-flex items-center gap-1.5 font-semibold text-ink-3">
+          <span
+            title="Registered"
+            className="inline-flex items-center gap-1.5 font-semibold text-ink-3"
+          >
             <UsersIcon size={15} className="text-faint" /> {total}
           </span>
-          <span className="inline-flex items-center gap-1.5 font-semibold text-brand-deep">
-            <CheckIcon size={14} /> {printed}
+          <span
+            title="Badge printed"
+            className="inline-flex items-center gap-1.5 font-semibold text-brand-deep"
+          >
+            <CheckIcon size={14} /> {printed} came
           </span>
-          <span className="font-semibold text-amber-ink">{remaining} left</span>
         </div>
 
         {event.authorName && <div className="mt-3 text-xs text-faint">by {event.authorName}</div>}

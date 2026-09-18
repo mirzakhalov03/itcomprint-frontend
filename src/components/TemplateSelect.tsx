@@ -2,13 +2,14 @@ import { useSetEventTemplate } from '../hooks/useTemplates';
 import { useEventTemplate } from '../hooks/useEventTemplate';
 import { toast } from '../store/toastStore';
 import { errMessage } from '../lib/errors';
+import { cn } from '../lib/cn';
 import type { AppEvent } from '../types';
 
 /**
  * Picks which template this event prints with. The value is the event's
  * templateId, or the default template's id when the event has none set.
  */
-export function TemplateSelect({ event }: { event: AppEvent }) {
+export function TemplateSelect({ event, className }: { event: AppEvent; className?: string }) {
   const setTemplate = useSetEventTemplate();
   const { templates, defaultId } = useEventTemplate(event);
   const value = event.templateId ?? defaultId;
@@ -24,7 +25,7 @@ export function TemplateSelect({ event }: { event: AppEvent }) {
   }
 
   return (
-    <label className="inline-flex items-center gap-2">
+    <label className={cn('inline-flex items-center gap-2', className)}>
       <span className="font-display text-[11px] font-semibold uppercase tracking-wide text-faint">
         Template
       </span>
@@ -32,7 +33,7 @@ export function TemplateSelect({ event }: { event: AppEvent }) {
         value={value}
         onChange={onChange}
         disabled={setTemplate.isPending || templates.length === 0}
-        className="h-9 rounded-[10px] border border-line-2 bg-surface px-2.5 text-sm text-ink outline-none"
+        className="h-10.5 min-w-0 flex-1 rounded-[10px] border border-line-2 bg-surface px-2.5 text-sm text-ink outline-none lg:h-9"
       >
         {templates.map((t) => (
           <option key={t._id} value={t._id}>

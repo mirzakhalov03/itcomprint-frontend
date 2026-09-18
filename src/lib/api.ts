@@ -74,6 +74,9 @@ export const api = {
   printAttendee: (attendeeId: string) =>
     request<Attendee>(`/attendees/${attendeeId}/print`, { method: 'POST' }),
 
+  unprintAttendee: (attendeeId: string) =>
+    request<Attendee>(`/attendees/${attendeeId}/print`, { method: 'DELETE' }),
+
   listTemplates: () => request<BadgeTemplate[]>('/templates'),
 
   templateFieldKeys: () => request<string[]>('/templates/field-keys'),

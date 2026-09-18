@@ -36,6 +36,7 @@ body,
 
 body {
   margin: 0;
+  -webkit-tap-highlight-color: transparent;
   background-color: var(--color-surface);
   color: var(--color-ink);
   color-scheme: light;
@@ -56,6 +57,21 @@ body {
 }
 ::-webkit-scrollbar-track {
   background: transparent;
+}
+
+/* iOS zooms the page when a field under 16px is focused; touch screens get 16px fields.
+   Unlayered on purpose so it beats Tailwind's text-* utilities. */
+@media (pointer: coarse) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+/* Clears the iPhone home indicator; plain 1rem everywhere else. */
+@utility pb-safe {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
 }
 
 button:focus-visible,
@@ -86,6 +102,14 @@ select:focus-visible {
     transform: scale(1);
   }
 }
+@keyframes sheetUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -100,6 +124,9 @@ select:focus-visible {
 }
 .animate-dlg-in {
   animation: dlgIn 0.16s ease;
+}
+.animate-sheet-up {
+  animation: sheetUp 0.22s cubic-bezier(0.16, 0.84, 0.44, 1);
 }
 .animate-fade-in {
   animation: fadeIn 0.16s ease;
