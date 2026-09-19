@@ -1,0 +1,101 @@
+docs/CLAUDE.md
+  s_41cfd708786881::t_47fb59163ab0a7 92
+index.html
+  s_76e954b692463f::t_b6f976d24a7e4e 5-6
+src/components/AppHeader.tsx
+  s_41cfd708786881::t_66aa4f58f0a5e4 3,8-9,11-19,28-31
+src/components/AttendeeRow.tsx
+  s_74fb4fecdea524::t_d5aa239e48dc94 1-2,34,43,48-49,51-63,65,69-70
+src/components/AttendeeStats.tsx
+  s_76e954b692463f::t_89cf5055fb85d6 1-45
+src/components/BadgePrintPanel.tsx
+  s_74fb4fecdea524::t_1c9f89155aefee 1,9,21-22,27-30,147,156,225-245,383-384,391-393
+src/components/PrinterStatus.tsx
+  s_41cfd708786881::t_64dc694489ff1c 1,3,7,10,13-14,41,49-59
+src/components/TemplateEditor.tsx
+  s_3cf07652717e87::t_273734b4ccced3 11,230-244,367
+src/components/TemplateSelect.tsx
+  s_3cf07652717e87::t_dc8f55aa3033d0 6,28-29,31-37,41,45,53-57
+src/components/icons.tsx
+  s_41cfd708786881::t_f3af2d5f984155 203-210
+src/components/ui/Button.tsx
+  s_74fb4fecdea524::t_5913398d2980c3 1,17
+src/components/ui/Dialog.tsx
+  s_41cfd708786881::t_0d96d400b2fbfe 6-11
+src/hooks/usePrintAttendee.ts
+  s_76e954b692463f::t_2088edf869e1bf 80-81
+src/hooks/usePrinterPresentation.ts
+  s_41cfd708786881::t_37b9fda3b66a18 5,14-20
+src/lib/api.ts
+  s_41cfd708786881::t_deba7843ba87b7 2,113-125
+src/lib/format.ts
+  s_74fb4fecdea524::t_9f6b9af4058d26 1-2,21-39
+src/pages/KioskPage.tsx
+  s_74fb4fecdea524::t_958c67f256e4d5 1,12,14,22-25,30-59,66-67,75,96,98
+src/pages/PrinterPage.tsx
+  s_41cfd708786881::t_6e8eeb03c05d66 1,3,7,40,46-54
+src/printer/PreviewPrinter.ts
+  s_41cfd708786881::t_4a9ba63fb803d3 16-18
+src/printer/PrinterAdapter.ts
+  s_41cfd708786881::t_6c88edea3fa297 17
+src/printer/WebUsbPrinter.ts
+  s_76e954b692463f::t_2958524fe110c4 29-45
+src/printer/renderBadge.ts
+  s_3cf07652717e87::t_df7e1e5ab903e2 17-18,109,118-119,123,130-131
+src/printer/zones.ts
+  s_3cf07652717e87::t_89f2d759be41f7 12-18
+src/store/printerStore.ts
+  s_41cfd708786881::t_5a2fb77ed7ea8e 7,17,36-39,45,48-63
+src/types.ts
+  s_3cf07652717e87::t_78b4257b374e4d 54,91-122
+src/components/ActivityLogButton.tsx
+  s_74fb4fecdea524::t_c82053640e8abd 1-23
+src/components/ActivityLogDialog.tsx
+  s_74fb4fecdea524::t_ef664e1da57ac8 1-147
+src/components/AttendeeTable.tsx
+  s_74fb4fecdea524::t_f47a2e3a19d093 1,3,6,11,17,35,40,50-51,56-57,59,61-65,67,71,75,77,90,146-171,173,175-203,210,213-214,217-220,237-248,251-263,281-284,299,310,312-316,319,353,362,364,366,382
+src/components/DoublePrintToggle.tsx
+  s_74fb4fecdea524::t_c31fd6df33b0dd 11-12,17,19
+src/hooks/useActivity.ts
+  s_74fb4fecdea524::t_de097e3586a66b 1-12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "80d16b33204d4a74141b2d28dd9c1f40c0f5012b",
+  "prompts": {},
+  "sessions": {
+    "s_3cf07652717e87": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cafee09d-196a-479b-8157-36fee843ea21",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    },
+    "s_41cfd708786881": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "60d50b77-b4cd-4262-be5e-dfa9c6d0c342",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    },
+    "s_74fb4fecdea524": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a4c903b4-87bf-4626-a457-d95349be5468",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    },
+    "s_76e954b692463f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6b5463c4-48d9-4022-b80d-820c26f4e03f",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
