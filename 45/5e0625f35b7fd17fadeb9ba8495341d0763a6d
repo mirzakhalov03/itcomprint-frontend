@@ -1,0 +1,31 @@
+src/components/AttendeeTable.tsx
+  s_41cfd708786881::t_f228b5e929529f 15,221,261
+src/components/BadgePreviewTray.tsx
+  s_41cfd708786881::t_8ac2ebd35444fc 63,65-69
+src/hooks/usePrintAttendee.ts
+  s_41cfd708786881::t_31e08458c11ecf 48-49,55,64
+src/printer/PrinterAdapter.ts
+  s_41cfd708786881::t_70a87c5b67fd78 8
+src/printer/buildBadgeTSPL.ts
+  s_41cfd708786881::t_cd19d80abb8294 13,26-27
+src/store/printerStore.ts
+  s_41cfd708786881::t_3208eea824190b 12-14,24-25
+src/components/DoublePrintToggle.tsx
+  s_41cfd708786881::t_68854ec8308ca8 1-26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "455e0625f35b7fd17fadeb9ba8495341d0763a6d",
+  "prompts": {},
+  "sessions": {
+    "s_41cfd708786881": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "60d50b77-b4cd-4262-be5e-dfa9c6d0c342",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
