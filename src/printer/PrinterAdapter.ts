@@ -5,6 +5,7 @@ export interface PrintJob {
   eventName?: string;
   labelWidthMm: number;
   labelHeightMm: number;
+  copies: number;
 }
 
 export type PrinterStatus = 'disconnected' | 'connected';

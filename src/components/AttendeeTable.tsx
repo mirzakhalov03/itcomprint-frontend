@@ -12,6 +12,7 @@ import { useEventTemplate } from '../hooks/useEventTemplate';
 import { useSheetSync } from '../hooks/useSheetSync';
 import { useIsDesktop } from '../hooks/useMediaQuery';
 import { TemplateSelect } from './TemplateSelect';
+import { DoublePrintToggle } from './DoublePrintToggle';
 import { SheetIssuesNotice } from './SheetIssuesNotice';
 import type { Attendee, AppEvent } from '../types';
 
@@ -217,6 +218,7 @@ export function AttendeeTable({
       {!isDesktop && (
         <div className="mb-3 flex items-center gap-2.5">
           <TemplateSelect event={event} className="min-w-0 flex-1" />
+          <DoublePrintToggle />
           {syncButton}
         </div>
       )}
@@ -256,6 +258,7 @@ export function AttendeeTable({
           </div>
 
           {isDesktop && <TemplateSelect event={event} />}
+          {isDesktop && <DoublePrintToggle />}
 
           <div className="flex w-full gap-0.5 rounded-[10px] border border-line bg-surface p-0.75 lg:inline-flex lg:w-auto">
             <Segment

@@ -45,13 +45,14 @@ export function usePrintAttendee() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ attendee, template, eventName }: PrintRequest) => {
-      const adapter = usePrinterStore.getState().adapter;
+      const { adapter, double } = usePrinterStore.getState();
+      const copies = double ? 2 : 1;
       if (adapter.status !== 'connected') {
         throw new Error('Printer not connected. Click "Connect printer" first.');
       }
       const canvas = await renderBadgeToCanvas(attendee, template);
       const bitmap = canvasToMonochromeBitmap(canvas);
-      const tspl = buildBadgeTSPL(bitmap, template.labelWidthMm, template.labelHeightMm);
+      const tspl = buildBadgeTSPL(bitmap, template.labelWidthMm, template.labelHeightMm, copies);
       const previewDataUrl = adapter.kind === 'preview' ? canvas.toDataURL('image/png') : ''; // only the preview tray shows it
       await adapter.print({
         name: attendee.fullName,
@@ -60,6 +61,7 @@ export function usePrintAttendee() {
         eventName,
         labelWidthMm: template.labelWidthMm,
         labelHeightMm: template.labelHeightMm,
+        copies,
       });
       return markPrinted(attendee);
     },

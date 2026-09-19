@@ -9,6 +9,9 @@ interface PrinterState {
   adapter: PrinterAdapter;
   status: PrinterStatus;
   error: string | null;
+  /** Print two copies of each badge. Session-only: every kiosk load starts checked. */
+  double: boolean;
+  setDouble: (double: boolean) => void;
   connect: () => Promise<void>;
 }
 
@@ -18,6 +21,8 @@ export const usePrinterStore = create<PrinterState>((set) => ({
   adapter,
   status: adapter.status,
   error: null,
+  double: true,
+  setDouble: (double) => set({ double }),
   connect: async () => {
     try {
       await adapter.connect();

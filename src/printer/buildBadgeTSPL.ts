@@ -10,6 +10,7 @@ export function buildBadgeTSPL(
   bitmap: Uint8Array<ArrayBuffer>,
   widthMm: number,
   heightMm: number,
+  copies = 1,
 ): Uint8Array<ArrayBuffer> {
   const widthDots = Math.round((widthMm * DPI) / 25.4);
   const heightDots = Math.round((heightMm * DPI) / 25.4);
@@ -22,7 +23,8 @@ export function buildBadgeTSPL(
     `CLS\n` +
     `BITMAP 0,0,${bytesPerRow},${heightDots},0,`;
 
-  const footer = `\nPRINT 1\n`;
+  // PRINT m,n = m label sets, n copies each — the printer repeats the bitmap itself.
+  const footer = `\nPRINT 1,${copies}\n`;
 
   const enc = new TextEncoder();
   const headerBytes = enc.encode(header);

@@ -60,8 +60,13 @@ export function BadgePreviewTray() {
             {jobs.map((job, i) => (
               <div
                 key={i}
-                className="animate-badge-rise w-[170px] shrink-0 snap-start sm:w-[220px]"
+                className="animate-badge-rise relative w-[170px] shrink-0 snap-start sm:w-[220px]"
               >
+                {job.copies > 1 && (
+                  <span className="absolute right-1.5 top-3 z-10 inline-flex h-5 items-center rounded-full bg-ink px-2 font-display text-[11px] font-bold text-brand-line">
+                    ×{job.copies}
+                  </span>
+                )}
                 <div className="flex h-[128px] w-full flex-col sm:h-[165px] overflow-hidden rounded-lg border border-line bg-white shadow-[0_10px_26px_rgba(0,0,0,.4)]">
                   <div className="h-1.5 bg-brand" />
                   <div className="flex flex-1 flex-col items-center justify-center px-3 py-2">
