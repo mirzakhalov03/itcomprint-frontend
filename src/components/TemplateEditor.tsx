@@ -8,6 +8,7 @@ import {
   normalizeLegacyZone,
   FONT_FAMILIES,
   FONT_SIZES,
+  SPACE_ABOVE_MM,
   SAMPLE_ATTENDEE,
 } from '../printer/renderBadge';
 import { newFieldZone, newStaticZone, resolveZoneText } from '../printer/zones';
@@ -226,6 +227,21 @@ export function TemplateEditor({
             ))}
           </select>
 
+          {/* Space above — separates e.g. the name from the role line */}
+          <select
+            value={selected?.spaceAboveMm ?? 0}
+            onChange={(e) => patchSelected({ spaceAboveMm: Number(e.target.value) })}
+            disabled={selected?.id === draft.zones[0]?.id}
+            title="Extra space above this line"
+            className="h-8 rounded-lg border border-line-2 bg-white px-2 text-sm disabled:opacity-40"
+          >
+            {SPACE_ABOVE_MM.map((mm) => (
+              <option key={mm} value={mm}>
+                {mm === 0 ? 'No gap above' : `Gap +${mm}mm`}
+              </option>
+            ))}
+          </select>
+
           {/* Bold */}
           <button
             onClick={() => patchSelected({ bold: !selected?.bold })}
@@ -348,6 +364,7 @@ export function TemplateEditor({
                     onDragOver={(e) => onDragOver(e, z.id)}
                     onDrop={(e) => onDrop(e, z.id)}
                     onDragEnd={onDragEnd}
+                    style={{ marginTop: i > 0 ? `${norm.spaceAboveMm ?? 0}mm` : undefined }}
                     onClick={(e) => {
                       e.stopPropagation();
                       setSelectedId(z.id);

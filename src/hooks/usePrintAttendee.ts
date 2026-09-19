@@ -77,9 +77,7 @@ export function useUnprintAttendee() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (attendee: Attendee) => api.unprintAttendee(attendee._id),
-    onSuccess: async (updated) => {
-      await patchAttendee(qc, updated);
-      toast(`${updated.fullName} marked as not printed`);
-    },
+    // No toast here: batch callers summarize once instead of one toast per attendee.
+    onSuccess: (updated) => patchAttendee(qc, updated),
   });
 }

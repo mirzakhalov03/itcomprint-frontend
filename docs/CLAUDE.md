@@ -89,6 +89,7 @@ A `BadgeTemplate` is a label size (`labelWidthMm`/`labelHeightMm`) plus an order
 - **Print and reprint are the same endpoint**: `POST /attendees/:id/print` `$inc`s `printCount` and sets `printStatus: 'printed'`. The UI shows "Print" → "Reprint" based on status. `DELETE /attendees/:id/print` undoes a mistaken print (resets status, `printCount`, `lastPrintedAt`) so stats stay "printed = came"; it's the "Mark unprinted" button in `BadgePrintPanel`.
 - **Printing patches the cache**: `usePrintAttendee` writes the returned attendee into `['attendees', eventId]` instead of refetching. **Sheet-linked kiosks are live**: `useSheetSync` pulls the sheet every 30 s and polls the roster (10 s) and events (30 s), so stations see each other's prints and template switches. Polling pauses in hidden tabs.
 - `listEvents` derives `attendeeCount` and `printedCount` via aggregation; neither is stored.
+- **Activity log**: controllers call `logActivity()` after each print/unprint, event and template mutation; the browser reports printer connect/disconnect via `POST /activity/printer` (WebUSB state is client-only). Rows snapshot actor/event/target names so history survives deletes. Logging is best-effort — a failed write never fails the action. Sheet sync is deliberately not logged (30 s timer). `GET /activity?eventId&before` pages 50 at a time by `_id` cursor; the top-bar modal is event-scoped on the kiosk, global elsewhere.
 
 ### Auth (self-hosted Google)
 

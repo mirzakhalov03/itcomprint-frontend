@@ -3,7 +3,12 @@ import { createPortal } from 'react-dom';
 import { cn } from '../../lib/cn';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
 
-const SIZES = { sm: 'max-w-[380px]', md: 'max-w-[420px]', lg: 'max-w-[520px]' } as const;
+const SIZES = {
+  sm: 'max-w-[380px]',
+  md: 'max-w-[420px]',
+  lg: 'max-w-[520px]',
+  xl: 'max-w-[760px]',
+} as const;
 
 /**
  * Modal shell. Portalled to <body> because a transformed ancestor (the sliding sidebar)

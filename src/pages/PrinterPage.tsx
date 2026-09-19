@@ -1,10 +1,10 @@
-import { connectPrinterWithToast } from '../store/printerStore';
+import { connectPrinterWithToast, disconnectPrinterWithToast } from '../store/printerStore';
 import { usePrinterPresentation } from '../hooks/usePrinterPresentation';
-import { PlugIcon, PrinterIcon } from '../components/icons';
+import { CloseIcon, PlugIcon, PrinterIcon } from '../components/icons';
 import { Button } from '../components/ui/Button';
 
 export function PrinterPage() {
-  const { preview, connected, isWebUsb, showConnect } = usePrinterPresentation();
+  const { preview, connected, isWebUsb, showConnect, showDisconnect } = usePrinterPresentation();
 
   const label = preview ? 'Preview mode' : connected ? 'Connected' : 'Not connected';
   const desc = preview
@@ -37,10 +37,19 @@ export function PrinterPage() {
         <p className="mt-4 text-sm text-muted">{desc}</p>
         {showConnect && (
           <Button
-            onClick={connectPrinterWithToast}
+            onClick={() => connectPrinterWithToast()}
             className="mt-5 h-11 gap-2 rounded-full px-5 text-sm"
           >
             <PlugIcon size={16} /> Connect printer
+          </Button>
+        )}
+        {showDisconnect && (
+          <Button
+            variant="secondary"
+            onClick={() => disconnectPrinterWithToast()}
+            className="mt-5 h-11 gap-2 rounded-full px-5 text-sm"
+          >
+            <CloseIcon size={15} /> Disconnect
           </Button>
         )}
       </div>

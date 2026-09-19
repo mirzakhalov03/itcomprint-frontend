@@ -14,5 +14,6 @@ export interface PrinterAdapter {
   readonly kind: 'preview' | 'webusb';
   status: PrinterStatus;
   connect(): Promise<void>;
+  disconnect(): Promise<void>;
   print(job: PrintJob): Promise<void>;
 }

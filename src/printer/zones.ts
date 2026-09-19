@@ -9,7 +9,13 @@ export function resolveZoneText(zone: TemplateZone, attendee: ZoneSource): strin
   return attendee.extra[zone.field ?? ''] ?? '';
 }
 
-const baseZone = { fontFamily: 'Inter', bold: false, align: 'center', hidden: false } as const;
+const baseZone = {
+  fontFamily: 'Inter',
+  bold: false,
+  align: 'center',
+  hidden: false,
+  spaceAboveMm: 0,
+} as const;
 
 export const newFieldZone = (): TemplateZone => ({
   ...baseZone,

@@ -13,6 +13,9 @@ export class PreviewPrinter implements PrinterAdapter {
     this.status = 'connected';
   }
 
+  // Preview has no device to release; it stays "connected".
+  async disconnect(): Promise<void> {}
+
   async print(job: PrintJob): Promise<void> {
     this.onPreview(job);
   }

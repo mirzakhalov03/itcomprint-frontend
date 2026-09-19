@@ -1,17 +1,17 @@
-import { connectPrinterWithToast } from '../store/printerStore';
+import { connectPrinterWithToast, disconnectPrinterWithToast } from '../store/printerStore';
 import { usePrinterPresentation } from '../hooks/usePrinterPresentation';
-import { PlugIcon } from './icons';
+import { CloseIcon, PlugIcon } from './icons';
 import { Button } from './ui/Button';
 
 /**
- * Printer state pill + conditional Connect button.
+ * Printer state pill + conditional Connect / Disconnect button.
  * Three looks, driven by real adapter state (no demo cycling):
  *  - preview      → dark pill, green dot ("Preview mode")
- *  - connected    → green filled pill ("Printer connected")
+ *  - connected    → green filled pill ("Printer connected") + Disconnect button
  *  - disconnected → red outline pill + Connect button ("Printer not connected")
  */
-export function PrinterStatus() {
-  const { preview, connected, showConnect } = usePrinterPresentation();
+export function PrinterStatus({ eventId }: { eventId?: string }) {
+  const { preview, connected, showConnect, showDisconnect } = usePrinterPresentation();
 
   const label = preview
     ? 'Preview mode'
@@ -38,12 +38,23 @@ export function PrinterStatus() {
       </span>
       {showConnect && (
         <Button
-          onClick={connectPrinterWithToast}
+          onClick={() => connectPrinterWithToast(eventId)}
           aria-label="Connect printer"
           className="h-[38px] shrink-0 gap-[7px] rounded-full px-3 text-[13px] tracking-[.02em] sm:px-[18px]"
         >
           <PlugIcon size={15} strokeWidth={2.4} />
           <span className="hidden sm:inline">Connect printer</span>
+        </Button>
+      )}
+      {showDisconnect && (
+        <Button
+          variant="secondary"
+          onClick={() => disconnectPrinterWithToast(eventId)}
+          aria-label="Disconnect printer"
+          className="h-[38px] shrink-0 gap-[7px] rounded-full px-3 text-[13px] tracking-[.02em] sm:px-[18px]"
+        >
+          <CloseIcon size={14} strokeWidth={2.4} />
+          <span className="hidden sm:inline">Disconnect</span>
         </Button>
       )}
     </div>

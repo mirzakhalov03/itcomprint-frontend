@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type RefObject } from 'react';
 import { usePrintAttendee, useUnprintAttendee } from '../hooks/usePrintAttendee';
 import { useUpdateTemplate, useTemplateFieldKeys } from '../hooks/useTemplates';
 import { useEventTemplate } from '../hooks/useEventTemplate';
@@ -6,6 +6,7 @@ import { useBadgeCanvas } from '../hooks/useBadgeCanvas';
 import { normalizeLegacyZone, FONT_SIZES } from '../printer/renderBadge';
 import { Button } from './ui/Button';
 import { NumberField } from './ui/NumberField';
+import { DoublePrintToggle } from './DoublePrintToggle';
 import { CloseIcon, PrinterIcon } from './icons';
 import { toast } from '../store/toastStore';
 import { errMessage } from '../lib/errors';
@@ -17,10 +18,16 @@ export function BadgePrintPanel({
   attendee,
   event,
   onClose,
+  onPrinted,
+  printRef,
 }: {
   attendee: Attendee;
   event: AppEvent;
   onClose: () => void;
+  /** Fires after a successful print; the kiosk returns focus to search for the next attendee. */
+  onPrinted?: () => void;
+  /** Autofocused on open, so a second Enter prints. */
+  printRef?: RefObject<HTMLButtonElement | null>;
 }) {
   const { template } = useEventTemplate(event);
   const { data: fieldKeys = [] } = useTemplateFieldKeys();
@@ -137,7 +144,7 @@ export function BadgePrintPanel({
         eventName: event.name,
         template: effectiveTemplate,
       });
-      onClose();
+      onPrinted?.();
     } catch (e) {
       toast(errMessage(e, 'Printer not connected'));
     }
@@ -146,7 +153,7 @@ export function BadgePrintPanel({
   async function handleUnprint() {
     try {
       await unprint.mutateAsync(attendee);
-      onClose();
+      toast(`${attendee.fullName} marked as not printed`);
     } catch (e) {
       toast(errMessage(e, 'Could not mark as not printed'));
     }
@@ -215,24 +222,27 @@ export function BadgePrintPanel({
       {/* Tab content */}
       <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
         {tab === 'fields' ? (
-          visibleZones.length > 0 ? (
-            <div className="flex flex-col gap-3">
-              {visibleZones.map((z) => (
-                <label key={z.id} className="flex flex-col gap-1">
-                  <span className="text-[12px] font-semibold capitalize text-muted">
-                    {z.field === 'fullName' ? 'Full Name' : (z.field ?? '')}
-                  </span>
-                  <input
-                    value={getFieldValue(z)}
-                    onChange={(e) => setFieldValue(z, e.target.value)}
-                    className="h-10 rounded-lg border border-line-2 bg-white px-3 text-sm text-ink outline-none transition-colors focus:border-brand lg:h-9"
-                  />
-                </label>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-faint">No visible zones in this template.</p>
-          )
+          <div className="flex flex-col gap-4">
+            {visibleZones.length > 0 ? (
+              <div className="flex flex-col gap-3">
+                {visibleZones.map((z) => (
+                  <label key={z.id} className="flex flex-col gap-1">
+                    <span className="text-[12px] font-semibold capitalize text-muted">
+                      {z.field === 'fullName' ? 'Full Name' : (z.field ?? '')}
+                    </span>
+                    <input
+                      value={getFieldValue(z)}
+                      onChange={(e) => setFieldValue(z, e.target.value)}
+                      className="h-10 rounded-lg border border-line-2 bg-white px-3 text-sm text-ink outline-none transition-colors focus:border-brand lg:h-9"
+                    />
+                  </label>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-faint">No visible zones in this template.</p>
+            )}
+            <DoublePrintToggle />
+          </div>
         ) : draft ? (
           <div className="flex flex-col gap-4">
             {/* Label dimensions */}
@@ -370,12 +380,17 @@ export function BadgePrintPanel({
       {/* Print action */}
       <div className="flex shrink-0 gap-2 border-t border-line px-5 pb-safe pt-4">
         <Button
+          ref={printRef}
+          autoFocus
           onClick={handlePrint}
           disabled={busy || !effectiveTemplate}
           className="h-12 flex-1 gap-2 rounded-xl lg:h-11 text-sm tracking-[.01em] shadow-[0_6px_16px_rgba(111,162,63,.26)]"
         >
           <PrinterIcon size={15} />
           {print.isPending ? 'Printing…' : isReprint ? 'Reprint Badge' : 'Print Badge'}
+          <kbd className="ml-1 hidden rounded border border-white/40 px-1.5 font-sans text-[11px] font-semibold leading-4.5 lg:inline">
+            ↵
+          </kbd>
         </Button>
         {isReprint && (
           <Button

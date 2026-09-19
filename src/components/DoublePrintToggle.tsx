@@ -8,18 +8,15 @@ export function DoublePrintToggle() {
   const toggle = () => setDouble(!double);
 
   return (
-    <div
-      className="inline-flex h-10.5 shrink-0 items-center gap-2 lg:h-9"
-      title="Print two copies of each badge"
-    >
-      <Checkbox checked={double} onClick={toggle} label="Double print — two copies per badge" />
+    <div className="flex items-center gap-2.5">
+      <Checkbox checked={double} onClick={toggle} label="Double print" />
       {/* The checkbox carries the accessible name; the text is just a bigger click target. */}
       <span
         onClick={toggle}
         aria-hidden
-        className="cursor-pointer select-none font-display text-[11px] font-semibold uppercase tracking-wide text-faint"
+        className="cursor-pointer select-none text-sm font-semibold text-ink"
       >
-        Double
+        Double print
       </span>
     </div>
   );

@@ -1,22 +1,22 @@
-import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useDeferredValue, useEffect, useMemo, useState, type RefObject } from 'react';
 import { useAttendees } from '../hooks/useAttendees';
-import { usePrintAttendee } from '../hooks/usePrintAttendee';
+import { usePrintAttendee, useUnprintAttendee } from '../hooks/usePrintAttendee';
 import { toast } from '../store/toastStore';
 import { errMessage } from '../lib/errors';
+import { regNumberOf } from '../lib/format';
 import { AttendeeRow } from './AttendeeRow';
 import { CloseIcon, PrinterIcon, RefreshIcon, SearchIcon } from './icons';
 import { Button } from './ui/Button';
 import { Checkbox } from './ui/Checkbox';
+import { ConfirmDialog } from './ui/ConfirmDialog';
 import { EmptyState, LoadingPanel } from './ui/EmptyState';
 import { useEventTemplate } from '../hooks/useEventTemplate';
 import { useSheetSync } from '../hooks/useSheetSync';
 import { useIsDesktop } from '../hooks/useMediaQuery';
 import { TemplateSelect } from './TemplateSelect';
-import { DoublePrintToggle } from './DoublePrintToggle';
+import { AttendeeStats } from './AttendeeStats';
 import { SheetIssuesNotice } from './SheetIssuesNotice';
 import type { Attendee, AppEvent } from '../types';
-
-type Filter = 'all' | 'printed' | 'notprinted';
 
 const isPrinted = (a: Attendee) => a.printStatus === 'printed';
 const haystack = (a: Attendee) =>
@@ -28,42 +28,16 @@ const haystack = (a: Attendee) =>
     Object.values(a.extra).join(' ')
   ).toLowerCase();
 
-function Segment({
-  label,
-  count,
-  active,
-  onClick,
-}: {
-  label: string;
-  count: number;
-  active: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`inline-flex h-8.5 flex-1 items-center justify-center gap-1.75 whitespace-nowrap rounded-lg px-2 font-display lg:flex-none lg:px-3.5 text-[13px] font-semibold transition-colors ${
-        active ? 'bg-brand text-white' : 'text-muted hover:text-ink'
-      }`}
-    >
-      {label}
-      <span
-        className={`font-display text-[11px] font-bold ${active ? 'text-white/85' : 'text-faint'}`}
-      >
-        {count}
-      </span>
-    </button>
-  );
-}
-
 export function AttendeeTable({
   event,
   onPreview,
   previewId,
+  searchRef,
 }: {
   event: AppEvent;
   onPreview: (a: Attendee) => void;
   previewId?: string;
+  searchRef: RefObject<HTMLInputElement | null>;
 }) {
   const eventId = event._id;
   const eventName = event.name;
@@ -71,39 +45,36 @@ export function AttendeeTable({
   const { syncNow, isSyncing, issues } = useSheetSync(eventId, !!event.sheetId);
   const [searchInput, setSearchInput] = useState('');
   const search = useDeferredValue(searchInput); // input stays instant; filtering yields to typing
-  const [filter, setFilter] = useState<Filter>('all');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [batch, setBatch] = useState<{ done: number; total: number } | null>(null);
-  const searchRef = useRef<HTMLInputElement>(null);
+  // Keyboard cursor for ↑/↓ when a search has several hits; cleared on every keystroke.
+  const [activeId, setActiveId] = useState<string | null>(null);
   const isDesktop = useIsDesktop();
 
   const { data: attendees = [], isLoading } = useAttendees(eventId);
   const print = usePrintAttendee();
+  const unprint = useUnprintAttendee();
+  const [confirmUnprint, setConfirmUnprint] = useState(false);
 
-  // `/` or Ctrl+F / Cmd+F focuses search (kiosk speed).
+  // `/` or Ctrl+F / Cmd+F focuses search (kiosk speed). Selecting lets the next ID overwrite the last.
   useEffect(() => {
+    function focusSearch(e: KeyboardEvent) {
+      e.preventDefault();
+      searchRef.current?.focus();
+      searchRef.current?.select();
+    }
     function onKey(e: KeyboardEvent) {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
-        e.preventDefault();
-        searchRef.current?.focus();
-        return;
-      }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'f') return focusSearch(e);
       const el = document.activeElement as HTMLElement | null;
       const typing =
         !!el && (el.isContentEditable || ['INPUT', 'SELECT', 'TEXTAREA'].includes(el.tagName));
-      if (e.key === '/' && !typing) {
-        e.preventDefault();
-        searchRef.current?.focus();
-      }
+      if (e.key === '/' && !typing) focusSearch(e);
     }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, []);
+  }, [searchRef]);
 
-  const counts = useMemo(() => {
-    const printed = attendees.filter(isPrinted).length;
-    return { all: attendees.length, printed, notprinted: attendees.length - printed };
-  }, [attendees]);
+  const printedCount = useMemo(() => attendees.filter(isPrinted).length, [attendees]);
 
   // Built once per roster, not per keystroke.
   const haystacks = useMemo(() => new Map(attendees.map((a) => [a._id, haystack(a)])), [attendees]);
@@ -112,13 +83,11 @@ export function AttendeeTable({
     (query: string) => {
       const q = query.trim().toLowerCase();
       return attendees.filter((a) => {
-        if (filter === 'printed' && !isPrinted(a)) return false;
-        if (filter === 'notprinted' && isPrinted(a)) return false;
         if (q && !haystacks.get(a._id)!.includes(q)) return false;
         return true;
       });
     },
-    [attendees, haystacks, filter],
+    [attendees, haystacks],
   );
 
   const visible = useMemo(() => matchAll(search), [matchAll, search]);
@@ -174,28 +143,81 @@ export function AttendeeTable({
     );
   }
 
-  // Enter opens the only match; on touch it also dismisses the keyboard to reveal results.
+  // Only printed ones can be unprinted; the rest of the selection is left alone.
+  const selectedPrinted = useMemo(
+    () => attendees.filter((a) => selected.has(a._id) && isPrinted(a)),
+    [attendees, selected],
+  );
+
+  // DB-only (no printer), so run in parallel. Successes are deselected; failures stay for retry.
+  async function batchUnprint() {
+    const targets = selectedPrinted;
+    const results = await Promise.allSettled(targets.map((a) => unprint.mutateAsync(a)));
+    const done = targets.filter((_, i) => results[i].status === 'fulfilled').map((a) => a._id);
+    setSelected((prev) => {
+      const next = new Set(prev);
+      done.forEach((id) => next.delete(id));
+      return next;
+    });
+    const failed = results.find((r): r is PromiseRejectedResult => r.status === 'rejected');
+    const failedCount = targets.length - done.length;
+    toast(
+      failedCount === 0
+        ? `${done.length} marked as not printed`
+        : `${done.length} marked · ${failedCount} failed (${errMessage(failed?.reason, 'unknown error')}) — failed ones stay selected`,
+    );
+  }
+
+  // Enter target: the arrowed-to row, else an exact Reg. Number (typing "189" also hits "1890"), else the only hit.
   // Matches the live input, not the deferred `search`, so a fast Enter isn't a keystroke behind.
-  function onSearchKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key !== 'Enter') return;
+  function enterTarget(): Attendee | undefined {
     const hits = matchAll(searchInput);
-    if (hits.length === 1 && activeTemplate) onPreview(hits[0]);
-    if (!isDesktop) e.currentTarget.blur();
+    const q = searchInput.trim();
+    return (
+      hits.find((a) => a._id === activeId) ??
+      (q ? hits.find((a) => regNumberOf(a) === q) : undefined) ??
+      (hits.length === 1 ? hits[0] : undefined)
+    );
+  }
+
+  function moveActive(step: 1 | -1) {
+    const i = visible.findIndex((a) => a._id === activeId);
+    const next = visible[Math.min(Math.max(i + step, 0), visible.length - 1)];
+    if (next) setActiveId(next._id);
+  }
+
+  function onSearchKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault(); // keep the caret put
+      moveActive(e.key === 'ArrowDown' ? 1 : -1);
+    } else if (e.key === 'Escape' && !previewId && searchInput) {
+      setSearchInput(''); // with the panel open, Escape closes it instead (KioskPage)
+      setActiveId(null);
+    } else if (e.key === 'Enter') {
+      // Focus jumps to Print mid-keystroke; without this the same Enter would click it.
+      e.preventDefault();
+      const target = enterTarget();
+      if (target && activeTemplate) onPreview(target);
+      // On touch, dismiss the keyboard to reveal results.
+      if (!isDesktop) e.currentTarget.blur();
+    }
   }
 
   const syncButton = event.sheetId && (
     <button
       onClick={syncNow}
       disabled={isSyncing}
-      className="inline-flex h-10.5 shrink-0 items-center gap-2 rounded-[10px] border border-brand/30 bg-brand-tint px-3.5 font-display lg:px-4 text-sm font-semibold text-brand-deep transition-colors hover:border-brand/50 hover:bg-brand-tint/70 disabled:opacity-60"
+      className="flex h-10.5 w-13 shrink-0 flex-col items-center justify-center gap-0.75 rounded-[10px] border border-brand/30 bg-brand-tint font-display text-brand-deep transition-colors hover:border-brand/50 hover:bg-brand-tint/70 disabled:opacity-60"
       title={
         event.lastSyncedAt
-          ? `Last synced ${new Date(event.lastSyncedAt).toLocaleTimeString()}`
-          : undefined
+          ? `Sync now · last synced ${new Date(event.lastSyncedAt).toLocaleTimeString()}`
+          : 'Sync now'
       }
     >
-      <RefreshIcon size={15} className={isSyncing ? 'animate-spin' : undefined} />
-      {isSyncing ? 'Syncing…' : isDesktop ? 'Sync now' : 'Sync'}
+      <RefreshIcon size={16} className={isSyncing ? 'animate-spin' : undefined} />
+      <span className="text-[9.5px] font-semibold uppercase leading-none tracking-[.06em]">
+        {isSyncing ? 'Syncing' : 'Sync'}
+      </span>
     </button>
   );
 
@@ -212,13 +234,37 @@ export function AttendeeTable({
     </Button>
   );
 
+  const unprintButton = selectedPrinted.length > 0 && (
+    <Button
+      variant="secondary"
+      onClick={() => setConfirmUnprint(true)}
+      disabled={!!batch}
+      title="Printed by mistake? Count these attendees as not arrived again."
+      className="animate-fade-in h-10.5 shrink-0 rounded-[10px] px-4 text-sm"
+    >
+      {isDesktop ? `Mark ${selectedPrinted.length} unprinted` : `Unprint ${selectedPrinted.length}`}
+    </Button>
+  );
+
   return (
     <>
+      {confirmUnprint && (
+        <ConfirmDialog
+          size="sm"
+          title={`Mark ${selectedPrinted.length} as not printed?`}
+          description="Their print status and count reset, so stats treat them as not arrived. Badges already printed aren't affected."
+          confirmLabel="Mark unprinted"
+          pendingLabel="Saving…"
+          errorFallback="Could not mark as not printed"
+          onConfirm={batchUnprint}
+          onClose={() => setConfirmUnprint(false)}
+        />
+      )}
+
       {/* Handheld: per-event settings scroll away so the sticky bar stays short. */}
       {!isDesktop && (
         <div className="mb-3 flex items-center gap-2.5">
           <TemplateSelect event={event} className="min-w-0 flex-1" />
-          <DoublePrintToggle />
           {syncButton}
         </div>
       )}
@@ -232,7 +278,10 @@ export function AttendeeTable({
             <input
               ref={searchRef}
               value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
+              onChange={(e) => {
+                setSearchInput(e.target.value);
+                setActiveId(null);
+              }}
               onKeyDown={onSearchKeyDown}
               placeholder={isDesktop ? 'Search attendees…   (press / )' : 'Search name or ID'}
               inputMode="search"
@@ -247,6 +296,7 @@ export function AttendeeTable({
               <button
                 onClick={() => {
                   setSearchInput('');
+                  setActiveId(null);
                   searchRef.current?.focus();
                 }}
                 aria-label="Clear search"
@@ -257,31 +307,16 @@ export function AttendeeTable({
             )}
           </div>
 
-          {isDesktop && <TemplateSelect event={event} />}
-          {isDesktop && <DoublePrintToggle />}
+          {isDesktop && <TemplateSelect event={event} className="w-52 shrink-0" />}
 
-          <div className="flex w-full gap-0.5 rounded-[10px] border border-line bg-surface p-0.75 lg:inline-flex lg:w-auto">
-            <Segment
-              label="All"
-              count={counts.all}
-              active={filter === 'all'}
-              onClick={() => setFilter('all')}
-            />
-            <Segment
-              label="Printed"
-              count={counts.printed}
-              active={filter === 'printed'}
-              onClick={() => setFilter('printed')}
-            />
-            <Segment
-              label="Not printed"
-              count={counts.notprinted}
-              active={filter === 'notprinted'}
-              onClick={() => setFilter('notprinted')}
-            />
-          </div>
+          <AttendeeStats
+            total={attendees.length}
+            came={printedCount}
+            className="w-full lg:w-auto"
+          />
 
           {isDesktop && syncButton}
+          {isDesktop && unprintButton}
           {isDesktop && batchButton}
         </div>
 
@@ -315,6 +350,7 @@ export function AttendeeTable({
                 template={activeTemplate}
                 selected={selected.has(a._id)}
                 isPreviewing={previewId === a._id}
+                isActive={activeId === a._id}
                 onToggle={toggle}
                 onPreview={onPreview}
               />
@@ -323,11 +359,11 @@ export function AttendeeTable({
         ) : (
           <EmptyState
             bordered={false}
-            title={counts.all === 0 ? 'No attendees yet' : 'No matches'}
+            title={attendees.length === 0 ? 'No attendees yet' : 'No matches'}
             subtitle={
-              counts.all === 0
+              attendees.length === 0
                 ? 'Import a spreadsheet to add attendees to this event.'
-                : 'No attendees match your search or filter.'
+                : 'No attendees match your search.'
             }
           />
         )}
@@ -343,6 +379,7 @@ export function AttendeeTable({
             >
               Clear
             </Button>
+            {unprintButton}
             {batchButton}
           </div>
         )}

@@ -26,6 +26,23 @@ export class WebUsbPrinter implements PrinterAdapter {
     this.status = 'connected';
   }
 
+  // forget() revokes the pairing so the next connect() starts fresh, as on first use.
+  // Errors are swallowed: a cable-pulled or wedged device can't be closed cleanly, and
+  // the point of disconnecting is to get back to a known-clean state anyway.
+  async disconnect(): Promise<void> {
+    const device = this.device;
+    this.device = null;
+    this.status = 'disconnected';
+    if (!device) return;
+    try {
+      if (typeof device.forget === 'function')
+        await device.forget(); // Chrome 101+
+      else await device.close();
+    } catch {
+      // already gone
+    }
+  }
+
   async print(job: PrintJob): Promise<void> {
     if (!this.device) throw new Error('Printer not connected.');
     await this.device.transferOut(this.endpointNumber, job.tspl);

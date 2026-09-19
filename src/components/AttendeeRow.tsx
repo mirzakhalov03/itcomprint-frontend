@@ -1,4 +1,5 @@
-import { memo, type ReactNode } from 'react';
+import { memo, useEffect, useRef, type ReactNode } from 'react';
+import { regNumberOf } from '../lib/format';
 import { CheckIcon, PrinterIcon } from './icons';
 import { Button } from './ui/Button';
 import { Checkbox } from './ui/Checkbox';
@@ -30,6 +31,7 @@ export const AttendeeRow = memo(function AttendeeRow({
   template,
   selected,
   isPreviewing = false,
+  isActive = false,
   onToggle,
   onPreview,
 }: {
@@ -38,25 +40,34 @@ export const AttendeeRow = memo(function AttendeeRow({
   template: BadgeTemplate | undefined;
   selected: boolean;
   isPreviewing?: boolean;
+  isActive?: boolean;
   onToggle: (id: string) => void;
   onPreview: (a: Attendee) => void;
 }) {
   const printed = attendee.printStatus === 'printed';
-  const regNumber = attendee.registrantId ?? attendee.extra['Reg. Number'] ?? '';
+  const regNumber = regNumberOf(attendee);
+  const rowRef = useRef<HTMLDivElement>(null);
 
-  const rowBg = selected
-    ? 'bg-brand-tint'
-    : isPreviewing
-      ? 'bg-surface-2'
-      : printed
-        ? 'bg-surface-3'
-        : 'bg-white';
+  // Keep the ↑/↓ cursor on screen; scroll-mt clears the sticky toolbar.
+  useEffect(() => {
+    if (isActive) rowRef.current?.scrollIntoView({ block: 'nearest' });
+  }, [isActive]);
+
+  const rowBg =
+    selected || isActive
+      ? 'bg-brand-tint'
+      : isPreviewing
+        ? 'bg-surface-2'
+        : printed
+          ? 'bg-surface-3'
+          : 'bg-white';
   const leftBorder =
-    selected || isPreviewing ? '3px solid var(--color-brand)' : '3px solid transparent';
+    selected || isPreviewing || isActive ? '3px solid var(--color-brand)' : '3px solid transparent';
 
   return (
     <div
-      className={`flex h-14 items-center gap-3 sm:h-13 border-b border-line-3 px-4 transition-colors hover:bg-brand-tint sm:gap-4 sm:px-5 ${rowBg}`}
+      ref={rowRef}
+      className={`flex h-14 scroll-mt-40 items-center gap-3 sm:h-13 border-b border-line-3 px-4 transition-colors hover:bg-brand-tint sm:gap-4 sm:px-5 ${rowBg}`}
       style={{ borderLeft: leftBorder }}
     >
       <Checkbox

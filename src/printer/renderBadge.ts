@@ -14,6 +14,8 @@ export const FONT_FAMILIES = [
 
 export const FONT_SIZES = [8, 10, 12, 14, 16, 18, 20, 24, 28, 32] as const;
 
+export const SPACE_ABOVE_MM = [0, 1, 2, 3, 4, 6] as const;
+
 export const SAMPLE_ATTENDEE: Pick<Attendee, 'fullName' | 'extra'> = {
   fullName: 'Jane Cooper',
   extra: { company: 'Acme Corp', role: 'Speaker' },
@@ -104,7 +106,7 @@ export async function renderBadgeToCanvas(
 
   // First pass: set each zone's font (needed for accurate measurement) and wrap
   // its text — a zone's height now depends on how many lines it wrapped to.
-  const zoneLines = visible.map((z) => {
+  const zoneLines = visible.map((z, i) => {
     // Convert pt to dots: 1 inch = 72pt = DPI dots
     const fontSizeDots = (z.fontSize / 72) * DPI;
     ctx.font = `${z.bold ? 'bold ' : ''}${fontSizeDots}px '${z.fontFamily}'`;
@@ -113,19 +115,20 @@ export async function renderBadgeToCanvas(
       lines: z.field === 'fullName' ? splitNameTwoLines(text) : wrapText(ctx, text, maxWidth),
       lineHeight: Math.ceil(fontSizeDots * 1.3),
       fontSizeDots,
+      // The first zone has nothing above it — a gap there would only skew centering.
+      gapAbove: i === 0 ? 0 : GAP_DOTS + Math.round(((z.spaceAboveMm ?? 0) * DPI) / 25.4),
     };
   });
 
-  const totalH =
-    zoneLines.reduce((sum, z) => sum + z.lineHeight * z.lines.length, 0) +
-    GAP_DOTS * Math.max(0, visible.length - 1);
+  const totalH = zoneLines.reduce((sum, z) => sum + z.gapAbove + z.lineHeight * z.lines.length, 0);
   let y = Math.max(4, Math.round((heightDots - totalH) / 2));
 
   ctx.fillStyle = '#000000';
 
   for (let i = 0; i < visible.length; i++) {
     const z = visible[i];
-    const { lines, lineHeight, fontSizeDots } = zoneLines[i];
+    const { lines, lineHeight, fontSizeDots, gapAbove } = zoneLines[i];
+    y += gapAbove;
     ctx.font = `${z.bold ? 'bold ' : ''}${fontSizeDots}px '${z.fontFamily}'`;
     ctx.textAlign = z.align;
     const x =
@@ -135,7 +138,6 @@ export async function renderBadgeToCanvas(
       ctx.fillText(line, x, y, maxWidth);
       y += lineHeight;
     }
-    y += i < visible.length - 1 ? GAP_DOTS : 0;
   }
 
   return canvas;

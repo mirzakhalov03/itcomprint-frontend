@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { AttendeeTable } from '../components/AttendeeTable';
 import { BadgePrintPanel } from '../components/BadgePrintPanel';
@@ -9,7 +9,9 @@ import { ArrowLeftIcon } from '../components/icons';
 import { EmptyState, LoadingPanel } from '../components/ui/EmptyState';
 import { Sheet } from '../components/ui/Sheet';
 import { useEvents } from '../hooks/useEvents';
+import { useAttendees } from '../hooks/useAttendees';
 import { useIsDesktop } from '../hooks/useMediaQuery';
+import { useEscapeKey } from '../hooks/useEscapeKey';
 import type { Attendee } from '../types';
 
 /** Full-screen, single-event badge-printing view. Event comes from the URL. */
@@ -17,11 +19,43 @@ export function KioskPage() {
   const { id } = useParams<{ id: string }>();
   const { data: events = [], isLoading } = useEvents();
   const event = events.find((e) => e._id === id);
-  const [previewAttendee, setPreviewAttendee] = useState<Attendee | null>(null);
+  const { data: attendees } = useAttendees(event ? event._id : null);
+  // Store the id, not a snapshot, so the open panel reflects prints and sync updates live
+  const [previewId, setPreviewId] = useState<string | null>(null);
+  const previewAttendee = attendees?.find((a) => a._id === previewId) ?? null;
   const isDesktop = useIsDesktop();
-  const closePanel = useCallback(() => setPreviewAttendee(null), []);
   const splitView = !!previewAttendee && isDesktop;
   const listRef = useRef<HTMLDivElement>(null);
+
+  // Keyboard loop: search → Enter opens → Enter prints → back to search, text selected for the next ID.
+  const searchRef = useRef<HTMLInputElement>(null);
+  const printRef = useRef<HTMLButtonElement>(null);
+  const focusSearch = useCallback(() => {
+    // Desktop only: on touch, focusing the input would pop the keyboard over the sheet.
+    if (!isDesktop) return;
+    searchRef.current?.focus();
+    searchRef.current?.select();
+  }, [isDesktop]);
+
+  // Ref mirror keeps openPanel stable for the memoized rows.
+  const previewIdRef = useRef(previewId);
+  useEffect(() => {
+    previewIdRef.current = previewId;
+  }, [previewId]);
+  const openPanel = useCallback((a: Attendee) => {
+    // Same attendee: no remount, so autoFocus won't fire again. A new one's panel autoFocuses.
+    if (a._id === previewIdRef.current) printRef.current?.focus();
+    setPreviewId(a._id);
+  }, []);
+  const closePanel = useCallback(() => {
+    setPreviewId(null);
+    focusSearch();
+  }, [focusSearch]);
+  // A dialog on top owns Escape. The handheld Sheet handles its own.
+  const escapePanel = useCallback(() => {
+    if (!document.querySelector('[aria-modal="true"]')) closePanel();
+  }, [closePanel]);
+  useEscapeKey(escapePanel, splitView);
 
   const panel = previewAttendee && event && (
     <BadgePrintPanel
@@ -29,6 +63,8 @@ export function KioskPage() {
       attendee={previewAttendee}
       event={event}
       onClose={closePanel}
+      onPrinted={focusSearch}
+      printRef={printRef}
     />
   );
 
@@ -36,6 +72,7 @@ export function KioskPage() {
     <div className="flex h-dvh flex-col overflow-hidden bg-surface text-ink">
       <AppHeader
         title={event?.name ?? 'Event'}
+        eventId={event?._id}
         leftSlot={
           <Link
             to="/app"
@@ -56,8 +93,9 @@ export function KioskPage() {
                 <AttendeeTable
                   key={event._id}
                   event={event}
-                  onPreview={setPreviewAttendee}
+                  onPreview={openPanel}
                   previewId={previewAttendee?._id}
+                  searchRef={searchRef}
                 />
               ) : isLoading ? (
                 <LoadingPanel>Loading event…</LoadingPanel>

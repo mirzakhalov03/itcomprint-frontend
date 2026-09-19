@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes } from 'react';
+import type { ComponentProps } from 'react';
 import { cn } from '../../lib/cn';
 
 type Variant = 'primary' | 'secondary' | 'outline' | 'danger';
@@ -14,7 +14,7 @@ const VARIANTS: Record<Variant, string> = {
   danger: 'border border-danger text-danger hover:bg-danger hover:text-white',
 };
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonProps extends ComponentProps<'button'> {
   variant?: Variant;
 }
 

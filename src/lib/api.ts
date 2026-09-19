@@ -1,4 +1,5 @@
 import type {
+  ActivityPage,
   AppEvent,
   Attendee,
   AuthUser,
@@ -108,6 +109,19 @@ export const api = {
 
   permanentDeleteEvent: (eventId: string) =>
     request<{ ok: boolean }>(`/events/${eventId}/permanent`, { method: 'DELETE' }),
+
+  listActivity: ({ eventId, before }: { eventId?: string; before?: string | null }) => {
+    const qs = new URLSearchParams();
+    if (eventId) qs.set('eventId', eventId);
+    if (before) qs.set('before', before);
+    return request<ActivityPage>(`/activity?${qs}`);
+  },
+
+  logPrinterActivity: (action: 'connect' | 'disconnect', eventId: string | null) =>
+    request<void>('/activity/printer', {
+      method: 'POST',
+      body: JSON.stringify({ action, eventId }),
+    }),
 
   googleLogin: (idToken: string) =>
     request<{ user: AuthUser; isNewUser: boolean }>('/auth/google', {

@@ -51,6 +51,7 @@ export interface TemplateZone {
   bold: boolean;
   align: 'left' | 'center' | 'right';
   hidden: boolean;
+  spaceAboveMm?: number; // extra gap before this zone; absent on older templates
 }
 
 export interface BadgeTemplate {
@@ -86,4 +87,36 @@ export interface SheetSyncResult {
   total: number;
   issues: SheetIssue[];
   lastSyncedAt: string;
+}
+
+export type ActivityAction =
+  | 'attendee.print'
+  | 'attendee.reprint'
+  | 'attendee.unprint'
+  | 'event.create'
+  | 'event.update'
+  | 'event.template'
+  | 'event.trash'
+  | 'event.restore'
+  | 'event.delete'
+  | 'template.create'
+  | 'template.update'
+  | 'template.delete'
+  | 'printer.connect'
+  | 'printer.disconnect';
+
+export interface ActivityEntry {
+  _id: string;
+  action: ActivityAction;
+  actorName: string;
+  actorPicture: string;
+  eventId: string | null;
+  eventName: string;
+  targetName: string;
+  createdAt: string;
+}
+
+export interface ActivityPage {
+  items: ActivityEntry[];
+  nextCursor: string | null; // pass as `before` to load the next (older) page
 }
