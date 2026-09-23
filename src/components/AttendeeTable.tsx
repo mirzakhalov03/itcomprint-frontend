@@ -15,6 +15,7 @@ import { useSheetSync } from '../hooks/useSheetSync';
 import { useIsDesktop } from '../hooks/useMediaQuery';
 import { TemplateSelect } from './TemplateSelect';
 import { AttendeeStats } from './AttendeeStats';
+import { SheetSyncErrorNotice } from './SheetSyncErrorNotice';
 import { SheetIssuesNotice } from './SheetIssuesNotice';
 import type { Attendee, AppEvent } from '../types';
 
@@ -42,7 +43,7 @@ export function AttendeeTable({
   const eventId = event._id;
   const eventName = event.name;
   const { template: activeTemplate } = useEventTemplate(event);
-  const { syncNow, isSyncing, issues } = useSheetSync(eventId, !!event.sheetId);
+  const { syncNow, isSyncing, issues, error: syncError } = useSheetSync(eventId, !!event.sheetId);
   const [searchInput, setSearchInput] = useState('');
   const search = useDeferredValue(searchInput); // input stays instant; filtering yields to typing
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -320,6 +321,7 @@ export function AttendeeTable({
           {isDesktop && batchButton}
         </div>
 
+        <SheetSyncErrorNotice message={syncError} />
         <SheetIssuesNotice issues={issues} />
 
         {/* List header */}

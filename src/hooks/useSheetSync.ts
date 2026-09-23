@@ -14,7 +14,7 @@ const EVENTS_POLL_MS = 30_000; // other stations' renames / template switches
 /**
  * Keeps a sheet-linked kiosk live: pulls the Google Sheet into the roster and polls
  * the shared roster/event caches so every station sees each other's prints and edits.
- * Background ticks are silent on failure; only syncNow() toasts, since it's deliberate.
+ * Background ticks never toast; the last failed pull is returned as `error` for a persistent notice.
  */
 export function useSheetSync(eventId: string | null, enabled: boolean) {
   const qc = useQueryClient();
@@ -23,6 +23,7 @@ export function useSheetSync(eventId: string | null, enabled: boolean) {
   const [lastIssues, setLastIssues] = useState<{ eventId: string; issues: SheetIssue[] } | null>(
     null,
   );
+  const [lastError, setLastError] = useState<{ eventId: string; message: string } | null>(null);
 
   // Extra observers on the shared keys — React Query polls at the fastest mounted interval.
   useQuery({
@@ -42,6 +43,7 @@ export function useSheetSync(eventId: string | null, enabled: boolean) {
     mutationFn: () => api.syncEventSheet(eventId!),
     onSuccess: (result) => {
       setLastIssues({ eventId: eventId!, issues: result.issues });
+      setLastError(null);
       if (result.added > 0 || result.updated > 0 || result.removed > 0) {
         void qc.invalidateQueries({ queryKey: ['attendees', eventId] });
       }
@@ -50,6 +52,8 @@ export function useSheetSync(eventId: string | null, enabled: boolean) {
         events?.map((e) => (e._id === eventId ? { ...e, lastSyncedAt: result.lastSyncedAt } : e)),
       );
     },
+    onError: (err) =>
+      setLastError({ eventId: eventId!, message: errMessage(err, "Couldn't reach the sheet.") }),
   });
   const mutateRef = useRef(mutation.mutate);
   const isPendingRef = useRef(mutation.isPending);
@@ -76,5 +80,6 @@ export function useSheetSync(eventId: string | null, enabled: boolean) {
       }),
     isSyncing: mutation.isPending,
     issues: live && lastIssues?.eventId === eventId ? lastIssues.issues : [],
+    error: live && lastError?.eventId === eventId ? lastError.message : null,
   };
 }
