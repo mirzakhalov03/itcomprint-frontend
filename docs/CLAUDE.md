@@ -37,7 +37,7 @@ Backend (`cd backend`):
 
 Both apps run **husky + lint-staged on pre-commit**, so staged files are auto-formatted and linted.
 
-Environment: `frontend/.env` (`VITE_API_URL`, `VITE_PRINTER_MODE`, `VITE_GOOGLE_CLIENT_ID`), `backend/.env` (`NODE_ENV`, `PORT`, `MONGODB_URI`, `CORS_ORIGIN`, `GOOGLE_CLIENT_ID`, `JWT_SECRET`, `COOKIE_DOMAIN`). See `backend/.env.example`. `config/env.ts` Zod-validates at import time and exits on bad config.
+Environment: `frontend/.env` (`VITE_API_URL`, `VITE_PRINTER_MODE`, `VITE_GOOGLE_CLIENT_ID`), `backend/.env` (`NODE_ENV`, `PORT`, `MONGODB_URI`, `CORS_ORIGIN`, `GOOGLE_CLIENT_ID`, `JWT_SECRET`, `GOOGLE_SERVICE_ACCOUNT_EMAIL`, `GOOGLE_SERVICE_ACCOUNT_KEY`, `MAIN_SHEET_ID`, `COOKIE_DOMAIN`). See `backend/.env.example`. `config/env.ts` Zod-validates at import time and exits on bad config.
 
 ## Architecture
 
@@ -84,10 +84,10 @@ A `BadgeTemplate` is a label size (`labelWidthMm`/`labelHeightMm`) plus an order
 
 ### Data flow
 
-- **Import is client-side**: `ImportDialog` parses the spreadsheet with `xlsx` in the browser (lazy-loaded — it is a ~370KB chunk), the operator picks the name column, and the whole event + attendee array is POSTed in one request. There is intentionally **no per-attendee create endpoint** — events are always created _with_ their attendees (`createEventWithAttendees` → `insertMany`). Walk-in attendees are therefore not supported.
+- **Events are created by picking a tab from the Main Sheet**: `LinkMainSheetTabDialog` → `POST /events/sheet { name, date, tabGid }`. Tabs are tracked by their stable `gid`; sync re-resolves gid → title on every pull using the read-only Sheets scope (never `values.batchGetByDataFilter`, never a cached title — see `sheetSync.services.ts`). The `one_event_per_tab` unique index reserves a tab while its event is live or trashed, so relinking a still-referenced tab 409s. Legacy URL-linked events (`tabGid: null`) keep reading `values/A:Z` of their own `sheetId`. `POST /events` (create with an attendee array) still exists as a backend primitive used by `verify`, but there is no XLSX import in the UI — there is intentionally **no per-attendee create endpoint**, so walk-ins can't be added in-app; they arrive by registering (via the bot) into their event's Main Sheet tab, which the kiosk picks up on the next sync.
 - **Attendees load once per event; search and filtering are client-side** (`useAttendees` fetches the full roster, `AttendeeTable` filters in memory) so keystrokes never hit the network. The roster endpoint takes no query params: search and filtering are client-side only.
 - **Print and reprint are the same endpoint**: `POST /attendees/:id/print` `$inc`s `printCount` and sets `printStatus: 'printed'`. The UI shows "Print" → "Reprint" based on status. `DELETE /attendees/:id/print` undoes a mistaken print (resets status, `printCount`, `lastPrintedAt`) so stats stay "printed = came"; it's the "Mark unprinted" button in `BadgePrintPanel`.
-- **Printing patches the cache**: `usePrintAttendee` writes the returned attendee into `['attendees', eventId]` instead of refetching. **Sheet-linked kiosks are live**: `useSheetSync` pulls the sheet every 30 s and polls the roster (10 s) and events (30 s), so stations see each other's prints and template switches. Polling pauses in hidden tabs.
+- **Printing patches the cache**: `usePrintAttendee` writes the returned attendee into `['attendees', eventId]` instead of refetching. **Sheet-linked kiosks are live**: `useSheetSync` pulls the sheet every 30 s and polls the roster (10 s) and events (30 s), so stations see each other's prints and template switches. A failed pull is surfaced persistently via `SheetSyncErrorNotice` (e.g. the linked tab was deleted from the Main Sheet) rather than silently retried. Polling pauses in hidden tabs.
 - `listEvents` derives `attendeeCount` and `printedCount` via aggregation; neither is stored.
 - **Activity log**: controllers call `logActivity()` after each print/unprint, event and template mutation; the browser reports printer connect/disconnect via `POST /activity/printer` (WebUSB state is client-only). Rows snapshot actor/event/target names so history survives deletes. Logging is best-effort — a failed write never fails the action. Sheet sync is deliberately not logged (30 s timer). `GET /activity?eventId&before` pages 50 at a time by `_id` cursor; the top-bar modal is event-scoped on the kiosk, global elsewhere.
 
@@ -115,5 +115,6 @@ Strict MVC: `routes → controllers → services → models`, with `validators/`
 ## Known gaps
 
 - **The hardware spike has never been run.** `VITE_PRINTER_MODE=preview` everywhere; the Gainscha's real DPI, USB VID/PID, and the Windows WinUSB binding are all unconfirmed. Nothing has physically printed.
-- **No walk-in attendee support** — see Data flow above.
+- **Still no in-app add-attendee.** Walk-ins arrive only by registering (via the bot) into the Main Sheet tab, which the kiosk picks up on its next sync — see Data flow above.
+- **Sheets read quota is shared across all open kiosks.** Google allows ~60 read requests/min for the service account. A tab-linked event costs 2 calls per 30 s pull (list tabs + read rows), so ~15 open kiosk screens before hitting the limit; legacy URL-linked events cost 1 call, so ~30.
 - Batch print runs sequentially; failures don't stop the run and stay selected for retry.
