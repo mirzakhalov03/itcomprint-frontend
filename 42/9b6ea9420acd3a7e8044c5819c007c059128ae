@@ -1,0 +1,21 @@
+docs/superpowers/plans/2026-09-23-bus-route-filter.md
+  s_15c327c5350ad5::t_e94213f2176656 1-1122
+docs/superpowers/specs/2026-09-23-bus-route-filter-design.md
+  s_15c327c5350ad5::t_047d88cf432513 1-216
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "429b6ea9420acd3a7e8044c5819c007c059128ae",
+  "prompts": {},
+  "sessions": {
+    "s_15c327c5350ad5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4c736e29-cf6e-4f58-8382-ecb35f5bd0f4",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
