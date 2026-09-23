@@ -1,0 +1,25 @@
+src/components/AttendeeTable.tsx
+  s_bc960d0d4ff84b::t_11f34c0fa3219d 20-21,62-67,88-100,108,113,333-334,337,388-390
+src/components/BusRouteFilter.tsx
+  s_bc960d0d4ff84b::t_e8a2c4c0b104b1 1-46
+src/lib/busRoutes.ts
+  s_bc960d0d4ff84b::t_22bec9f81f3167 1-34
+src/types.ts
+  s_bc960d0d4ff84b::t_4bbdb1bf7b94df 9-21,36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "24e4a6fe4b466ba992384cf19afad4524ddf8e0a",
+  "prompts": {},
+  "sessions": {
+    "s_bc960d0d4ff84b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-ac730169b6bb1fcf1",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
