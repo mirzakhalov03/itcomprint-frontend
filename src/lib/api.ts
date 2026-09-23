@@ -7,6 +7,7 @@ import type {
   SheetTab,
   SheetSyncResult,
   TemplateInput,
+  UpdateEventPayload,
 } from '../types';
 
 const BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:4000/api';
@@ -98,7 +99,7 @@ export const api = {
       body: JSON.stringify({ templateId }),
     }),
 
-  updateEvent: (eventId: string, payload: { name: string; date: string }) =>
+  updateEvent: (eventId: string, payload: UpdateEventPayload) =>
     request<AppEvent>(`/events/${eventId}`, { method: 'PATCH', body: JSON.stringify(payload) }),
 
   trashEvent: (eventId: string) => request<AppEvent>(`/events/${eventId}`, { method: 'DELETE' }),

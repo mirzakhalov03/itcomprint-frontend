@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/api';
-import type { AppEvent } from '../types';
+import type { AppEvent, UpdateEventPayload } from '../types';
 
 export const eventsQueryOptions = queryOptions({ queryKey: ['events'], queryFn: api.listEvents });
 
@@ -52,7 +52,7 @@ export function useCreateEventFromSheet() {
 export function useUpdateEvent() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ eventId, ...payload }: { eventId: string; name: string; date: string }) =>
+    mutationFn: ({ eventId, ...payload }: { eventId: string } & UpdateEventPayload) =>
       api.updateEvent(eventId, payload),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['events'] }),
   });
