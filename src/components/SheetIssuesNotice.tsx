@@ -3,7 +3,7 @@ import { ChevronDownIcon } from './icons';
 import type { SheetIssue } from '../types';
 
 const REASON_LABEL: Record<SheetIssue['reason'], string> = {
-  missing_name: 'no Full Name',
+  missing_name: 'no First Name',
   missing_id: 'no Reg. Number',
   duplicate_id: 'repeats an earlier Reg. Number',
 };

@@ -18,7 +18,14 @@ export const SPACE_ABOVE_MM = [0, 1, 2, 3, 4, 6] as const;
 
 export const SAMPLE_ATTENDEE: Pick<Attendee, 'fullName' | 'extra'> = {
   fullName: 'Jane Cooper',
-  extra: { company: 'Acme Corp', role: 'Speaker' },
+  // Keys mirror the Main Sheet's columns so field zones preview with real-looking data.
+  extra: {
+    'First Name': 'Jane',
+    'Last Name': 'Cooper',
+    Company: 'Acme Corp',
+    'Job Title': 'Speaker',
+    Track: 'Frontend',
+  },
 };
 
 const LEGACY_FONT_SIZE_MAP: Record<number, number> = {
