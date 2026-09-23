@@ -1,0 +1,25 @@
+src/components/BusRoutesEditor.tsx
+  s_41fb807d646776::t_28d21fdd884376 1-85
+src/components/EditEventDialog.tsx
+  s_41fb807d646776::t_96bab72e28e5e2 5,9,15-16,19-22,26-33,44,67-68
+src/hooks/useEvents.ts
+  s_41fb807d646776::t_b53949e7878120 4,55
+src/lib/api.ts
+  s_41fb807d646776::t_5525aeb86164da 10,102
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "b3a01b2107c1471afc2032f0a5a47c4fbab2f878",
+  "prompts": {},
+  "sessions": {
+    "s_41fb807d646776": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a365a2e5bbab31f5c",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
