@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/api';
 import type { AppEvent } from '../types';
@@ -8,9 +9,33 @@ export function useEvents() {
   return useQuery({ ...eventsQueryOptions, refetchOnWindowFocus: true });
 }
 
+// staleTime 0: the dialog shows the cached list instantly and revalidates in the background,
+// since tabs get reserved/freed as events are created and deleted.
+const sheetTabsQueryOptions = queryOptions({
+  queryKey: ['sheet-tabs'],
+  queryFn: () => api.listSheetTabs(),
+  staleTime: 0,
+});
+
 export function useSheetTabs() {
-  // Always refetch on open — tabs get reserved/freed as events are created and deleted.
-  return useQuery({ queryKey: ['sheet-tabs'], queryFn: api.listSheetTabs, staleTime: 0 });
+  return useQuery(sheetTabsQueryOptions);
+}
+
+/** Warms the tab list before "New event" is clicked, so the picker opens ready. */
+export function usePrefetchSheetTabs() {
+  const qc = useQueryClient();
+  useEffect(() => {
+    void qc.prefetchQuery(sheetTabsQueryOptions);
+  }, [qc]);
+}
+
+/** Bypasses the server's cache — for a tab just added in Google Sheets. */
+export function useRefreshSheetTabs() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => api.listSheetTabs(true),
+    onSuccess: (tabs) => qc.setQueryData(sheetTabsQueryOptions.queryKey, tabs),
+  });
 }
 
 export function useCreateEventFromSheet() {

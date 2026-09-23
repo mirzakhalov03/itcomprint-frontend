@@ -1,22 +1,14 @@
-import { useState } from 'react';
-import { useCreateEventFromSheet, useSheetTabs } from '../hooks/useEvents';
+import { useId, useState } from 'react';
+import { useCreateEventFromSheet, useRefreshSheetTabs, useSheetTabs } from '../hooks/useEvents';
 import { toast } from '../store/toastStore';
 import { errMessage } from '../lib/errors';
 import { ApiError } from '../lib/api';
 import { todayLocal } from '../lib/format';
-import { cn } from '../lib/cn';
 import { Button } from './ui/Button';
-import { inputBaseClass } from './ui/Input';
 import { Dialog } from './ui/Dialog';
-import { ChevronDownIcon } from './icons';
+import { SheetTabPicker } from './SheetTabPicker';
 import { EventDetailsFields } from './EventDetailsFields';
-import type { AppEvent, SheetTabStatus } from '../types';
-
-const STATUS_SUFFIX: Record<SheetTabStatus, string> = {
-  available: '',
-  linked: ' (already added)',
-  trashed: ' (in trash)',
-};
+import type { AppEvent, SheetTab } from '../types';
 
 export function LinkMainSheetTabDialog({
   onClose,
@@ -30,11 +22,11 @@ export function LinkMainSheetTabDialog({
   const [eventDate, setEventDate] = useState(todayLocal);
   const [tabGid, setTabGid] = useState<number | null>(null);
   const { data: tabs = [], isLoading, isError, error, refetch } = useSheetTabs();
+  const refreshTabs = useRefreshSheetTabs();
   const createFromSheet = useCreateEventFromSheet();
+  const tabLabelId = useId();
 
-  function handleTabChange(value: string) {
-    const tab = tabs.find((t) => t.gid === Number(value));
-    if (!tab) return;
+  function handleTabChange(tab: SheetTab) {
     setTabGid(tab.gid);
     // Only overwrite a name the operator hasn't customized.
     if (!eventName.trim() || eventName === autoName) setEventName(tab.title);
@@ -86,31 +78,25 @@ export function LinkMainSheetTabDialog({
         </>
       }
     >
-      <label className="mt-3.5 flex flex-col gap-1.5">
-        <span className="font-display text-xs font-semibold text-ink-3">Sheet tab</span>
-        <div className="relative">
-          <select
-            className={cn(inputBaseClass, 'w-full appearance-none pr-9')}
-            value={tabGid ?? ''}
-            disabled={isLoading || isError}
-            onChange={(e) => handleTabChange(e.target.value)}
-          >
-            <option value="" disabled>
-              {isLoading ? 'Loading tabs…' : 'Select a tab'}
-            </option>
-            {tabs.map((tab) => (
-              <option key={tab.gid} value={tab.gid} disabled={tab.status !== 'available'}>
-                {tab.title}
-                {STATUS_SUFFIX[tab.status]}
-              </option>
-            ))}
-          </select>
-          <ChevronDownIcon
-            size={16}
-            className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-faint"
-          />
-        </div>
-        {isError && (
+      <div className="mt-3.5 flex flex-col gap-1.5">
+        <span id={tabLabelId} className="font-display text-xs font-semibold text-ink-3">
+          Sheet tab
+        </span>
+        <SheetTabPicker
+          tabs={tabs}
+          value={tabGid}
+          onChange={handleTabChange}
+          loading={isLoading}
+          disabled={isError && tabs.length === 0}
+          refreshing={refreshTabs.isPending}
+          onRefresh={() =>
+            refreshTabs.mutate(undefined, {
+              onError: (err) => toast(errMessage(err, "Couldn't refresh the tabs — try again.")),
+            })
+          }
+          labelId={tabLabelId}
+        />
+        {isError && tabs.length === 0 && (
           <span className="text-xs text-danger">
             {errMessage(error, "Couldn't load the Main Sheet's tabs — try again.")}{' '}
             <button onClick={() => refetch()} className="font-semibold text-brand-deep underline">
@@ -118,7 +104,7 @@ export function LinkMainSheetTabDialog({
             </button>
           </span>
         )}
-      </label>
+      </div>
 
       <EventDetailsFields
         name={eventName}

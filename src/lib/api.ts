@@ -58,7 +58,9 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 export const api = {
   listEvents: () => request<AppEvent[]>('/events'),
 
-  listSheetTabs: () => request<SheetTab[]>('/events/sheet-tabs'),
+  // `refresh` skips the server's short cache of Google's tab list.
+  listSheetTabs: (refresh = false) =>
+    request<SheetTab[]>(`/events/sheet-tabs${refresh ? '?refresh=1' : ''}`),
 
   createEventFromSheet: (payload: { name: string; date: string; tabGid: number }) =>
     request<AppEvent & SheetSyncResult>('/events/sheet', {

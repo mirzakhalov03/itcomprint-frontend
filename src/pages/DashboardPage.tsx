@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useEvents } from '../hooks/useEvents';
+import { useEvents, usePrefetchSheetTabs } from '../hooks/useEvents';
 import { EventCard } from '../components/EventCard';
 import { LinkMainSheetTabDialog } from '../components/LinkMainSheetTabDialog';
 import { PlusIcon } from '../components/icons';
@@ -54,6 +54,7 @@ function EventSection({
 
 export function DashboardPage() {
   const { data: events = [], isLoading } = useEvents();
+  usePrefetchSheetTabs();
   const [dialogOpen, setDialogOpen] = useState(false);
   const navigate = useNavigate();
   const { upcoming, past } = useMemo(() => splitByDate(events), [events]);
