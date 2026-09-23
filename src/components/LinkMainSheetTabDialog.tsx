@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useCreateEventFromSheet, useSheetTabs } from '../hooks/useEvents';
 import { toast } from '../store/toastStore';
 import { errMessage } from '../lib/errors';
+import { ApiError } from '../lib/api';
 import { todayLocal } from '../lib/format';
 import { cn } from '../lib/cn';
 import { Button } from './ui/Button';
@@ -28,7 +29,7 @@ export function LinkMainSheetTabDialog({
   const [autoName, setAutoName] = useState(''); // last title we filled in, to tell it from a typed name
   const [eventDate, setEventDate] = useState(todayLocal);
   const [tabGid, setTabGid] = useState<number | null>(null);
-  const { data: tabs = [], isLoading, isError, error } = useSheetTabs();
+  const { data: tabs = [], isLoading, isError, error, refetch } = useSheetTabs();
   const createFromSheet = useCreateEventFromSheet();
 
   function handleTabChange(value: string) {
@@ -40,7 +41,7 @@ export function LinkMainSheetTabDialog({
     setAutoName(tab.title);
   }
 
-  const canCreate = !!eventName.trim() && tabGid !== null;
+  const canCreate = !!eventName.trim() && tabGid !== null && !!eventDate;
 
   async function handleCreate() {
     if (tabGid === null) return;
@@ -53,7 +54,8 @@ export function LinkMainSheetTabDialog({
       toast(`Event created — ${created.added} attendee(s) synced`);
       onCreated(created);
     } catch (err) {
-      setTabGid(null); // a 409 means the list just refetched with this tab disabled
+      // Only a 409 means the tab got taken — the list just refetched with it disabled.
+      if (err instanceof ApiError && err.status === 409) setTabGid(null);
       toast(errMessage(err, "Couldn't create the event — try again."));
     }
   }
@@ -110,7 +112,10 @@ export function LinkMainSheetTabDialog({
         </div>
         {isError && (
           <span className="text-xs text-danger">
-            {errMessage(error, "Couldn't load the Main Sheet's tabs — try again.")}
+            {errMessage(error, "Couldn't load the Main Sheet's tabs — try again.")}{' '}
+            <button onClick={() => refetch()} className="font-semibold text-brand-deep underline">
+              Retry
+            </button>
           </span>
         )}
       </label>

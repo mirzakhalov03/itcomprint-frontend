@@ -25,7 +25,7 @@ export class ApiError extends Error {
 const FALLBACK_MESSAGES: Record<number, string> = {
   400: 'Some details look invalid — check them and try again.',
   401: 'Your session expired — sign in again.',
-  413: 'That spreadsheet is too large — split it into smaller files.',
+  413: 'That request is too large.',
 };
 
 async function toApiError(res: Response): Promise<ApiError> {

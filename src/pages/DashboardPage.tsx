@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useEvents } from '../hooks/useEvents';
 import { EventCard } from '../components/EventCard';
 import { LinkMainSheetTabDialog } from '../components/LinkMainSheetTabDialog';
-import { UploadIcon } from '../components/icons';
+import { PlusIcon } from '../components/icons';
 import { Button } from '../components/ui/Button';
 import { EmptyState, LoadingPanel } from '../components/ui/EmptyState';
 import { todayLocal } from '../lib/format';
@@ -66,7 +66,7 @@ export function DashboardPage() {
           onClick={() => setDialogOpen(true)}
           className="h-11 gap-2 rounded-full px-[18px] text-sm"
         >
-          <UploadIcon size={16} /> New event
+          <PlusIcon size={16} /> New event
         </Button>
       </div>
 
