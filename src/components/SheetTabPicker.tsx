@@ -199,7 +199,8 @@ export function SheetTabPicker({
               }}
               onKeyDown={handleSearchKey}
               placeholder="Search by event or city"
-              className="h-11 flex-1 bg-transparent text-sm text-ink outline-none placeholder:text-faint"
+              // outline-none! beats the global unlayered :focus-visible ring — the open popover already shows focus.
+              className="h-11 flex-1 bg-transparent text-sm text-ink outline-none! placeholder:text-faint"
             />
           </div>
 
