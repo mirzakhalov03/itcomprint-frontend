@@ -1,0 +1,25 @@
+src/components/LinkMainSheetTabDialog.tsx
+  s_c674d4c2c59867::t_eeb0fe37ca557f 5,32,44,57-58,115-118
+src/components/icons.tsx
+  s_c674d4c2c59867::t_0c63ceb986a815 73-76
+src/lib/api.ts
+  s_c674d4c2c59867::t_7873941c503688 28
+src/pages/DashboardPage.tsx
+  s_c674d4c2c59867::t_026e94f68f4b0b 6,69
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "6bcceb9943b4949179182bd3f5479af50f9d8af1",
+  "prompts": {},
+  "sessions": {
+    "s_c674d4c2c59867": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8aec7056-3ec6-40d3-88c3-aa47502e9838",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
