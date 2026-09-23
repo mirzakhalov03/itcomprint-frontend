@@ -1,23 +1,13 @@
-import { lazy, Suspense, useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEvents } from '../hooks/useEvents';
-import { useClickOutside } from '../hooks/useClickOutside';
 import { EventCard } from '../components/EventCard';
-import { UploadIcon, ChevronDownIcon } from '../components/icons';
+import { LinkMainSheetTabDialog } from '../components/LinkMainSheetTabDialog';
+import { UploadIcon } from '../components/icons';
 import { Button } from '../components/ui/Button';
 import { EmptyState, LoadingPanel } from '../components/ui/EmptyState';
 import { todayLocal } from '../lib/format';
 import type { AppEvent } from '../types';
-
-// Lazy so the ~500KB xlsx parser only loads when an operator opens Import.
-const ImportDialog = lazy(() =>
-  import('../components/ImportDialog').then((m) => ({ default: m.ImportDialog })),
-);
-const LinkSheetDialog = lazy(() =>
-  import('../components/LinkSheetDialog').then((m) => ({ default: m.LinkSheetDialog })),
-);
-
-type NewEventMode = 'closed' | 'upload' | 'sheet';
 
 // Calendar day as picked (date-only input is stored as UTC midnight).
 const dayOf = (e: AppEvent) => e.date.slice(0, 10);
@@ -64,10 +54,7 @@ function EventSection({
 
 export function DashboardPage() {
   const { data: events = [], isLoading } = useEvents();
-  const [mode, setMode] = useState<NewEventMode>('closed');
-  const [chooserOpen, setChooserOpen] = useState(false);
-  const chooserRef = useRef<HTMLDivElement>(null);
-  useClickOutside(chooserRef, chooserOpen, () => setChooserOpen(false));
+  const [dialogOpen, setDialogOpen] = useState(false);
   const navigate = useNavigate();
   const { upcoming, past } = useMemo(() => splitByDate(events), [events]);
 
@@ -75,36 +62,12 @@ export function DashboardPage() {
     <div>
       <div className="mb-5 flex items-center justify-between">
         <h1 className="font-display text-xl font-bold text-ink">Events</h1>
-        <div ref={chooserRef} className="relative">
-          <Button
-            onClick={() => setChooserOpen((v) => !v)}
-            className="h-11 gap-2 rounded-full px-[18px] text-sm"
-          >
-            <UploadIcon size={16} /> New event <ChevronDownIcon size={14} />
-          </Button>
-          {chooserOpen && (
-            <div className="absolute right-0 z-20 mt-2 w-56 overflow-hidden rounded-xl border border-brand-line bg-brand-tint shadow-lg">
-              <button
-                onClick={() => {
-                  setChooserOpen(false);
-                  setMode('upload');
-                }}
-                className="block w-full px-4 py-3 text-left text-sm text-ink hover:bg-white/60"
-              >
-                Upload spreadsheet
-              </button>
-              <button
-                onClick={() => {
-                  setChooserOpen(false);
-                  setMode('sheet');
-                }}
-                className="block w-full px-4 py-3 text-left text-sm text-ink hover:bg-white/60"
-              >
-                Link Google Sheet
-              </button>
-            </div>
-          )}
-        </div>
+        <Button
+          onClick={() => setDialogOpen(true)}
+          className="h-11 gap-2 rounded-full px-[18px] text-sm"
+        >
+          <UploadIcon size={16} /> New event
+        </Button>
       </div>
 
       {isLoading ? (
@@ -117,31 +80,18 @@ export function DashboardPage() {
       ) : (
         <EmptyState
           title="No events yet"
-          subtitle="Import a spreadsheet to create your first event."
+          subtitle="Pick a tab from the Main Sheet to create your first event."
         />
       )}
 
-      {mode === 'upload' && (
-        <Suspense fallback={null}>
-          <ImportDialog
-            onClose={() => setMode('closed')}
-            onImported={(event: AppEvent) => {
-              setMode('closed');
-              navigate(`/app/events/${event._id}`);
-            }}
-          />
-        </Suspense>
-      )}
-      {mode === 'sheet' && (
-        <Suspense fallback={null}>
-          <LinkSheetDialog
-            onClose={() => setMode('closed')}
-            onImported={(event: AppEvent) => {
-              setMode('closed');
-              navigate(`/app/events/${event._id}`);
-            }}
-          />
-        </Suspense>
+      {dialogOpen && (
+        <LinkMainSheetTabDialog
+          onClose={() => setDialogOpen(false)}
+          onCreated={(event) => {
+            setDialogOpen(false);
+            navigate(`/app/events/${event._id}`);
+          }}
+        />
       )}
     </div>
   );

@@ -1,6 +1,6 @@
 import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/api';
-import type { AppEvent, NewAttendee } from '../types';
+import type { AppEvent } from '../types';
 
 export const eventsQueryOptions = queryOptions({ queryKey: ['events'], queryFn: api.listEvents });
 
@@ -8,21 +8,19 @@ export function useEvents() {
   return useQuery({ ...eventsQueryOptions, refetchOnWindowFocus: true });
 }
 
-export function useCreateEvent() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (payload: { name: string; date: string; attendees: NewAttendee[] }) =>
-      api.createEvent(payload),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['events'] }),
-  });
+export function useSheetTabs() {
+  // Always refetch on open — tabs get reserved/freed as events are created and deleted.
+  return useQuery({ queryKey: ['sheet-tabs'], queryFn: api.listSheetTabs, staleTime: 0 });
 }
 
 export function useCreateEventFromSheet() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (payload: { name: string; date: string; sheetUrl: string }) =>
+    mutationFn: (payload: { name: string; date: string; tabGid: number }) =>
       api.createEventFromSheet(payload),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['events'] }),
+    // Success or 409, the tab list is now out of date.
+    onSettled: () => qc.invalidateQueries({ queryKey: ['sheet-tabs'] }),
   });
 }
 
@@ -75,6 +73,7 @@ export function usePermanentDeleteEvent() {
     onSuccess: (_result, eventId) => {
       qc.setQueryData<AppEvent[]>(['events', 'trash'], (old) => removeEvent(old, eventId));
       qc.invalidateQueries({ queryKey: ['events', 'trash'] });
+      qc.invalidateQueries({ queryKey: ['sheet-tabs'] });
     },
   });
 }

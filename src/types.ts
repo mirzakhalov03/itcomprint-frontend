@@ -18,6 +18,7 @@ export interface AppEvent {
   templateId: string | null;
   sheetId: string | null;
   sheetUrl: string | null;
+  tabGid: number | null;
   lastSyncedAt: string | null;
   deletedAt: string | null;
   purgeAt?: string; // trash listing only
@@ -36,9 +37,13 @@ export interface Attendee {
   registrantId: string | null;
 }
 
-export interface NewAttendee {
-  fullName: string;
-  extra: Record<string, string>;
+export type SheetTabStatus = 'available' | 'linked' | 'trashed';
+
+/** One tab of the Main Sheet, as offered by the "New event" picker. */
+export interface SheetTab {
+  gid: number;
+  title: string;
+  status: SheetTabStatus;
 }
 
 export interface TemplateZone {

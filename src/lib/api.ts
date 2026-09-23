@@ -4,7 +4,7 @@ import type {
   Attendee,
   AuthUser,
   BadgeTemplate,
-  NewAttendee,
+  SheetTab,
   SheetSyncResult,
   TemplateInput,
 } from '../types';
@@ -58,10 +58,9 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 export const api = {
   listEvents: () => request<AppEvent[]>('/events'),
 
-  createEvent: (payload: { name: string; date: string; attendees: NewAttendee[] }) =>
-    request<AppEvent>('/events', { method: 'POST', body: JSON.stringify(payload) }),
+  listSheetTabs: () => request<SheetTab[]>('/events/sheet-tabs'),
 
-  createEventFromSheet: (payload: { name: string; date: string; sheetUrl: string }) =>
+  createEventFromSheet: (payload: { name: string; date: string; tabGid: number }) =>
     request<AppEvent & SheetSyncResult>('/events/sheet', {
       method: 'POST',
       body: JSON.stringify(payload),
