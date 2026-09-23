@@ -1,0 +1,31 @@
+src/components/AttendeeTable.tsx
+  s_8d65e8d7906008::t_95b2940d631a81 18,46,324
+src/components/SheetSyncErrorNotice.tsx
+  s_1b81d9a6766fcc::t_d8ce57dbf19801 1-12
+src/hooks/useSheetSync.ts
+  s_8d65e8d7906008::t_076eff84812d9b 17,26,46,55-56,83
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "a1b833474adaef73fce770d73d1b41187c935f70",
+  "prompts": {},
+  "sessions": {
+    "s_1b81d9a6766fcc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a51fe53a0bba39b38",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    },
+    "s_8d65e8d7906008": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-afcf89c410f6b36c9",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
