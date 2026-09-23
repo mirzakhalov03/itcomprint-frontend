@@ -17,6 +17,8 @@ import { TemplateSelect } from './TemplateSelect';
 import { AttendeeStats } from './AttendeeStats';
 import { SheetSyncErrorNotice } from './SheetSyncErrorNotice';
 import { SheetIssuesNotice } from './SheetIssuesNotice';
+import { BusRouteFilter } from './BusRouteFilter';
+import { routeByAttendee } from '../lib/busRoutes';
 import type { Attendee, AppEvent } from '../types';
 
 const isPrinted = (a: Attendee) => a.printStatus === 'printed';
@@ -57,6 +59,12 @@ export function AttendeeTable({
   const unprint = useUnprintAttendee();
   const [confirmUnprint, setConfirmUnprint] = useState(false);
 
+  const routes = useMemo(() => (event.busRoutes ?? []).filter((r) => !r.hidden), [event.busRoutes]);
+  const routeOf = useMemo(() => routeByAttendee(attendees, routes), [attendees, routes]);
+  const [routeFilter, setRouteFilter] = useState<string | null>(null);
+  // A route renamed or hidden from another station just falls back to "all".
+  const activeRoute = routes.some((r) => r.label === routeFilter) ? routeFilter : null;
+
   // `/` or Ctrl+F / Cmd+F focuses search (kiosk speed). Selecting lets the next ID overwrite the last.
   useEffect(() => {
     function focusSearch(e: KeyboardEvent) {
@@ -77,6 +85,19 @@ export function AttendeeTable({
 
   const printedCount = useMemo(() => attendees.filter(isPrinted).length, [attendees]);
 
+  const routeCounts = useMemo(
+    () =>
+      routes.map((r) => {
+        const riders = attendees.filter((a) => routeOf.get(a._id) === r.label);
+        return { label: r.label, total: riders.length, came: riders.filter(isPrinted).length };
+      }),
+    [routes, attendees, routeOf],
+  );
+  const stats = routeCounts.find((c) => c.label === activeRoute) ?? {
+    total: attendees.length,
+    came: printedCount,
+  };
+
   // Built once per roster, not per keystroke.
   const haystacks = useMemo(() => new Map(attendees.map((a) => [a._id, haystack(a)])), [attendees]);
 
@@ -84,11 +105,12 @@ export function AttendeeTable({
     (query: string) => {
       const q = query.trim().toLowerCase();
       return attendees.filter((a) => {
+        if (activeRoute && routeOf.get(a._id) !== activeRoute) return false;
         if (q && !haystacks.get(a._id)!.includes(q)) return false;
         return true;
       });
     },
-    [attendees, haystacks],
+    [attendees, haystacks, activeRoute, routeOf],
   );
 
   const visible = useMemo(() => matchAll(search), [matchAll, search]);
@@ -308,13 +330,11 @@ export function AttendeeTable({
             )}
           </div>
 
+          <BusRouteFilter counts={routeCounts} active={activeRoute} onChange={setRouteFilter} />
+
           {isDesktop && <TemplateSelect event={event} className="w-52 shrink-0" />}
 
-          <AttendeeStats
-            total={attendees.length}
-            came={printedCount}
-            className="w-full lg:w-auto"
-          />
+          <AttendeeStats total={stats.total} came={stats.came} className="w-full lg:w-auto" />
 
           {isDesktop && syncButton}
           {isDesktop && unprintButton}
@@ -365,7 +385,9 @@ export function AttendeeTable({
             subtitle={
               attendees.length === 0
                 ? 'Import a spreadsheet to add attendees to this event.'
-                : 'No attendees match your search.'
+                : activeRoute && !search.trim()
+                  ? `Nobody is registered on the ${activeRoute} bus.`
+                  : 'No attendees match your search.'
             }
           />
         )}

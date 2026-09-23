@@ -6,6 +6,19 @@ export interface AuthUser {
   onboardedAt: string | null;
 }
 
+export interface BusRoute {
+  label: string;
+  autoLabel: boolean;
+  phrases: string[];
+  hidden: boolean;
+}
+
+export interface UpdateEventPayload {
+  name?: string;
+  date?: string;
+  busRoutes?: BusRoute[];
+}
+
 export interface AppEvent {
   _id: string;
   name: string;
@@ -20,6 +33,7 @@ export interface AppEvent {
   sheetUrl: string | null;
   tabGid: number | null;
   lastSyncedAt: string | null;
+  busRoutes?: BusRoute[]; // absent until the event's first sync after bus routes shipped
   deletedAt: string | null;
   purgeAt?: string; // trash listing only
 }
