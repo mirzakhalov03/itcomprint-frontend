@@ -74,6 +74,12 @@ export const api = {
 
   listAttendees: (eventId: string) => request<Attendee[]>(`/events/${eventId}/attendees`),
 
+  addAttendee: (eventId: string, fullName: string) =>
+    request<Attendee>(`/events/${eventId}/attendees`, {
+      method: 'POST',
+      body: JSON.stringify({ fullName }),
+    }),
+
   printAttendee: (attendeeId: string) =>
     request<Attendee>(`/attendees/${attendeeId}/print`, { method: 'POST' }),
 

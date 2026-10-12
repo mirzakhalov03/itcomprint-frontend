@@ -49,6 +49,7 @@ export interface Attendee {
   printCount: number;
   lastPrintedAt: string | null;
   registrantId: string | null;
+  manual?: boolean;
 }
 
 export type SheetTabStatus = 'available' | 'linked' | 'trashed';
@@ -112,6 +113,7 @@ export type ActivityAction =
   | 'attendee.print'
   | 'attendee.reprint'
   | 'attendee.unprint'
+  | 'attendee.add'
   | 'event.create'
   | 'event.update'
   | 'event.template'

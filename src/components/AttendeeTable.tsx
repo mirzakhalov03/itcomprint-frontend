@@ -1,11 +1,21 @@
-import { useCallback, useDeferredValue, useEffect, useMemo, useState, type RefObject } from 'react';
+import {
+  Fragment,
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+  type RefObject,
+} from 'react';
 import { useAttendees } from '../hooks/useAttendees';
 import { usePrintAttendee, useUnprintAttendee } from '../hooks/usePrintAttendee';
 import { toast } from '../store/toastStore';
 import { errMessage } from '../lib/errors';
 import { regNumberOf } from '../lib/format';
 import { AttendeeRow } from './AttendeeRow';
-import { CloseIcon, PrinterIcon, RefreshIcon, SearchIcon } from './icons';
+import { NewAttendeeRow } from './NewAttendeeRow';
+import { CloseIcon, PlusIcon, PrinterIcon, RefreshIcon, SearchIcon } from './icons';
 import { Button } from './ui/Button';
 import { Checkbox } from './ui/Checkbox';
 import { ConfirmDialog } from './ui/ConfirmDialog';
@@ -30,6 +40,14 @@ const haystack = (a: Attendee) =>
     ' ' +
     Object.values(a.extra).join(' ')
   ).toLowerCase();
+
+function SectionStrip({ children }: { children: ReactNode }) {
+  return (
+    <div className="border-b border-line-3 bg-surface-2 px-5 py-1.5 font-display text-[10.5px] font-semibold uppercase tracking-[.08em] text-faint">
+      {children}
+    </div>
+  );
+}
 
 export function AttendeeTable({
   event,
@@ -58,6 +76,7 @@ export function AttendeeTable({
   const print = usePrintAttendee();
   const unprint = useUnprintAttendee();
   const [confirmUnprint, setConfirmUnprint] = useState(false);
+  const [adding, setAdding] = useState(false);
 
   const routes = useMemo(() => (event.busRoutes ?? []).filter((r) => !r.hidden), [event.busRoutes]);
   const routeOf = useMemo(() => routeByAttendee(attendees, routes), [attendees, routes]);
@@ -113,7 +132,12 @@ export function AttendeeTable({
     [attendees, haystacks, activeRoute, routeOf],
   );
 
-  const visible = useMemo(() => matchAll(search), [matchAll, search]);
+  // Manual entries are pinned above the sheet rows; one array keeps ↑/↓ and select-all in render order.
+  const { visible, manualCount } = useMemo(() => {
+    const hits = matchAll(search);
+    const manual = hits.filter((a) => a.manual);
+    return { visible: [...manual, ...hits.filter((a) => !a.manual)], manualCount: manual.length };
+  }, [matchAll, search]);
 
   const allChecked = visible.length > 0 && visible.every((a) => selected.has(a._id));
 
@@ -244,6 +268,19 @@ export function AttendeeTable({
     </button>
   );
 
+  const addButton = (
+    <button
+      onClick={() => setAdding(true)}
+      className="flex h-10.5 w-13 shrink-0 flex-col items-center justify-center gap-0.75 rounded-[10px] border border-line-2 bg-surface font-display text-muted transition-colors hover:border-brand/50 hover:text-brand-deep"
+      title="Add a walk-in attendee"
+    >
+      <PlusIcon size={16} />
+      <span className="text-[9.5px] font-semibold uppercase leading-none tracking-[.06em]">
+        Add
+      </span>
+    </button>
+  );
+
   const batchButton = selected.size > 0 && (
     <Button
       onClick={batchPrint}
@@ -288,6 +325,7 @@ export function AttendeeTable({
       {!isDesktop && (
         <div className="mb-3 flex items-center gap-2.5">
           <TemplateSelect event={event} className="min-w-0 flex-1" />
+          {addButton}
           {syncButton}
         </div>
       )}
@@ -336,6 +374,7 @@ export function AttendeeTable({
 
           <AttendeeStats total={stats.total} came={stats.came} className="w-full lg:w-auto" />
 
+          {isDesktop && addButton}
           {isDesktop && syncButton}
           {isDesktop && unprintButton}
           {isDesktop && batchButton}
@@ -362,20 +401,32 @@ export function AttendeeTable({
         {/* Body */}
         {isLoading ? (
           <LoadingPanel>Loading attendees…</LoadingPanel>
-        ) : visible.length > 0 ? (
+        ) : visible.length > 0 || adding ? (
           <div>
-            {visible.map((a) => (
-              <AttendeeRow
-                key={a._id}
-                attendee={a}
-                search={search}
-                template={activeTemplate}
-                selected={selected.has(a._id)}
-                isPreviewing={previewId === a._id}
-                isActive={activeId === a._id}
-                onToggle={toggle}
-                onPreview={onPreview}
+            {(adding || manualCount > 0) && <SectionStrip>Manual entries</SectionStrip>}
+            {adding && (
+              <NewAttendeeRow
+                eventId={eventId}
+                onAdded={(a) => activeTemplate && onPreview(a)}
+                onClose={() => setAdding(false)}
               />
+            )}
+            {visible.map((a, i) => (
+              <Fragment key={a._id}>
+                {i === manualCount && (adding || manualCount > 0) && (
+                  <SectionStrip>Registered</SectionStrip>
+                )}
+                <AttendeeRow
+                  attendee={a}
+                  search={search}
+                  template={activeTemplate}
+                  selected={selected.has(a._id)}
+                  isPreviewing={previewId === a._id}
+                  isActive={activeId === a._id}
+                  onToggle={toggle}
+                  onPreview={onPreview}
+                />
+              </Fragment>
             ))}
           </div>
         ) : (

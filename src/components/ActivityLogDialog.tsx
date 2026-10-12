@@ -12,6 +12,7 @@ const DESCRIBE: Record<ActivityAction, (target: ReactNode) => ReactNode> = {
   'attendee.print': (t) => <>printed {t}’s badge</>,
   'attendee.reprint': (t) => <>reprinted {t}’s badge</>,
   'attendee.unprint': (t) => <>marked {t} as not printed</>,
+  'attendee.add': (t) => <>added {t} manually</>,
   'event.create': (t) => <>created event {t}</>,
   'event.update': (t) => <>edited event {t}</>,
   'event.template': (t) => <>switched the template to {t}</>,
