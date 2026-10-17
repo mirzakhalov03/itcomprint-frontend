@@ -269,16 +269,16 @@ export function AttendeeTable({
   );
 
   const addButton = (
-    <button
+    <Button
+      variant="outline"
       onClick={() => setAdding(true)}
-      className="flex h-10.5 w-13 shrink-0 flex-col items-center justify-center gap-0.75 rounded-[10px] border border-line-2 bg-surface font-display text-muted transition-colors hover:border-brand/50 hover:text-brand-deep"
       title="Add a walk-in attendee"
+      // w-24.5 = the Print button's content width (icon + label + px-5)
+      className="h-9.5 w-24.5 gap-1.75 rounded-[9px] border-brand text-sm tracking-[.01em]"
     >
-      <PlusIcon size={16} />
-      <span className="text-[9.5px] font-semibold uppercase leading-none tracking-[.06em]">
-        Add
-      </span>
-    </button>
+      <PlusIcon size={14} />
+      Add
+    </Button>
   );
 
   const batchButton = selected.size > 0 && (
@@ -374,7 +374,6 @@ export function AttendeeTable({
 
           <AttendeeStats total={stats.total} came={stats.came} className="w-full lg:w-auto" />
 
-          {isDesktop && addButton}
           {isDesktop && syncButton}
           {isDesktop && unprintButton}
           {isDesktop && batchButton}
@@ -395,7 +394,7 @@ export function AttendeeTable({
           <span className="hidden w-35 font-display text-[11px] font-semibold uppercase tracking-[.08em] text-faint sm:block">
             Status
           </span>
-          <span className="w-23 sm:w-31" />
+          <span className="flex w-23 justify-end sm:w-31">{isDesktop && addButton}</span>
         </div>
 
         {/* Body */}
