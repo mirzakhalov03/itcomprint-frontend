@@ -22,6 +22,7 @@ const DEFAULT_BUTTON: GoogleButtonOptions = {
 export function useGoogleSignIn<T extends HTMLElement>(
   ref: RefObject<T | null>,
   options?: GoogleButtonOptions,
+  { oneTap = false }: { oneTap?: boolean } = {},
 ) {
   const login = useGoogleLogin();
 
@@ -34,6 +35,7 @@ export function useGoogleSignIn<T extends HTMLElement>(
         callback: (resp) => login.mutate(resp.credential),
       });
       window.google.accounts.id.renderButton(ref.current, { ...DEFAULT_BUTTON, ...options });
+      if (oneTap) window.google.accounts.id.prompt();
     });
     return () => {
       cancelled = true;

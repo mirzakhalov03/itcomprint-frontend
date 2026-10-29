@@ -12,7 +12,7 @@ import { useGoogleSignIn } from '../hooks/useGoogleSignIn';
 export function LandingPage() {
   const { user, isLoading } = useAuth();
   const gsiRef = useRef<HTMLDivElement>(null);
-  const login = useGoogleSignIn(gsiRef, { width: 320 });
+  const login = useGoogleSignIn(gsiRef, { width: 320 }, { oneTap: true });
   const [hover, setHover] = useState(false);
 
   if (isLoading) return null;
